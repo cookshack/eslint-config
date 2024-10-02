@@ -1,0 +1,9 @@
+*~
+*.bak
+*.BAK
+*.rej
+*.orig
+*.tgz
+/node_modules
+package-lock.json
+/dist

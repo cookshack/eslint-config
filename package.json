@@ -1,0 +1,26 @@
+{
+  "name": "@cookshack/eslint-config",
+  "version": "0.1.0",
+  "description": "ESLint config for Cookshack projects",
+  "homepage": "https://git.sr.ht/~mattmundell/eslint-config",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "rollup -c"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.sr.ht/~mattmundell/eslint-config"
+  },
+  "author": "Matt Mundell",
+  "license": "CC0-1.0",
+  "dependencies": {
+    "globals": "^15.10.0"
+  }
+}
