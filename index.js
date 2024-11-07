@@ -5,6 +5,7 @@ export let rules, languageOptions
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
   'array-bracket-spacing': [ 'error', 'always' ],
+  'arrow-parens': [ 'error', 'as-needed' ],
   'brace-style': [ 'error', 'stroustrup' ],
   'curly': [ 'error', 'multi' ],
   'eol-last': [ 'error', 'always' ],
@@ -30,7 +31,7 @@ rules = {
   'no-case-declarations': 'error',
   'no-global-assign': 'error',
   'no-multi-spaces': 'error',
-  'no-multiple-empty-lines': [ 'error', { max: 2, maxEOF: 0 } ],
+  'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],
   'no-redeclare': 'error',
   'no-tabs': 'error',
   'no-trailing-spaces': 'error',
