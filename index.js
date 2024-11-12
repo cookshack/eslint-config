@@ -4,13 +4,14 @@ export let rules, languageOptions, plugins
 
 plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                 docs: { description: 'Prevent !.' },
-                                                                schema: [] },
+                                                                messages: { logicalNot: 'Logical not used.' },
+                                                                schema: [] }, // options
                                                         create(context) {
                                                           return {
                                                             UnaryExpression(node) {
                                                               if (node.operator == '!')
                                                                 context.report({ node,
-                                                                                 message: 'Logical not used.' })
+                                                                                 messageId: 'logicalNot' })
                                                             }
                                                           }
                                                         } } } } }
