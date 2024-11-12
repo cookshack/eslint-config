@@ -1,6 +1,19 @@
 import globals from 'globals'
 
-export let rules, languageOptions
+export let rules, languageOptions, plugins
+
+plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
+                                                                docs: { description: 'Prevent !.' },
+                                                                schema: [] },
+                                                        create(context) {
+                                                          return {
+                                                            UnaryExpression(node) {
+                                                              if (node.operator == '!')
+                                                                context.report({ node,
+                                                                                 message: 'Logical not used.' })
+                                                            }
+                                                          }
+                                                        } } } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
@@ -30,6 +43,7 @@ rules = {
                                        { blankLine: 'never', prev: 'let', next: 'let' } ],
   'no-case-declarations': 'error',
   'no-global-assign': 'error',
+  'cookshack/no-logical-not': 'error',
   'no-multi-spaces': 'error',
   'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],
   'no-negated-condition': 'error',
