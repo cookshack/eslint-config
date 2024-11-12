@@ -4,7 +4,9 @@ export let rules, languageOptions, plugins
 
 plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                 docs: { description: 'Prevent !.' },
-                                                                messages: { logicalNot: 'Logical not used.' },
+                                                                messages: { logicalNot: 'Logical not used.',
+                                                                            inequality: 'Inequality operator used.',
+                                                                            strictInequality: 'Strict inequality operator used.' },
                                                                 schema: [] }, // options
                                                         create(context) {
                                                           return {
@@ -12,6 +14,14 @@ plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                               if (node.operator == '!')
                                                                 context.report({ node,
                                                                                  messageId: 'logicalNot' })
+                                                            },
+                                                            BinaryExpression(node) {
+                                                              if (node.operator == '!=')
+                                                                context.report({ node,
+                                                                                 messageId: 'inequality' })
+                                                              else if (node.operator == '!==')
+                                                                context.report({ node,
+                                                                                 messageId: 'strictInequality' })
                                                             }
                                                           }
                                                         } } } } }
