@@ -59,6 +59,7 @@ rules = {
   'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],
   'no-negated-condition': 'error',
   'no-redeclare': 'error',
+  'no-sequences': 'error',
   'no-tabs': 'error',
   'no-trailing-spaces': 'error',
   'no-undef': 'error',
