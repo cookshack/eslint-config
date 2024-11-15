@@ -31,6 +31,7 @@ rules = {
   'array-bracket-spacing': [ 'error', 'always' ],
   'arrow-parens': [ 'error', 'as-needed' ],
   'brace-style': [ 'error', 'stroustrup' ],
+  'comma-dangle': 'error',
   'curly': [ 'error', 'multi' ],
   'eol-last': [ 'error', 'always' ],
   'function-paren-newline': [ 'error', 'never' ],
