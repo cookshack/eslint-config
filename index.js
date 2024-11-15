@@ -55,6 +55,7 @@ rules = {
   'no-case-declarations': 'error',
   'no-global-assign': 'error',
   'cookshack/no-logical-not': 'error',
+  'no-mixed-operators': 'error',
   'no-multi-spaces': 'error',
   'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],
   'no-negated-condition': 'error',
