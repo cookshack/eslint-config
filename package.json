@@ -22,5 +22,8 @@
   "license": "CC0-1.0",
   "dependencies": {
     "globals": "^15.10.0"
+  },
+  "devDependencies": {
+    "rollup": "^4.27.2"
   }
 }
