@@ -82,3 +82,11 @@ languageOptions = {
     sourceType: 'module'
   }
 }
+
+export
+default [ { ignores: [ 'TAGS.mjs',
+                       // HACK remove once eslint understands "import ... with"
+                       'json.mjs' ] },
+          { languageOptions: languageOptions,
+            plugins: plugins,
+            rules: rules } ]
