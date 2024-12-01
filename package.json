@@ -1,6 +1,6 @@
 {
   "name": "@cookshack/eslint-config",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "ESLint config for Cookshack projects",
   "homepage": "https://git.sr.ht/~mattmundell/eslint-config",
   "type": "module",
