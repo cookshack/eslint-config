@@ -70,17 +70,25 @@ rules = {
   'no-var': 'error',
   'object-curly-spacing': [ 'error', 'always' ],
   quotes: [ 'error', 'single', { avoidEscape: true } ],
-  semi: [ 'error', 'never' ],
+  semi: [ 'error', 'never' ]
   //'vars-on-top': [ 'error' ], // want version for let
   //'newline-before-function-paren': ['error', 'always'],
 }
 
 languageOptions = {
   globals: {
-    ...globals.node,
+    ...globals.node
   },
   parserOptions: {
     ecmaVersion: 2022,
-    sourceType: 'module',
-  },
+    sourceType: 'module'
+  }
 }
+
+export
+default [ { ignores: [ 'TAGS.mjs',
+                       // HACK remove once eslint understands "import ... with"
+                       'json.mjs' ] },
+          { languageOptions: languageOptions,
+            plugins: plugins,
+            rules: rules } ]

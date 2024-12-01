@@ -21,6 +21,7 @@
   "author": "Matt Mundell",
   "license": "CC0-1.0",
   "dependencies": {
+    "eslint": "^9.16.0",
     "globals": "^15.10.0"
   },
   "devDependencies": {
