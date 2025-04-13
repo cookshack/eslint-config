@@ -80,15 +80,13 @@ languageOptions = {
     ...globals.node
   },
   parserOptions: {
-    ecmaVersion: 2022,
+    ecmaVersion: 2025,
     sourceType: 'module'
   }
 }
 
 export
-default [ { ignores: [ 'TAGS.mjs',
-                       // HACK remove once eslint understands "import ... with"
-                       'json.mjs' ] },
+default [ { ignores: [ 'TAGS.mjs' ] },
           { languageOptions: languageOptions,
             plugins: plugins,
             rules: rules } ]
