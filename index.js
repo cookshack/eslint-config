@@ -69,6 +69,7 @@ rules = {
   'no-unused-vars': 'error',
   'no-var': 'error',
   'object-curly-spacing': [ 'error', 'always' ],
+  'object-shorthand': [ 'error', 'always' ],
   quotes: [ 'error', 'single', { avoidEscape: true } ],
   semi: [ 'error', 'never' ]
   //'vars-on-top': [ 'error' ], // want version for let
