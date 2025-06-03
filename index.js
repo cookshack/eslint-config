@@ -88,6 +88,6 @@ languageOptions = {
 
 export
 default [ { ignores: [ 'TAGS.mjs' ] },
-          { languageOptions: languageOptions,
-            plugins: plugins,
-            rules: rules } ]
+          { languageOptions,
+            plugins,
+            rules } ]
