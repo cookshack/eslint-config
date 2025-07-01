@@ -7,7 +7,7 @@
   "scripts": {
     "check": "npx eslint --no-warn-ignored -f ./formatter.js -c ./index.js *.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "rollup -c"
+    "prepare": "husky && rollup -c"
   },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -26,6 +26,7 @@
     "globals": "^15.10.0"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "rollup": "^4.27.2"
   }
 }
