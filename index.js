@@ -62,6 +62,7 @@ rules = {
   'no-negated-condition': 'error',
   'no-redeclare': 'error',
   'no-sequences': 'error',
+  'no-sparse-arrays': 'error',
   'no-tabs': 'error',
   'no-trailing-spaces': 'error',
   'no-undef': 'error',
