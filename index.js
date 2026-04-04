@@ -2,6 +2,50 @@ import globals from 'globals'
 
 export let rules, languageOptions, plugins
 
+function getNarrowestScope
+(scopeManager, variable) {
+  let common
+
+  common = null
+  for (let ref of variable.references) {
+    if (variable.defs.some(def => def.name == ref.identifier))
+      continue
+    if (common == null)
+      common = ref.from
+    else
+      common = getCommonAncestor(common, ref.from)
+  }
+  return common
+}
+
+function getCommonAncestor
+(scopeManager, scope1, scope2) {
+  let ancestors, s
+
+  ancestors = []
+  s = scope1
+  while (s) {
+    if (s.type == 'global')
+      break
+    ancestors.push(s)
+    s = s.upper
+  }
+  s = scope2
+  while (s) {
+    if (s.type == 'global')
+      break
+    if (ancestors.includes(s))
+      return s
+    s = s.upper
+  }
+  return scopeManager.globalScope
+}
+
+function getDefinitionScope
+(variable) {
+  return variable.scope
+}
+
 plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                 docs: { description: 'Prevent !.' },
                                                                 messages: { logicalNot: 'Logical not used.',
@@ -24,7 +68,58 @@ plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                                  messageId: 'strictInequality' })
                                                             }
                                                           }
-                                                        } } } } }
+                                                        } },
+                                    'narrowest-scope': { meta: { type: 'suggestion',
+                                                                 docs: { description: 'Enforce variables are declared in their narrowest possible scope.' },
+                                                                 messages: { tooBroad: 'Variable "{{ name }}" is declared in a broader scope than necessary.' },
+                                                                 schema: [] },
+                                                         create(context) {
+                                                           return {
+                                                             'Program:exit'() {
+                                                               let scopeManager
+
+                                                               scopeManager = context.sourceCode.scopeManager
+                                                               if (scopeManager) {
+                                                                 let allScopes, reported
+
+                                                                 allScopes = scopeManager.scopes
+                                                                 reported = new Set
+
+                                                                 for (let scope of allScopes)
+                                                                   for (let variable of scope.variables)
+                                                                     if (variable.defs.length > 0) {
+                                                                       let node
+
+                                                                       if (reported.has(variable))
+                                                                         continue
+                                                                       if (variable.defs[0].type == 'Parameter')
+                                                                         continue
+                                                                       node = variable.defs[0]?.name
+                                                                       if (node) {
+                                                                         let defScope, narrowestScope
+
+                                                                         defScope = getDefinitionScope(variable, scopeManager)
+                                                                         narrowestScope = getNarrowestScope(scopeManager, variable)
+
+                                                                         if (narrowestScope) {
+                                                                           if (defScope.type == 'for')
+                                                                             continue
+                                                                           if (defScope == narrowestScope)
+                                                                             continue
+
+                                                                           reported.add(variable)
+                                                                           context.report({
+                                                                             node,
+                                                                             messageId: 'tooBroad',
+                                                                             data: { name: variable.name }
+                                                                           })
+                                                                         }
+                                                                       }
+                                                                     }
+                                                               }
+                                                             }
+                                                           }
+                                                         } } } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
@@ -55,6 +150,7 @@ rules = {
                                        { blankLine: 'never', prev: 'let', next: 'let' } ],
   'no-case-declarations': 'error',
   'no-global-assign': 'error',
+  'cookshack/narrowest-scope': 'error',
   'cookshack/no-logical-not': 'error',
   'no-mixed-operators': 'error',
   'no-multi-spaces': 'error',

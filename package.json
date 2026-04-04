@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "check": "npx eslint --no-warn-ignored -f ./formatter.js -c ./index.js *.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha test/**/*.js",
     "prepare": "husky && rollup -c"
   },
   "main": "dist/index.cjs",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
+    "mocha": "^11.7.5",
     "rollup": "^4.27.2"
   }
 }
