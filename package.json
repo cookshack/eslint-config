@@ -5,7 +5,7 @@
   "homepage": "https://git.sr.ht/~mattmundell/eslint-config",
   "type": "module",
   "scripts": {
-    "check": "npx eslint --no-warn-ignored -f ./formatter.js -c ./index.js *.js",
+    "check": "npx eslint --no-warn-ignored -f ./formatter.js -c ./index.js *.js test/rules/*.js",
     "test": "mocha test/**/*.js",
     "prepare": "husky && rollup -c"
   },
