@@ -74,6 +74,22 @@ function update
 }
 `)
 
+// requires var usage analysis
+//
+pass(`
+function init
+() {
+  let tout
+
+  function update
+  (view) {
+    if (tout)
+      clearTimeout(tout)
+    tout = setTimeout(() => console.log('hi'), 10000)
+  }
+}
+`)
+
 fail(1, 'let x = 1; function foo() { return x }')
 
 fail(1, 'let x; { let y = 1; x = y }')
