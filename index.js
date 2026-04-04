@@ -47,7 +47,7 @@ function getDefinitionScope
   return variable.scope
 }
 
-function createNarrowestScope
+function createPositiveVibes
 (context) {
   let scopeManager
 
@@ -101,26 +101,26 @@ function createNarrowestScope
   }
 }
 
-plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
-                                                                docs: { description: 'Prevent !.' },
-                                                                messages: { logicalNot: 'Logical not used.',
-                                                                            inequality: 'Inequality operator used.',
-                                                                            strictInequality: 'Strict inequality operator used.' },
-                                                                schema: [] }, // options
+plugins = { 'cookshack': { rules: { 'positive-vibes': { meta: { type: 'problem',
+                                                                docs: { description: 'Prefer positive expressions.' },
+                                                                messages: { positiveVibes: 'Be positive!',
+                                                                            equality: 'Use ==.',
+                                                                            strictEquality: 'Use ===.' },
+                                                                schema: [] },
                                                         create(context) {
                                                           return {
                                                             UnaryExpression(node) {
                                                               if (node.operator == '!')
                                                                 context.report({ node,
-                                                                                 messageId: 'logicalNot' })
+                                                                                 messageId: 'positiveVibes' })
                                                             },
                                                             BinaryExpression(node) {
                                                               if (node.operator == '!=')
                                                                 context.report({ node,
-                                                                                 messageId: 'inequality' })
+                                                                                 messageId: 'equality' })
                                                               else if (node.operator == '!==')
                                                                 context.report({ node,
-                                                                                 messageId: 'strictInequality' })
+                                                                                 messageId: 'strictEquality' })
                                                             }
                                                           }
                                                         } },
@@ -128,7 +128,7 @@ plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                  docs: { description: 'Enforce variables are declared in their narrowest possible scope.' },
                                                                  messages: { tooBroad: 'Variable "{{ name }}" is declared in a broader scope than necessary.' },
                                                                  schema: [] },
-                                                         create: createNarrowestScope } } } }
+                                                         create: createPositiveVibes } } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
@@ -160,7 +160,7 @@ rules = {
   'no-case-declarations': 'error',
   'no-global-assign': 'error',
   'cookshack/narrowest-scope': 'error',
-  'cookshack/no-logical-not': 'error',
+  'cookshack/positive-vibes': 'error',
   'no-mixed-operators': 'error',
   'no-multi-spaces': 'error',
   'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],
