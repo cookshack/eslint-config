@@ -94,6 +94,9 @@ plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                          continue
                                                                        if (variable.defs[0].type == 'Parameter')
                                                                          continue
+                                                                       if (variable.defs[0].type == 'FunctionName')
+                                                                         continue
+
                                                                        node = variable.defs[0]?.name
                                                                        if (node) {
                                                                          let defScope, narrowestScope
