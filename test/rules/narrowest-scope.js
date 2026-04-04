@@ -125,6 +125,8 @@ function f
 }
 `)
 
+fail(1, 'let a; try { f() } catch (err) { a = err.message; console.log(a) }')
+
 globalThis.describe('narrowest-scope',
                     () => ruleTester.run('narrowest-scope',
                                          plugins.cookshack.rules['narrowest-scope'],
