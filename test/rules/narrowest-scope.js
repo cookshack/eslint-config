@@ -1,7 +1,7 @@
 import { RuleTester } from 'eslint'
 import { plugins } from '../../index.js'
 
-let long1, long2, ruleTester
+let long1, long2, long3, ruleTester
 
 ruleTester = new RuleTester()
 
@@ -64,6 +64,30 @@ function f
 }
 `
 
+long3 = `
+function f(s1, s2, otherwise) {
+  let a, s
+
+  a = []
+  s = s1
+  while (s) {
+    if (s.done)
+      break
+    a.push(s)
+    s = s.next
+  }
+  s = s2
+  while (s) {
+    if (s.done)
+      break
+    if (a.includes(s))
+      return s
+    s = s.next
+  }
+  return otherwise
+}
+`
+
 describe('narrowest-scope',
          () => {
            ruleTester.run('narrowest-scope',
@@ -72,6 +96,7 @@ describe('narrowest-scope',
                                      { code: 'for (let i = 0; i < 10; i++) { console.log(i) }' },
                                      { code: 'function outer() { let x; function inner() { x = 1 } return x }' },
                                      { code: 'let x; function foo() { x = 1 } function bar() { return x }' },
+                                     { code: long3 },
                                      // laxer on functions for now
                                      { code: 'function foo() { return 1 } function bar() { return foo() }' } ],
                             invalid: [ { code: 'let x = 1; function foo() { return x }',

@@ -8,18 +8,18 @@ function getNarrowestScope
 
   common = null
   for (let ref of variable.references) {
-    if (variable.defs.some(def => def.name == ref.identifier))
+    if (variable.defs.some(def => def.name === ref.identifier))
       continue
-    if (common == null)
-      common = ref.from
-    else
-      common = getCommonAncestor(common, ref.from)
+    if (ref.from)
+      if (common)
+        common = getCommonAncestor(common, ref.from)
+      else
+        common = ref.from
   }
   return common
 }
 
-function getCommonAncestor
-(scopeManager, scope1, scope2) {
+function getCommonAncestor(scope1, scope2) {
   let ancestors, s
 
   ancestors = []
@@ -38,7 +38,7 @@ function getCommonAncestor
       return s
     s = s.upper
   }
-  return scopeManager.globalScope
+  return scope1
 }
 
 function getDefinitionScope
@@ -107,7 +107,7 @@ plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                          if (narrowestScope) {
                                                                            if (defScope.type == 'for')
                                                                              continue
-                                                                           if (defScope == narrowestScope)
+                                                                           if (defScope === narrowestScope)
                                                                              continue
 
                                                                            reported.add(variable)
