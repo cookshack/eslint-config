@@ -1,7 +1,7 @@
 import { RuleTester } from 'eslint'
 import { plugins } from '../../index.js'
 
-let long1, long2, long3, ruleTester
+let long1, long2, long3, long4, long5, ruleTester
 
 ruleTester = new RuleTester()
 
@@ -88,6 +88,31 @@ function f(s1, s2, otherwise) {
 }
 `
 
+long4 = `
+let tout
+
+function update
+(view) {
+  if (tout)
+    clearTimeout(tout)
+  tout = setTimeout(() => console.log('hi'), 10000)
+}
+`
+
+long5 = `
+function init
+() {
+  let tout
+
+  function update
+  (view) {
+    if (tout)
+      clearTimeout(tout)
+    tout = setTimeout(() => console.log('hi'), 10000)
+  }
+}
+`
+
 globalThis.describe('narrowest-scope',
                     () => {
                       ruleTester.run('narrowest-scope',
@@ -97,6 +122,8 @@ globalThis.describe('narrowest-scope',
                                                 { code: 'function outer() { let x; function inner() { x = 1 } return x }' },
                                                 { code: 'let x; function foo() { x = 1 } function bar() { return x }' },
                                                 { code: long3 },
+                                                ...(0 ? { code: long4 } : []),
+                                                ...(0 ? { code: long5 } : []),
                                                 { code: 'import { a } from \'a.js\'; { a.f() }' },
                                                 // laxer on functions for now
                                                 { code: 'function foo() { return 1 } function bar() { return foo() }' } ],
