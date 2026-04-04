@@ -90,6 +90,29 @@ function init
 }
 `)
 
+pass(`
+function init
+() {
+  let stopTimeout
+
+  function f() {
+    if (stopTimeout) {
+      clearTimeout(stopTimeout)
+      stopTimeout = 0
+    }
+    else {
+      console.log('Again to stop')
+      stopTimeout = setTimeout(() => {
+        stopTimeout = 0
+        console.log('stop timed out')
+      }, 5000)
+    }
+  }
+
+  return f
+}
+`)
+
 pass('try { f() } catch (err) { console.log(err.message) }')
 
 fail(1, 'let x = 1; function foo() { return x }')
@@ -107,8 +130,8 @@ function f
     ok = 1
 
   if (b) {
+    c1 = 2
     b.forEach(d => {
-      c1 = c1 || ok
       c1 += d
     })
     return c1

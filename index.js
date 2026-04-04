@@ -68,27 +68,25 @@ function isReadRef
 }
 
 function hasReadBeforeWriteInNestedScope(variable, defScope) {
-  let nestedScopes
+  let nestedFunctions
 
-  nestedScopes = new Set(variable.references
+  nestedFunctions = new Set(variable.references
     .filter(ref => {
       let refScope
 
       refScope = ref.from
       if (refScope == defScope)
         return 0
-      return refScope.upper == defScope
+      return isProperAncestor(defScope, refScope) && (refScope.type == 'function' || refScope.type == 'arrow')
     })
     .map(ref => ref.from))
-  for (let scope of nestedScopes) {
-    let refsInScope, hasRead, hasWrite, defIsProperAncestor, isFunction
+  for (let fnScope of nestedFunctions) {
+    let fnRefs, hasRead, hasWrite
 
-    defIsProperAncestor = isProperAncestor(defScope, scope)
-    isFunction = scope.type == 'function' || scope.type == 'arrow'
-    refsInScope = variable.references.filter(ref => ref.from == scope)
-    hasRead = refsInScope.some(ref => isReadRef(ref))
-    hasWrite = refsInScope.some(ref => isWriteRef(ref))
-    if (hasRead && hasWrite && defIsProperAncestor && isFunction)
+    fnRefs = variable.references.filter(ref => ref.from === fnScope || isProperAncestor(fnScope, ref.from))
+    hasRead = fnRefs.some(ref => isReadRef(ref))
+    hasWrite = fnRefs.some(ref => isWriteRef(ref))
+    if (hasRead && hasWrite)
       return 1
   }
   return 0
