@@ -3,7 +3,7 @@ import globals from 'globals'
 export let rules, languageOptions, plugins
 
 function getNarrowestScope
-(scopeManager, variable) {
+(variable) {
   let common
 
   common = null
@@ -19,7 +19,8 @@ function getNarrowestScope
   return common
 }
 
-function getCommonAncestor(scope1, scope2) {
+function getCommonAncestor
+(scope1, scope2) {
   let ancestors, s
 
   ancestors = []
@@ -44,6 +45,60 @@ function getCommonAncestor(scope1, scope2) {
 function getDefinitionScope
 (variable) {
   return variable.scope
+}
+
+function createNarrowestScope
+(context) {
+  let scopeManager
+
+  scopeManager = context.sourceCode.scopeManager
+  if (scopeManager) {
+    let allScopes, reported
+
+    allScopes = scopeManager.scopes
+    reported = new Set
+
+    return {
+      'Program:exit'() {
+        for (let scope of allScopes)
+          for (let variable of scope.variables)
+            if (variable.defs.length > 0) {
+              let node
+
+              if (reported.has(variable))
+                continue
+              if (variable.defs[0].type == 'Parameter')
+                continue
+              if (variable.defs[0].type == 'FunctionName')
+                continue
+              if (variable.defs[0].type == 'ImportBinding')
+                continue
+
+              node = variable.defs[0]?.name
+              if (node) {
+                let defScope, narrowestScope
+
+                defScope = getDefinitionScope(variable)
+                narrowestScope = getNarrowestScope(variable)
+
+                if (narrowestScope) {
+                  if (defScope.type == 'for')
+                    continue
+                  if (defScope === narrowestScope)
+                    continue
+
+                  reported.add(variable)
+                  context.report({
+                    node,
+                    messageId: 'tooBroad',
+                    data: { name: variable.name }
+                  })
+                }
+              }
+            }
+      }
+    }
+  }
 }
 
 plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
@@ -73,58 +128,7 @@ plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                  docs: { description: 'Enforce variables are declared in their narrowest possible scope.' },
                                                                  messages: { tooBroad: 'Variable "{{ name }}" is declared in a broader scope than necessary.' },
                                                                  schema: [] },
-                                                         create(context) {
-                                                           return {
-                                                             'Program:exit'() {
-                                                               let scopeManager
-
-                                                               scopeManager = context.sourceCode.scopeManager
-                                                               if (scopeManager) {
-                                                                 let allScopes, reported
-
-                                                                 allScopes = scopeManager.scopes
-                                                                 reported = new Set
-
-                                                                 for (let scope of allScopes)
-                                                                   for (let variable of scope.variables)
-                                                                     if (variable.defs.length > 0) {
-                                                                       let node
-
-                                                                       if (reported.has(variable))
-                                                                         continue
-                                                                       if (variable.defs[0].type == 'Parameter')
-                                                                         continue
-                                                                       if (variable.defs[0].type == 'FunctionName')
-                                                                         continue
-                                                                       if (variable.defs[0].type == 'ImportBinding')
-                                                                         continue
-
-                                                                       node = variable.defs[0]?.name
-                                                                       if (node) {
-                                                                         let defScope, narrowestScope
-
-                                                                         defScope = getDefinitionScope(variable, scopeManager)
-                                                                         narrowestScope = getNarrowestScope(scopeManager, variable)
-
-                                                                         if (narrowestScope) {
-                                                                           if (defScope.type == 'for')
-                                                                             continue
-                                                                           if (defScope === narrowestScope)
-                                                                             continue
-
-                                                                           reported.add(variable)
-                                                                           context.report({
-                                                                             node,
-                                                                             messageId: 'tooBroad',
-                                                                             data: { name: variable.name }
-                                                                           })
-                                                                         }
-                                                                       }
-                                                                     }
-                                                               }
-                                                             }
-                                                           }
-                                                         } } } } }
+                                                         create: createNarrowestScope } } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
