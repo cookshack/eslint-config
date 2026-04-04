@@ -47,6 +47,65 @@ function getDefinitionScope
   return variable.scope
 }
 
+function isWriteRef(ref) {
+  let parent
+
+  parent = ref.identifier.parent
+  if (parent) {
+    if (parent.type == 'AssignmentExpression' && parent.left == ref.identifier)
+      return 1
+    if (parent.type == 'UpdateExpression')
+      return 1
+  }
+  return 0
+}
+
+function isReadRef
+(ref) {
+  if (isWriteRef(ref))
+    return 0
+  return 1
+}
+
+function hasReadBeforeWriteInNestedScope(variable, defScope) {
+  let nestedScopes
+
+  nestedScopes = new Set(variable.references
+    .filter(ref => {
+      let refScope
+
+      refScope = ref.from
+      if (refScope == defScope)
+        return 0
+      return refScope.upper == defScope
+    })
+    .map(ref => ref.from))
+  for (let scope of nestedScopes) {
+    let refsInScope, hasRead, hasWrite, defIsProperAncestor, isFunction
+
+    defIsProperAncestor = isProperAncestor(defScope, scope)
+    isFunction = scope.type == 'function' || scope.type == 'arrow'
+    refsInScope = variable.references.filter(ref => ref.from == scope)
+    hasRead = refsInScope.some(ref => isReadRef(ref))
+    hasWrite = refsInScope.some(ref => isWriteRef(ref))
+    if (hasRead && hasWrite && defIsProperAncestor && isFunction)
+      return 1
+  }
+  return 0
+}
+
+function isProperAncestor(ancestor, descendant) {
+  let s
+
+  s = descendant.upper
+  while (s) {
+    if (s == ancestor)
+      return 1
+    s = s.upper
+  }
+  return 0
+}
+
 function createPositiveVibes
 (context) {
   let scopeManager
@@ -85,6 +144,8 @@ function createPositiveVibes
                   if (defScope.type == 'for')
                     continue
                   if (defScope === narrowestScope)
+                    continue
+                  if (hasReadBeforeWriteInNestedScope(variable, defScope))
                     continue
 
                   reported.add(variable)
