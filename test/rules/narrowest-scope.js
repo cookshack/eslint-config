@@ -88,26 +88,27 @@ function f(s1, s2, otherwise) {
 }
 `
 
-describe('narrowest-scope',
-         () => {
-           ruleTester.run('narrowest-scope',
-                          plugins.cookshack.rules['narrowest-scope'],
-                          { valid: [ { code: 'function foo() { let x; x = 1; return x }' },
-                                     { code: 'for (let i = 0; i < 10; i++) { console.log(i) }' },
-                                     { code: 'function outer() { let x; function inner() { x = 1 } return x }' },
-                                     { code: 'let x; function foo() { x = 1 } function bar() { return x }' },
-                                     { code: long3 },
-                                     // laxer on functions for now
-                                     { code: 'function foo() { return 1 } function bar() { return foo() }' } ],
-                            invalid: [ { code: 'let x = 1; function foo() { return x }',
-                                         errors: [ { messageId: 'tooBroad' } ] },
-                                       { code: 'let x; { let y = 1; x = y }',
-                                         errors: [ { messageId: 'tooBroad' } ] },
-                                        ...(0
-                                            ? [ { code: long1,
-                                                  errors: [ { messageId: 'tooBroad' } ] } ]
-                                            : []),
-                                       { code: long2,
-                                         errors: [ { messageId: 'tooBroad' },
-                                                   { messageId: 'tooBroad' } ] } ] })
-         })
+globalThis.describe('narrowest-scope',
+                    () => {
+                      ruleTester.run('narrowest-scope',
+                                     plugins.cookshack.rules['narrowest-scope'],
+                                     { valid: [ { code: 'function foo() { let x; x = 1; return x }' },
+                                                { code: 'for (let i = 0; i < 10; i++) { console.log(i) }' },
+                                                { code: 'function outer() { let x; function inner() { x = 1 } return x }' },
+                                                { code: 'let x; function foo() { x = 1 } function bar() { return x }' },
+                                                { code: long3 },
+                                                { code: 'import { a } from \'a.js\'; { a.f() }' },
+                                                // laxer on functions for now
+                                                { code: 'function foo() { return 1 } function bar() { return foo() }' } ],
+                                       invalid: [ { code: 'let x = 1; function foo() { return x }',
+                                                    errors: [ { messageId: 'tooBroad' } ] },
+                                                  { code: 'let x; { let y = 1; x = y }',
+                                                    errors: [ { messageId: 'tooBroad' } ] },
+                                                  ...(0
+                                                      ? [ { code: long1,
+                                                            errors: [ { messageId: 'tooBroad' } ] } ]
+                                                      : []),
+                                                  { code: long2,
+                                                    errors: [ { messageId: 'tooBroad' },
+                                                              { messageId: 'tooBroad' } ] } ] })
+                    })

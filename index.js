@@ -96,6 +96,8 @@ plugins = { 'cookshack': { rules: { 'no-logical-not': { meta: { type: 'problem',
                                                                          continue
                                                                        if (variable.defs[0].type == 'FunctionName')
                                                                          continue
+                                                                       if (variable.defs[0].type == 'ImportBinding')
+                                                                         continue
 
                                                                        node = variable.defs[0]?.name
                                                                        if (node) {
