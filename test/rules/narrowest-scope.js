@@ -115,6 +115,18 @@ function init
 
 pass('try { f() } catch (err) { console.log(err.message) }')
 
+pass(`
+  class A extends B {
+    constructor
+    (name) {
+      super()
+      this.name = name
+    }
+  }
+
+  g = f({ a() { return new A('eg') } })
+`)
+
 fail(1, 'let x = 1; function foo() { return x }')
 
 fail(1, 'let x; { let y = 1; x = y }')

@@ -132,6 +132,8 @@ function createPositiveVibes
                 continue
               if (variable.defs[0].type == 'CatchClause')
                 continue
+              if (variable.defs[0].type == 'ClassName')
+                continue
 
               node = variable.defs[0]?.name
               if (node) {
