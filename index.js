@@ -123,70 +123,86 @@ function createNarrowestScope
 
     return {
       'Program:exit'() {
+        let scopeInfo
+
+        scopeInfo = new WeakMap
         function visit(scope, prefix) {
-          let siblingNum
+          let siblingNum, info
 
           print('SCOPE', prefix, scope.type.toUpperCase())
-          {
+          for (let variable of scope.variables)
+            if (variable.defs.length > 0) {
+              print('LET ' + variable.name)
+              for (let ref of variable.references) {
+                let refInfo
+
+                refInfo = scopeInfo.get(ref.from)
+                if (refInfo) {
+                }
+                else {
+                  refInfo = { refs: [] }
+                  scopeInfo.set(ref.from, refInfo)
+                }
+                refInfo.refs.push(ref)
+              }
+            }
+          info = scopeInfo.get(scope)
+          if (info) {
             let items
 
             items = []
-            for (let variable of scope.variables) {
-              if (variable.defs.length > 0)
-                items.push({ pos: variable.defs[0].name.range[0], text: 'LET ' + variable.name })
-              for (let ref of variable.references)
-                if (isWriteRef(ref))
-                  if (ref.identifier.parent?.type == 'UpdateExpression')
-                    items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name },
-                               { pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
-                  else
-                    items.push({ pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
+            for (let ref of info.refs)
+              if (isWriteRef(ref))
+                if (ref.identifier.parent?.type == 'UpdateExpression')
+                  items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name },
+                             { pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
                 else
-                  items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name })
-            }
+                  items.push({ pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
+              else
+                items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name })
             items.sort((a, b) => a.pos - b.pos)
             for (let item of items)
               print(item.text)
-            for (let variable of scope.variables) {
-              if (reported.has(variable))
-                continue
-              if (variable.defs.length === 0)
-                continue
-              if (variable.defs[0].type == 'Parameter')
-                continue
-              if (variable.defs[0].type == 'FunctionName')
-                continue
-              if (variable.defs[0].type == 'ImportBinding')
-                continue
-              if (variable.defs[0].type == 'CatchClause')
-                continue
-              if (variable.defs[0].type == 'ClassName')
-                continue
+          }
+          for (let variable of scope.variables) {
+            if (reported.has(variable))
+              continue
+            if (variable.defs.length === 0)
+              continue
+            if (variable.defs[0].type == 'Parameter')
+              continue
+            if (variable.defs[0].type == 'FunctionName')
+              continue
+            if (variable.defs[0].type == 'ImportBinding')
+              continue
+            if (variable.defs[0].type == 'CatchClause')
+              continue
+            if (variable.defs[0].type == 'ClassName')
+              continue
 
-              let node
+            let node
 
-              node = variable.defs[0]?.name
-              if (node) {
-                let defScope, narrowestScope
+            node = variable.defs[0]?.name
+            if (node) {
+              let defScope, narrowestScope
 
-                defScope = getDefinitionScope(variable)
-                narrowestScope = getNarrowestScope(variable)
+              defScope = getDefinitionScope(variable)
+              narrowestScope = getNarrowestScope(variable)
 
-                if (narrowestScope) {
-                  if (defScope.type == 'for')
-                    continue
-                  if (defScope === narrowestScope)
-                    continue
-                  if (hasReadBeforeWriteInNestedScope(variable, defScope))
-                    continue
+              if (narrowestScope) {
+                if (defScope.type == 'for')
+                  continue
+                if (defScope === narrowestScope)
+                  continue
+                if (hasReadBeforeWriteInNestedScope(variable, defScope))
+                  continue
 
-                  reported.add(variable)
-                  context.report({
-                    node,
-                    messageId: 'tooBroad',
-                    data: { name: variable.name }
-                  })
-                }
+                reported.add(variable)
+                context.report({
+                  node,
+                  messageId: 'tooBroad',
+                  data: { name: variable.name }
+                })
               }
             }
           }
