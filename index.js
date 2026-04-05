@@ -125,12 +125,23 @@ function createNarrowestScope
           let siblingNum
 
           print('SCOPE', prefix, scope.type.toUpperCase())
-          for (let variable of scope.variables)
-            if (variable.defs.length > 0) {
-              let node
+          {
+            let items
 
-              print('LET', variable.name)
+            items = []
+            for (let variable of scope.variables) {
+              if (variable.defs.length > 0)
+                items.push({ pos: variable.defs[0].name.range[0], text: 'LET ' + variable.name })
+              for (let ref of variable.references)
+                items.push({ pos: ref.identifier.range[0], text: (isWriteRef(ref) ? 'WRITE ' : 'READ ') + ref.identifier.name })
+            }
+            items.sort((a, b) => a.pos - b.pos)
+            for (let item of items)
+              print(item.text)
+            for (let variable of scope.variables) {
               if (reported.has(variable))
+                continue
+              if (variable.defs.length === 0)
                 continue
               if (variable.defs[0].type == 'Parameter')
                 continue
@@ -142,6 +153,8 @@ function createNarrowestScope
                 continue
               if (variable.defs[0].type == 'ClassName')
                 continue
+
+              let node
 
               node = variable.defs[0]?.name
               if (node) {
@@ -167,6 +180,7 @@ function createNarrowestScope
                 }
               }
             }
+          }
           siblingNum = 0
           for (let child of scope.childScopes) {
             siblingNum++
