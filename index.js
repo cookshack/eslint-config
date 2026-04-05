@@ -2,6 +2,10 @@ import globals from 'globals'
 
 export let rules, languageOptions, plugins
 
+let print
+
+print = console.log
+
 function getNarrowestScope
 (variable) {
   let common
@@ -117,11 +121,15 @@ function createPositiveVibes
 
     return {
       'Program:exit'() {
-        for (let scope of allScopes)
+        function visit(scope, prefix) {
+          let siblingNum
+
+          print('SCOPE', prefix, scope.type.toUpperCase())
           for (let variable of scope.variables)
             if (variable.defs.length > 0) {
               let node
 
+              print('LET', variable.name)
               if (reported.has(variable))
                 continue
               if (variable.defs[0].type == 'Parameter')
@@ -159,6 +167,14 @@ function createPositiveVibes
                 }
               }
             }
+          siblingNum = 0
+          for (let child of scope.childScopes) {
+            siblingNum++
+            visit(child, prefix + '.' + siblingNum)
+          }
+        }
+
+        visit(allScopes[0], '1')
       }
     }
   }
