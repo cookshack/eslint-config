@@ -108,7 +108,7 @@ function isProperAncestor(ancestor, descendant) {
   return 0
 }
 
-function createPositiveVibes
+function createNarrowestScope
 (context) {
   let scopeManager
 
@@ -180,34 +180,37 @@ function createPositiveVibes
   }
 }
 
+function createPositiveVibes
+(context) {
+  return {
+    UnaryExpression(node) {
+      if (node.operator == '!')
+        context.report({ node,
+                         messageId: 'positiveVibes' })
+    },
+    BinaryExpression(node) {
+      if (node.operator == '!=')
+        context.report({ node,
+                         messageId: 'equality' })
+      else if (node.operator == '!==')
+        context.report({ node,
+                         messageId: 'strictEquality' })
+    }
+  }
+}
+
 plugins = { 'cookshack': { rules: { 'positive-vibes': { meta: { type: 'problem',
                                                                 docs: { description: 'Prefer positive expressions.' },
                                                                 messages: { positiveVibes: 'Be positive!',
                                                                             equality: 'Use ==.',
                                                                             strictEquality: 'Use ===.' },
                                                                 schema: [] },
-                                                        create(context) {
-                                                          return {
-                                                            UnaryExpression(node) {
-                                                              if (node.operator == '!')
-                                                                context.report({ node,
-                                                                                 messageId: 'positiveVibes' })
-                                                            },
-                                                            BinaryExpression(node) {
-                                                              if (node.operator == '!=')
-                                                                context.report({ node,
-                                                                                 messageId: 'equality' })
-                                                              else if (node.operator == '!==')
-                                                                context.report({ node,
-                                                                                 messageId: 'strictEquality' })
-                                                            }
-                                                          }
-                                                        } },
+                                                        create: createPositiveVibes },
                                     'narrowest-scope': { meta: { type: 'suggestion',
                                                                  docs: { description: 'Enforce variables are declared in their narrowest possible scope.' },
                                                                  messages: { tooBroad: 'Variable "{{ name }}" is declared in a broader scope than necessary.' },
                                                                  schema: [] },
-                                                         create: createPositiveVibes } } } }
+                                                         create: createNarrowestScope } } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
