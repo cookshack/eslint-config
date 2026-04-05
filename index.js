@@ -135,7 +135,14 @@ function createNarrowestScope
               if (variable.defs.length > 0)
                 items.push({ pos: variable.defs[0].name.range[0], text: 'LET ' + variable.name })
               for (let ref of variable.references)
-                items.push({ pos: ref.identifier.range[0], text: (isWriteRef(ref) ? 'WRITE ' : 'READ ') + ref.identifier.name })
+                if (isWriteRef(ref))
+                  if (ref.identifier.parent?.type == 'UpdateExpression')
+                    items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name },
+                               { pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
+                  else
+                    items.push({ pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
+                else
+                  items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name })
             }
             items.sort((a, b) => a.pos - b.pos)
             for (let item of items)
