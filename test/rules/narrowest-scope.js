@@ -27,6 +27,8 @@ function fail
 
 pass('let x = 0; x++; console.log(x);')
 
+pass('{ let x = 0; if (x) console.log(1); }')
+
 pass('let x = 0; x++; let y = x; console.log(y);')
 
 pass('function foo() { let x; x = 1; return x }')
