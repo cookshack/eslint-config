@@ -29,6 +29,8 @@ pass('function foo() { let x; x = 1; return x }')
 
 pass('let x = 0; x++; console.log(x);')
 
+pass('let x = 0; x++; let y = x; console.log(y);')
+
 pass('for (let i = 0; i < 10; i++) { console.log(i) }')
 
 pass('function outer() { let x; function inner() { x = 1 } return x }')

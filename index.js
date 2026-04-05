@@ -60,7 +60,7 @@ function isWriteRef(ref) {
       return 1
     if (parent.type == 'UpdateExpression')
       return 1
-    if (parent.type == 'VariableDeclarator' && parent.init)
+    if (parent.type == 'VariableDeclarator' && parent.id == ref.identifier)
       return 1
   }
   return 0
@@ -71,6 +71,20 @@ function isReadRef
   if (isWriteRef(ref))
     return 0
   return 1
+}
+
+function isRightSideOfAssignment(r, ref) {
+  if (r == ref)
+    return 0
+  return r.identifier.parent === ref.identifier.parent &&
+         ref.identifier.parent?.right === r.identifier
+}
+
+function isIdOfSameDeclarator(r, ref, declarator) {
+  if (r == ref)
+    return 0
+  return r.identifier.parent === declarator &&
+         declarator.id === r.identifier
 }
 
 function hasReadBeforeWriteInNestedScope(variable, defScope) {
@@ -127,12 +141,16 @@ function createNarrowestScope
 
         scopeInfo = new WeakMap
         function visit(scope, prefix) {
-          let siblingNum, info
+          let siblingNum
 
           print('SCOPE', prefix, scope.type.toUpperCase())
-          for (let variable of scope.variables)
-            if (variable.defs.length > 0) {
-              print('LET ' + variable.name)
+          {
+            let items, info
+
+            items = []
+            for (let variable of scope.variables) {
+              if (variable.defs.length > 0)
+                items.push({ pos: variable.defs[0].name.range[0], text: 'LET ' + variable.name })
               for (let ref of variable.references) {
                 let refInfo
 
@@ -146,23 +164,53 @@ function createNarrowestScope
                 refInfo.refs.push(ref)
               }
             }
-          info = scopeInfo.get(scope)
-          if (info) {
-            let items
+            info = scopeInfo.get(scope)
+            if (info)
+              for (let ref of info.refs) {
+                let parent, sortPos
 
-            items = []
-            for (let ref of info.refs)
-              if (isWriteRef(ref))
-                if (ref.identifier.parent?.type == 'UpdateExpression')
-                  items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name },
-                             { pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
+                parent = ref.identifier.parent
+                if (isWriteRef(ref))
+                  if (ref.identifier.parent?.type == 'UpdateExpression')
+                    items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name },
+                               { pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
+                  else if (ref.identifier.parent?.type == 'AssignmentExpression') {
+                    let rightRef
+
+                    rightRef = info.refs.find(r => isRightSideOfAssignment(r, ref))
+                    if (rightRef)
+                      sortPos = rightRef.identifier.range[0] - 0.5
+                    else
+                      sortPos = ref.identifier.range[0]
+                    items.push({ pos: sortPos, text: 'WRITE ' + ref.identifier.name })
+                  }
+                  else
+                    items.push({ pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
+                else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
+                  let idRef
+
+                  idRef = info.refs.find(r => isIdOfSameDeclarator(r, ref, parent))
+                  if (idRef)
+                    sortPos = idRef.identifier.range[0] - 0.5
+                  else
+                    sortPos = ref.identifier.range[0]
+                  items.push({ pos: sortPos, text: 'READ ' + ref.identifier.name })
+                }
                 else
-                  items.push({ pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
-              else
-                items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name })
-            items.sort((a, b) => a.pos - b.pos)
+                  items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name })
+              }
+            items.sort((a, b) => {
+              if (a.pos == b.pos) {
+                if (a.text.startsWith('READ') && b.text.startsWith('WRITE'))
+                  return -1
+                if (a.text.startsWith('WRITE') && b.text.startsWith('READ'))
+                  return 1
+                return 0
+              }
+              return a.pos - b.pos
+            })
             for (let item of items)
-              print(item.text)
+              print(item.text.replace(/^(LET|READ|WRITE)/, m => m.padEnd(5)) + '  (pos ' + item.pos + ')')
           }
           for (let variable of scope.variables) {
             if (reported.has(variable))
