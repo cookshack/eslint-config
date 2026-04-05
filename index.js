@@ -60,6 +60,8 @@ function isWriteRef(ref) {
       return 1
     if (parent.type == 'UpdateExpression')
       return 1
+    if (parent.type == 'VariableDeclarator' && parent.init)
+      return 1
   }
   return 0
 }
