@@ -179,11 +179,13 @@ function createNarrowestScope
 
                     rightRef = info.refs.find(r => isRightSideOfAssignment(r, ref))
                     if (rightRef)
-                      sortPos = rightRef.identifier.range[0] - 0.5
+                      sortPos = rightRef.identifier.range[0] - 0.4
                     else
                       sortPos = ref.identifier.range[0]
                     items.push({ pos: sortPos, text: 'WRITE ' + ref.identifier.name })
                   }
+                  else if (ref.identifier.parent?.type == 'VariableDeclarator')
+                    items.push({ pos: ref.identifier.range[0] + 0.4, text: 'WRITE ' + ref.identifier.name })
                   else
                     items.push({ pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name })
                 else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
@@ -191,7 +193,7 @@ function createNarrowestScope
 
                   idRef = info.refs.find(r => isIdOfSameDeclarator(r, ref, parent))
                   if (idRef)
-                    sortPos = idRef.identifier.range[0] - 0.5
+                    sortPos = idRef.identifier.range[0] - 0.4
                   else
                     sortPos = ref.identifier.range[0]
                   items.push({ pos: sortPos, text: 'READ ' + ref.identifier.name })
