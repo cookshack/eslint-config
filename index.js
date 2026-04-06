@@ -108,13 +108,6 @@ function getConditionalContext(ref, scope) {
   return ''
 }
 
-function isRightSideOfAssignment(r, ref) {
-  if (r == ref)
-    return 0
-  return r.identifier.parent === ref.identifier.parent &&
-         ref.identifier.parent?.right === r.identifier
-}
-
 function isIdOfSameDeclarator(r, ref, declarator) {
   if (r == ref)
     return 0
@@ -212,13 +205,7 @@ function createNarrowestScope
                     items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name, ctx },
                                { pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name, ctx })
                   else if (ref.identifier.parent?.type == 'AssignmentExpression') {
-                    let rightRef
-
-                    rightRef = info.refs.find(r => isRightSideOfAssignment(r, ref))
-                    if (rightRef)
-                      sortPos = rightRef.identifier.range[0] - 0.4
-                    else
-                      sortPos = ref.identifier.range[0]
+                    sortPos = parent.right.range[1] + 0.4
                     items.push({ pos: sortPos, text: 'WRITE ' + ref.identifier.name, ctx })
                   }
                   else if (ref.identifier.parent?.type == 'VariableDeclarator')

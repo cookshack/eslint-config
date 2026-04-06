@@ -1,5 +1,6 @@
 import { Linter } from 'eslint'
 import { plugins, getPrintBuffer } from '../../index.js'
+import { diffLines } from 'diff'
 
 let linter, validCases, invalidCases, config
 
@@ -25,8 +26,7 @@ function _pass(tc) {
     throw new Error('unexpected errors: ' + JSON.stringify(messages))
   if (tc.expected?.trim() == output.trim())
     return
-  console.log(output)
-  throw new Error('output mismatch\nExpected:\n' + tc.expected + '\n\nGot:\n' + output)
+  throw new Error('output mismatch\n--- expected\n+++ actual\n' + diffLines(tc.expected.trim(), output.trim()).map(p => p.added ? '+ ' + p.value : p.removed ? '- ' + p.value : p.value).join(''))
 }
 
 function _fail(tc) {
@@ -37,8 +37,7 @@ function _fail(tc) {
   if (messages.length == tc.errors.length) {
     if (tc.expected?.trim() == output.trim())
       return
-    console.log(output)
-    throw new Error('output mismatch\nExpected:\n' + tc.expected + '\n\nGot:\n' + output)
+    throw new Error('output mismatch\n--- expected\n+++ actual\n' + diffLines(tc.expected.trim(), output.trim()).map(p => p.added ? '+ ' + p.value : p.removed ? '- ' + p.value : p.value).join(''))
   }
   throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length)
 }
@@ -99,7 +98,7 @@ SCOPE 1.1 MODULE
 LET   foo   pos 9
 SCOPE 1.1.1 FUNCTION
 LET   x   pos 21
-WRITE x   pos 24
+WRITE x   pos 29.4
 READ  x   pos 38`)
 
 pass('for (let i = 0; i < 10; i++) { console.log(i) }',
@@ -123,7 +122,7 @@ LET   x   pos 23
 LET   inner   pos 35
 READ  x   pos 60
 SCOPE 1.1.1.1 FUNCTION
-WRITE x   pos 45`)
+WRITE x   pos 50.4`)
 
 pass('let x; function foo() { x = 1 } function bar() { return x }',
      `SCOPE 1 GLOBAL
@@ -132,7 +131,7 @@ LET   x   pos 4
 LET   foo   pos 16
 LET   bar   pos 41
 SCOPE 1.1.1 FUNCTION
-WRITE x   pos 24
+WRITE x   pos 29.4
 SCOPE 1.1.2 FUNCTION
 READ  x   pos 56`)
 
@@ -168,27 +167,27 @@ LET   s2   pos 16
 LET   otherwise   pos 20
 LET   a   pos 39
 LET   s   pos 42
-WRITE a   pos 47
-WRITE s   pos 59.6
+WRITE a   pos 53.4
 READ  s1   pos 60
+WRITE s   pos 62.4
 READ  s   pos 72
-WRITE s   pos 143.6
 READ  s2   pos 144
+WRITE s   pos 146.4
 READ  s   pos 156
 READ  otherwise   pos 255
 SCOPE 1.1.1.1 BLOCK
 READ  s B pos 85
 READ  a   pos 109
 READ  s   pos 116
-WRITE s   pos 123
 READ  s   pos 127
+WRITE s   pos 133.4
 SCOPE 1.1.1.2 BLOCK
 READ  s B pos 169
 READ  a B pos 197
 READ  s B pos 208
 READ  s B pos 225
-WRITE s   pos 231
-READ  s   pos 235`)
+READ  s   pos 235
+WRITE s   pos 241.4`)
 
 pass('import { a } from \'a.js\'; { a.f() }',
      `SCOPE 1 GLOBAL
@@ -224,7 +223,7 @@ SCOPE 1.1.1 FUNCTION
 LET   view   pos 28
 READ  tout C pos 42
 READ  tout B pos 65
-WRITE tout   pos 73
+WRITE tout   pos 122.4
 SCOPE 1.1.1.1 FUNCTION`)
 
 pass(`
@@ -250,7 +249,7 @@ SCOPE 1.1.1.1 FUNCTION
 LET   view   pos 53
 READ  tout C pos 69
 READ  tout B pos 94
-WRITE tout   pos 104
+WRITE tout   pos 153.4
 SCOPE 1.1.1.1.1 FUNCTION`)
 
 pass(`
@@ -286,11 +285,11 @@ SCOPE 1.1.1.1 FUNCTION
 READ  stopTimeout C pos 64
 SCOPE 1.1.1.1.1 BLOCK
 READ  stopTimeout   pos 98
-WRITE stopTimeout   pos 117
+WRITE stopTimeout   pos 132.4
 SCOPE 1.1.1.1.2 BLOCK
-WRITE stopTimeout   pos 191
+WRITE stopTimeout   pos 300.4
 SCOPE 1.1.1.1.2.1 FUNCTION
-WRITE stopTimeout   pos 232`)
+WRITE stopTimeout   pos 247.4`)
 
 pass('try { f() } catch (err) { console.log(err.message) }',
      `SCOPE 1 GLOBAL
@@ -339,8 +338,8 @@ LET   x   pos 4
 SCOPE 1.1.1 BLOCK
 LET   y   pos 13
 WRITE y   pos 13.4
-WRITE x   pos 23.6
-READ  y   pos 24`)
+READ  y   pos 24
+WRITE x   pos 25.4`)
 
 fail(2, `
 function f
@@ -381,24 +380,24 @@ LET   c1   pos 38
 LET   c2   pos 42
 LET   ok   pos 46
 READ  a C pos 56
-WRITE ok B pos 63
-WRITE ok B pos 81
+WRITE ok B pos 69.4
+WRITE ok B pos 87.4
 READ  b C pos 95
 READ  otherwise   pos 253
 SCOPE 1.1.1.1 BLOCK
-WRITE c1   pos 104
+WRITE c1   pos 110.4
 READ  b   pos 115
 READ  c1   pos 164
 SCOPE 1.1.1.1.1 FUNCTION
 LET   d   pos 125
-WRITE c1   pos 143.6
 READ  d   pos 144
+WRITE c1   pos 145.4
 SCOPE 1.1.1.2 BLOCK
-WRITE c2   pos 184.6
 READ  ok   pos 185
-WRITE c2   pos 192
+WRITE c2   pos 187.4
 READ  ok   pos 198
 READ  ok   pos 203
+WRITE c2   pos 205.4
 READ  c2 B pos 214
 READ  ok B pos 236`)
 
@@ -410,8 +409,8 @@ SCOPE 1.1.1 BLOCK
 SCOPE 1.1.2 CATCH
 LET   err   pos 26
 SCOPE 1.1.2.1 BLOCK
-WRITE a   pos 33
 READ  err   pos 37
+WRITE a   pos 48.4
 READ  a   pos 62`)
 
 globalThis.describe('narrowest-scope', () => {
