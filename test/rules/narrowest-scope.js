@@ -17,6 +17,11 @@ function pass(code, expected) {
   validCases.push({ code, expected })
 }
 
+function patch(expected, output) {
+  return diffLines(expected.trim(), output.trim()).flatMap(p => p.value.split('\n').filter(l => l).map(l => ({ ...p, line: l })))
+    .map(p => (p.removed ? '- ' : p.added ? '+ ' : '  ') + p.line).join('\n')
+}
+
 function _pass(tc) {
   let messages, output
 
@@ -26,7 +31,7 @@ function _pass(tc) {
     throw new Error('unexpected errors: ' + JSON.stringify(messages))
   if (tc.expected?.trim() == output.trim())
     return
-  throw new Error('output mismatch\n--- expected\n+++ actual\n' + diffLines(tc.expected.trim(), output.trim()).map(p => p.added ? '+ ' + p.value : p.removed ? '- ' + p.value : p.value).join(''))
+  throw new Error('output mismatch:\n' + patch(tc.expected, output))
 }
 
 function _fail(tc) {
@@ -37,7 +42,7 @@ function _fail(tc) {
   if (messages.length == tc.errors.length) {
     if (tc.expected?.trim() == output.trim())
       return
-    throw new Error('output mismatch\n--- expected\n+++ actual\n' + diffLines(tc.expected.trim(), output.trim()).map(p => p.added ? '+ ' + p.value : p.removed ? '- ' + p.value : p.value).join(''))
+    throw new Error('output mismatch:\n' + patch(tc.expected, output))
   }
   throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length)
 }
