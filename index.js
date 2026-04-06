@@ -148,8 +148,10 @@ function isProperAncestor(ancestor, descendant) {
 
 function createNarrowestScope
 (context) {
-  let scopeManager
+  let scopeManager, printBuffer
 
+  printBuffer = []
+  print = (...args) => printBuffer.push(args.join(' '))
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager) {
     let allScopes, reported
@@ -287,6 +289,8 @@ function createNarrowestScope
         }
 
         visit(allScopes[0], '1')
+        for (let line of printBuffer)
+          console.log(line)
       }
     }
   }
