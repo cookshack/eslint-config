@@ -120,18 +120,18 @@ LET   outer   pos 9
 SCOPE 1.1.1 FUNCTION
 LET   x   pos 23
 LET   inner   pos 35
-READ  x   pos 60
 SCOPE 1.1.1.1 FUNCTION
-WRITE x   pos 50.4`)
+WRITE x   pos 50.4
+READ  x   pos 60`)
 
 pass('let x; function foo() { x = 1 } function bar() { return x }',
      `SCOPE 1 GLOBAL
 SCOPE 1.1 MODULE
 LET   x   pos 4
 LET   foo   pos 16
-LET   bar   pos 41
 SCOPE 1.1.1 FUNCTION
 WRITE x   pos 29.4
+LET   bar   pos 41
 SCOPE 1.1.2 FUNCTION
 READ  x   pos 56`)
 
@@ -171,23 +171,23 @@ WRITE a   pos 53.4
 READ  s1   pos 60
 WRITE s   pos 62.4
 READ  s   pos 72
-READ  s2   pos 144
-WRITE s   pos 146.4
-READ  s   pos 156
-READ  otherwise   pos 255
 SCOPE 1.1.1.1 BLOCK
 READ  s B pos 85
 READ  a   pos 109
 READ  s   pos 116
 READ  s   pos 127
 WRITE s   pos 133.4
+READ  s2   pos 144
+WRITE s   pos 146.4
+READ  s   pos 156
 SCOPE 1.1.1.2 BLOCK
 READ  s B pos 169
 READ  a B pos 197
 READ  s B pos 208
 READ  s B pos 225
 READ  s   pos 235
-WRITE s   pos 241.4`)
+WRITE s   pos 241.4
+READ  otherwise   pos 255`)
 
 pass('import { a } from \'a.js\'; { a.f() }',
      `SCOPE 1 GLOBAL
@@ -200,8 +200,8 @@ pass('function foo() { return 1 } function bar() { return foo() }',
      `SCOPE 1 GLOBAL
 SCOPE 1.1 MODULE
 LET   foo   pos 9
-LET   bar   pos 37
 SCOPE 1.1.1 FUNCTION
+LET   bar   pos 37
 SCOPE 1.1.2 FUNCTION
 READ  foo   pos 52`)
 
@@ -223,8 +223,8 @@ SCOPE 1.1.1 FUNCTION
 LET   view   pos 28
 READ  tout C pos 42
 READ  tout B pos 65
-WRITE tout   pos 122.4
-SCOPE 1.1.1.1 FUNCTION`)
+SCOPE 1.1.1.1 FUNCTION
+WRITE tout   pos 122.4`)
 
 pass(`
 function init
@@ -249,8 +249,8 @@ SCOPE 1.1.1.1 FUNCTION
 LET   view   pos 53
 READ  tout C pos 69
 READ  tout B pos 94
-WRITE tout   pos 153.4
-SCOPE 1.1.1.1.1 FUNCTION`)
+SCOPE 1.1.1.1.1 FUNCTION
+WRITE tout   pos 153.4`)
 
 pass(`
 function init
@@ -280,16 +280,16 @@ LET   init   pos 10
 SCOPE 1.1.1 FUNCTION
 LET   stopTimeout   pos 26
 LET   f   pos 50
-READ  f   pos 321
 SCOPE 1.1.1.1 FUNCTION
 READ  stopTimeout C pos 64
 SCOPE 1.1.1.1.1 BLOCK
 READ  stopTimeout   pos 98
 WRITE stopTimeout   pos 132.4
 SCOPE 1.1.1.1.2 BLOCK
-WRITE stopTimeout   pos 300.4
 SCOPE 1.1.1.1.2.1 FUNCTION
-WRITE stopTimeout   pos 247.4`)
+WRITE stopTimeout   pos 247.4
+WRITE stopTimeout   pos 300.4
+READ  f   pos 321`)
 
 pass('try { f() } catch (err) { console.log(err.message) }',
      `SCOPE 1 GLOBAL
@@ -383,15 +383,14 @@ READ  a C pos 56
 WRITE ok B pos 69.4
 WRITE ok B pos 87.4
 READ  b C pos 95
-READ  otherwise   pos 253
 SCOPE 1.1.1.1 BLOCK
 WRITE c1   pos 110.4
 READ  b   pos 115
-READ  c1   pos 164
 SCOPE 1.1.1.1.1 FUNCTION
 LET   d   pos 125
 READ  d   pos 144
 WRITE c1   pos 145.4
+READ  c1   pos 164
 SCOPE 1.1.1.2 BLOCK
 READ  ok   pos 185
 WRITE c2   pos 187.4
@@ -399,7 +398,8 @@ READ  ok   pos 198
 READ  ok   pos 203
 WRITE c2   pos 205.4
 READ  c2 B pos 214
-READ  ok B pos 236`)
+READ  ok B pos 236
+READ  otherwise   pos 253`)
 
 fail(1, 'let a; try { f() } catch (err) { a = err.message; console.log(a) }',
      `SCOPE 1 GLOBAL

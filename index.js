@@ -169,17 +169,26 @@ function createNarrowestScope
         let scopeInfo
 
         scopeInfo = new WeakMap
+        function scopeStart(scope) {
+          if (scope.block == null)
+            return Infinity
+          if (scope.type == 'function' && scope.block.type == 'FunctionDeclaration')
+            return scope.block.id?.range[0] ?? scope.block.range[0]
+          if (scope.type == 'class')
+            return scope.block.id?.range[0] ?? scope.block.range[0]
+          return scope.block.range[0]
+        }
         function visit(scope, prefix) {
-          let siblingNum
+          let siblingNum, items, children, i, childIdx
 
-          print('SCOPE', prefix, scope.type.toUpperCase())
+          items = []
+          items.push({ type: 'SCOPE', name: prefix + ' ' + scope.type.toUpperCase(), pos: scopeStart(scope) })
           {
-            let items, info
+            let info
 
-            items = []
             for (let variable of scope.variables) {
               if (variable.defs.length > 0)
-                items.push({ pos: variable.defs[0].name.range[0], text: 'LET ' + variable.name })
+                items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0] })
               for (let ref of variable.references) {
                 let refInfo
 
@@ -201,17 +210,18 @@ function createNarrowestScope
                 ctx = getConditionalContext(ref, scope)
                 parent = ref.identifier.parent
                 if (isWriteRef(ref))
-                  if (ref.identifier.parent?.type == 'UpdateExpression')
-                    items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name, ctx },
-                               { pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name, ctx })
+                  if (ref.identifier.parent?.type == 'UpdateExpression') {
+                    items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+                    items.push({ type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+                  }
                   else if (ref.identifier.parent?.type == 'AssignmentExpression') {
                     sortPos = parent.right.range[1] + 0.4
-                    items.push({ pos: sortPos, text: 'WRITE ' + ref.identifier.name, ctx })
+                    items.push({ type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
                   }
                   else if (ref.identifier.parent?.type == 'VariableDeclarator')
-                    items.push({ pos: ref.identifier.range[0] + 0.4, text: 'WRITE ' + ref.identifier.name, ctx })
+                    items.push({ type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
                   else
-                    items.push({ pos: ref.identifier.range[0], text: 'WRITE ' + ref.identifier.name, ctx })
+                    items.push({ type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
                 else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
                   let idRef
 
@@ -220,23 +230,12 @@ function createNarrowestScope
                     sortPos = idRef.identifier.range[0] - 0.4
                   else
                     sortPos = ref.identifier.range[0]
-                  items.push({ pos: sortPos, text: 'READ ' + ref.identifier.name, ctx })
+                  items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
                 }
                 else
-                  items.push({ pos: ref.identifier.range[0], text: 'READ ' + ref.identifier.name, ctx })
+                  items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
               }
-            items.sort((a, b) => {
-              if (a.pos == b.pos) {
-                if (a.text.startsWith('READ') && b.text.startsWith('WRITE'))
-                  return -1
-                if (a.text.startsWith('WRITE') && b.text.startsWith('READ'))
-                  return 1
-                return 0
-              }
-              return a.pos - b.pos
-            })
-            for (let item of items)
-              print(item.text.replace(/^(LET|READ|WRITE)/, m => m.padEnd(5)) + (item.ctx ? ' ' + item.ctx : '').padEnd(3) + 'pos ' + item.pos)
+            items.sort((a, b) => a.pos - b.pos)
           }
           for (let variable of scope.variables) {
             if (reported.has(variable))
@@ -281,10 +280,27 @@ function createNarrowestScope
             }
           }
           siblingNum = 0
-          for (let child of scope.childScopes) {
-            siblingNum++
-            visit(child, prefix + '.' + siblingNum)
-          }
+          children = []
+          for (let child of scope.childScopes)
+            children.push({ scope: child, pos: scopeStart(child) })
+          children.sort((a, b) => a.pos - b.pos)
+          i = 0
+          childIdx = 0
+          while (i < items.length || childIdx < children.length)
+            if (childIdx < children.length && (i >= items.length || children[childIdx].pos < items[i].pos)) {
+              siblingNum++
+              visit(children[childIdx++].scope, prefix + '.' + siblingNum)
+            }
+            else if (i < items.length) {
+              let item
+
+              item = items[i]
+              i++
+              if (item.type == 'SCOPE')
+                print('SCOPE ' + item.name)
+              else
+                print(item.type.padEnd(5) + ' ' + item.name + (item.ctx ? ' ' + item.ctx : '').padEnd(3) + 'pos ' + item.pos)
+            }
         }
 
         visit(allScopes[0], '1')
