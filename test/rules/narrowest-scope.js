@@ -78,7 +78,7 @@ SCOPE 1.1 MODULE
 SCOPE 1.1.1 BLOCK
 LET   x   pos 6
 WRITE x   pos 6.4
-READ  x C pos 17`)
+READ  x   pos 17`)
 
 pass('let x = 0; x++; let y = x; console.log(y);',
      `SCOPE 1 GLOBAL
@@ -172,7 +172,7 @@ READ  s1   pos 60
 WRITE s   pos 62.4
 READ  s   pos 72
 SCOPE 1.1.1.1 BLOCK
-READ  s B pos 85
+READ  s   pos 85
 READ  a   pos 109
 READ  s   pos 116
 READ  s   pos 127
@@ -181,9 +181,9 @@ READ  s2   pos 144
 WRITE s   pos 146.4
 READ  s   pos 156
 SCOPE 1.1.1.2 BLOCK
-READ  s B pos 169
-READ  a B pos 197
-READ  s B pos 208
+READ  s   pos 169
+READ  a   pos 197
+READ  s   pos 208
 READ  s B pos 225
 READ  s   pos 235
 WRITE s   pos 241.4
@@ -221,7 +221,7 @@ LET   tout   pos 5
 LET   update   pos 20
 SCOPE 1.1.1 FUNCTION
 LET   view   pos 28
-READ  tout C pos 42
+READ  tout   pos 42
 READ  tout B pos 65
 SCOPE 1.1.1.1 FUNCTION
 WRITE tout   pos 122.4`)
@@ -247,7 +247,7 @@ LET   tout   pos 26
 LET   update   pos 43
 SCOPE 1.1.1.1 FUNCTION
 LET   view   pos 53
-READ  tout C pos 69
+READ  tout   pos 69
 READ  tout B pos 94
 SCOPE 1.1.1.1.1 FUNCTION
 WRITE tout   pos 153.4`)
@@ -281,7 +281,7 @@ SCOPE 1.1.1 FUNCTION
 LET   stopTimeout   pos 26
 LET   f   pos 50
 SCOPE 1.1.1.1 FUNCTION
-READ  stopTimeout C pos 64
+READ  stopTimeout   pos 64
 SCOPE 1.1.1.1.1 BLOCK
 READ  stopTimeout   pos 98
 WRITE stopTimeout   pos 132.4
@@ -321,6 +321,30 @@ LET   name   pos 44
 READ  name   pos 84
 SCOPE 1.1.2 FUNCTION
 READ  A   pos 127`)
+
+pass(`
+let clen
+
+function parse
+() {
+  if (maybe())
+    clen = get()
+
+  if (check(clen)) {
+    run()
+    clen = 0
+  }
+}
+`,
+     `SCOPE 1 GLOBAL
+SCOPE 1.1 MODULE
+LET   clen   pos 5
+LET   parse   pos 20
+SCOPE 1.1.1 FUNCTION
+WRITE clen B pos 62.4
+READ  clen   pos 76
+SCOPE 1.1.1.1 BLOCK
+WRITE clen   pos 107.4`)
 
 fail(1, 'let x = 1; function foo() { return x }',
      `SCOPE 1 GLOBAL
@@ -379,10 +403,10 @@ LET   otherwise   pos 19
 LET   c1   pos 38
 LET   c2   pos 42
 LET   ok   pos 46
-READ  a C pos 56
+READ  a   pos 56
 WRITE ok B pos 69.4
 WRITE ok B pos 87.4
-READ  b C pos 95
+READ  b   pos 95
 SCOPE 1.1.1.1 BLOCK
 WRITE c1   pos 110.4
 READ  b   pos 115
@@ -397,7 +421,7 @@ WRITE c2   pos 187.4
 READ  ok   pos 198
 READ  ok   pos 203
 WRITE c2   pos 205.4
-READ  c2 B pos 214
+READ  c2   pos 214
 READ  ok B pos 236
 READ  otherwise   pos 253`)
 

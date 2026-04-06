@@ -87,25 +87,47 @@ function isReadRef
 }
 
 function getConditionalContext(ref, scope) {
-  let node, inCondition, inBody, scopeBlock
+  let node, prevNode, scopeBlock
 
-  inCondition = false
-  inBody = false
   scopeBlock = scope.block
+  prevNode = ref.identifier
   node = ref.identifier.parent
   while (node) {
     if (node === scopeBlock)
       break
     if (node.type === 'IfStatement')
-      if (node.test === ref.identifier)
-        inCondition = true
+      if (prevNode === node.test || nodeContains(node.test, prevNode))
+        prevNode = node
       else
-        inBody = true
+        return 'B'
+    else if ([ 'WhileStatement', 'DoWhileStatement', 'ForStatement', 'ForInStatement', 'ForOfStatement', 'SwitchStatement' ].includes(node.type))
+      if (prevNode === node.test || nodeContains(node.test, prevNode))
+        prevNode = node
+      else
+        return 'B'
+    else
+      prevNode = node
     node = node.parent
   }
-  if (inCondition || inBody)
-    return (inCondition ? 'C' : '') + (inBody ? 'B' : '')
   return ''
+}
+
+function nodeContains(node, target) {
+  if (node === target)
+    return true
+  if (node && typeof node === 'object')
+    for (let key in node)
+      if (nodeHas(node[key], target))
+        return true
+  return false
+}
+
+function nodeHas(value, target) {
+  if (value === target)
+    return true
+  if (Array.isArray(value))
+    return value.some(v => nodeContains(v, target))
+  return false
 }
 
 function isIdOfSameDeclarator(r, ref, declarator) {
