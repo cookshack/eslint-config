@@ -1,28 +1,41 @@
-import { RuleTester } from 'eslint'
+import { Linter } from 'eslint'
 import { plugins } from '../../index.js'
 
-let ruleTester, validCases, invalidCases
+let linter, validCases, invalidCases, config
 
-ruleTester = new RuleTester()
+linter = new Linter()
 validCases = []
 invalidCases = []
 
+config = [ { languageOptions: { ecmaVersion: 2025,
+                                sourceType: 'module' },
+             plugins,
+             rules: { 'cookshack/narrowest-scope': 'error' } } ]
+
 function pass
 (code) {
+  let messages
+
   validCases.push({ code })
+  messages = linter.verify(code, config)
+  if (messages.length > 0)
+    throw new Error('unexpected errors: ' + JSON.stringify(messages))
 }
 
 function fail
 (count, code) {
-  let errors
+  let messages, errors
 
   errors = []
-
   while (count > 0) {
     errors.push({ messageId: 'tooBroad' })
     count--
   }
   invalidCases.push({ code, errors })
+  messages = linter.verify(code, config)
+  if (messages.length == errors.length)
+    return
+  throw new Error('expected ' + errors.length + ' errors, got ' + messages.length)
 }
 
 pass('if (g) { let x = 0; x++; console.log(x); }')
@@ -69,8 +82,6 @@ pass('import { a } from \'a.js\'; { a.f() }')
 
 pass('function foo() { return 1 } function bar() { return foo() }')
 
-// requires var usage analysis
-//
 pass(`
 let tout
 
@@ -82,8 +93,6 @@ function update
 }
 `)
 
-// requires var usage analysis
-//
 pass(`
 function init
 () {
@@ -170,8 +179,9 @@ function f
 
 fail(1, 'let a; try { f() } catch (err) { a = err.message; console.log(a) }')
 
-globalThis.describe('narrowest-scope',
-                    () => ruleTester.run('narrowest-scope',
-                                         plugins.cookshack.rules['narrowest-scope'],
-                                         { valid: validCases,
-                                           invalid: invalidCases }))
+globalThis.describe('narrowest-scope', () => {
+  for (let tc of validCases)
+    globalThis.it(tc.code, () => pass(tc.code))
+  for (let tc of invalidCases)
+    globalThis.it(tc.code, () => fail(tc.errors.length, tc.code))
+})
