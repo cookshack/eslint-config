@@ -25,6 +25,8 @@ function fail
   invalidCases.push({ code, errors })
 }
 
+pass('if (g) { let x = 0; x++; console.log(x); }')
+
 pass('let x = 0; x++; console.log(x);')
 
 pass('{ let x = 0; if (x) console.log(1); }')
