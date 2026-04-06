@@ -12,19 +12,20 @@ config = [ { languageOptions: { ecmaVersion: 2025,
              plugins,
              rules: { 'cookshack/narrowest-scope': 'error' } } ]
 
-function pass
-(code) {
+function pass(code) {
+  validCases.push({ code })
+}
+
+function _pass(code) {
   let messages
 
-  validCases.push({ code })
   messages = linter.verify(code, config)
   if (messages.length > 0)
     throw new Error('unexpected errors: ' + JSON.stringify(messages))
 }
 
-function fail
-(count, code) {
-  let messages, errors
+function fail(count, code) {
+  let errors
 
   errors = []
   while (count > 0) {
@@ -32,10 +33,15 @@ function fail
     count--
   }
   invalidCases.push({ code, errors })
+}
+
+function _fail(count, code) {
+  let messages
+
   messages = linter.verify(code, config)
-  if (messages.length == errors.length)
+  if (messages.length == count)
     return
-  throw new Error('expected ' + errors.length + ' errors, got ' + messages.length)
+  throw new Error('expected ' + count + ' errors, got ' + messages.length)
 }
 
 pass('if (g) { let x = 0; x++; console.log(x); }')
@@ -181,7 +187,7 @@ fail(1, 'let a; try { f() } catch (err) { a = err.message; console.log(a) }')
 
 globalThis.describe('narrowest-scope', () => {
   for (let tc of validCases)
-    globalThis.it(tc.code, () => pass(tc.code))
+    globalThis.it(tc.code, () => _pass(tc.code))
   for (let tc of invalidCases)
-    globalThis.it(tc.code, () => fail(tc.errors.length, tc.code))
+    globalThis.it(tc.code, () => _fail(tc.errors.length, tc.code))
 })
