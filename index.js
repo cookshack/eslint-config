@@ -2,9 +2,22 @@ import globals from 'globals'
 
 export let rules, languageOptions, plugins
 
-let print
+let printBuffer
 
-print = console.log
+printBuffer = []
+
+function print (...args) {
+  printBuffer.push(args.join(' '))
+}
+
+export
+function getPrintBuffer() {
+  return printBuffer.join('\n')
+}
+
+function clearPrintBuffer() {
+  printBuffer = []
+}
 
 function getNarrowestScope
 (variable) {
@@ -148,10 +161,9 @@ function isProperAncestor(ancestor, descendant) {
 
 function createNarrowestScope
 (context) {
-  let scopeManager, printBuffer
+  let scopeManager
 
-  printBuffer = []
-  print = (...args) => printBuffer.push(args.join(' '))
+  clearPrintBuffer()
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager) {
     let allScopes, reported
@@ -289,8 +301,6 @@ function createNarrowestScope
         }
 
         visit(allScopes[0], '1')
-        for (let line of printBuffer)
-          console.log(line)
       }
     }
   }

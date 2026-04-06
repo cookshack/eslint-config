@@ -1,5 +1,5 @@
 import { Linter } from 'eslint'
-import { plugins } from '../../index.js'
+import { plugins, getPrintBuffer } from '../../index.js'
 
 let linter, validCases, invalidCases, config
 
@@ -12,19 +12,38 @@ config = [ { languageOptions: { ecmaVersion: 2025,
              plugins,
              rules: { 'cookshack/narrowest-scope': 'error' } } ]
 
-function pass(code) {
-  validCases.push({ code })
+function pass(code, expected) {
+  validCases.push({ code, expected })
 }
 
-function _pass(code) {
-  let messages
+function _pass(tc) {
+  let messages, output
 
-  messages = linter.verify(code, config)
+  messages = linter.verify(tc.code, config)
+  output = getPrintBuffer()
   if (messages.length > 0)
     throw new Error('unexpected errors: ' + JSON.stringify(messages))
+  if (tc.expected?.trim() == output.trim())
+    return
+  console.log(output)
+  throw new Error('output mismatch\nExpected:\n' + tc.expected + '\n\nGot:\n' + output)
 }
 
-function fail(count, code) {
+function _fail(tc) {
+  let messages, output
+
+  messages = linter.verify(tc.code, config)
+  output = getPrintBuffer()
+  if (messages.length == tc.errors.length) {
+    if (tc.expected?.trim() == output.trim())
+      return
+    console.log(output)
+    throw new Error('output mismatch\nExpected:\n' + tc.expected + '\n\nGot:\n' + output)
+  }
+  throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length)
+}
+
+function fail(count, code, expected) {
   let errors
 
   errors = []
@@ -32,16 +51,7 @@ function fail(count, code) {
     errors.push({ messageId: 'tooBroad' })
     count--
   }
-  invalidCases.push({ code, errors })
-}
-
-function _fail(count, code) {
-  let messages
-
-  messages = linter.verify(code, config)
-  if (messages.length == count)
-    return
-  throw new Error('expected ' + count + ' errors, got ' + messages.length)
+  invalidCases.push({ code, errors, expected })
 }
 
 pass('if (g) { let x = 0; x++; console.log(x); }',
@@ -406,7 +416,7 @@ READ  a   pos 62`)
 
 globalThis.describe('narrowest-scope', () => {
   for (let tc of validCases)
-    globalThis.it(tc.code, () => _pass(tc.code))
+    globalThis.it(tc.code, () => _pass(tc))
   for (let tc of invalidCases)
-    globalThis.it(tc.code, () => _fail(tc.errors.length, tc.code))
+    globalThis.it(tc.code, () => _fail(tc))
 })
