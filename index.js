@@ -91,10 +91,10 @@ function isReadRef
   return 1
 }
 
-function getConditionalContext(ref, scope) {
+function getConditionalContext(ref) {
   let node, prevNode, scopeBlock
 
-  scopeBlock = scope.block
+  scopeBlock = ref.from.block
   prevNode = ref.identifier
   node = ref.identifier.parent
   while (node) {
@@ -248,7 +248,7 @@ function buildScopeTree(scope, prefix, scopeToNode) {
       if (!targetNode)
         continue
 
-      ctx = getConditionalContext(ref, variable.scope)
+      ctx = getConditionalContext(ref)
       parent = ref.identifier.parent
       if (isWriteRef(ref))
         if (ref.identifier.parent?.type == 'UpdateExpression') {

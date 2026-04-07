@@ -435,10 +435,10 @@ function f
   return otherwise
 }
 `,
-`SCOPE 1 GLOBAL pos 0
-  SCOPE 1.1 MODULE pos 0
+`SCOPE 1 GLOBAL pos 1
+  SCOPE 1.1 MODULE pos 1
     LET   f   pos 10
-    SCOPE 1.1.1 FUNCTION
+    SCOPE 1.1.1 FUNCTION pos 11
       LET   a   pos 13
       LET   b   pos 16
       LET   otherwise   pos 19
@@ -449,15 +449,15 @@ function f
       WRITE ok B pos 69.4
       WRITE ok B pos 87.4
       READ  b   pos 95
-      SCOPE 1.1.1.1 BLOCK
+      SCOPE 1.1.1.1 BLOCK pos 98
         WRITE c1   pos 110.4
         READ  b   pos 115
-        SCOPE 1.1.1.1.1 FUNCTION
+        SCOPE 1.1.1.1.1 FUNCTION pos 125
           LET   d   pos 125
           READ  d   pos 144
           WRITE c1   pos 145.4
-          READ  c1   pos 164
-      SCOPE 1.1.1.2 BLOCK
+        READ  c1   pos 164
+      SCOPE 1.1.1.2 BLOCK pos 174
         READ  ok   pos 185
         WRITE c2   pos 187.4
         READ  ok   pos 198
