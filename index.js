@@ -207,6 +207,122 @@ function isProperAncestor(ancestor, descendant) {
   return 0
 }
 
+function scopeStart(scope) {
+  if (scope.block == null)
+    return Infinity
+  if (scope.type == 'function' && scope.block.id)
+    return scope.block.id.range[1]
+  if (scope.type == 'class' && scope.block.id)
+    return scope.block.id.range[0]
+  return scope.block.range[0]
+}
+
+function buildScopeTree(scope, prefix) {
+  let node, siblingNum
+
+  node = {
+    scope,
+    prefix,
+    items: [],
+    children: []
+  }
+  for (let variable of scope.variables) {
+    if (variable.defs.length > 0)
+      node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0] })
+    for (let ref of variable.references) {
+      let parent, sortPos, ctx
+
+      ctx = getConditionalContext(ref, scope)
+      parent = ref.identifier.parent
+      if (isWriteRef(ref))
+        if (ref.identifier.parent?.type == 'UpdateExpression') {
+          node.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+        }
+        else if (ref.identifier.parent?.type == 'AssignmentExpression') {
+          sortPos = parent.right.range[1] + 0.4
+          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
+        }
+        else if (ref.identifier.parent?.type == 'VariableDeclarator')
+          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
+        else
+          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+      else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
+        let idRef
+
+        idRef = variable.references.find(r => isIdOfSameDeclarator(r, ref, parent))
+        if (idRef)
+          sortPos = idRef.identifier.range[0] - 0.4
+        else
+          sortPos = ref.identifier.range[0]
+        node.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
+      }
+      else
+        node.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+    }
+  }
+  node.items.sort((a, b) => a.pos - b.pos)
+  siblingNum = 0
+  for (let child of scope.childScopes) {
+    siblingNum++
+    node.children.push(buildScopeTree(child, prefix + '.' + siblingNum))
+  }
+  return node
+}
+
+function checkScopeNode(context, treeNode, reported) {
+  reported = reported || new Set
+  for (let variable of treeNode.scope.variables) {
+    if (reported.has(variable))
+      continue
+    if (variable.defs.length === 0)
+      continue
+    if (['Parameter', 'FunctionName', 'ImportBinding', 'CatchClause', 'ClassName'].includes(variable.defs[0].type))
+      continue
+
+    let defNode = variable.defs[0]?.name
+    if (!defNode)
+      continue
+
+    let defScope = getDefinitionScope(variable)
+    let narrowestScope = getNarrowestScope(variable)
+
+    if (defScope == narrowestScope)
+      continue
+
+    if (mayBeReadBeforeAnyWrite(defScope, variable, treeNode.items))
+      continue
+
+    reported.add(variable)
+    context.report({
+      node: defNode,
+      messageId: 'tooBroad',
+      data: { name: variable.name }
+    })
+  }
+
+  for (let child of treeNode.children)
+    checkScopeNode(context, child, reported)
+}
+
+function printTree(node, siblingNum) {
+  let prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
+  print('SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase())
+
+  let all = [
+    ...node.items.map(i => ({ pos: i.pos, type: 'item', data: i })),
+    ...node.children.map((c, i) => ({ pos: scopeStart(c.scope), type: 'scope', data: c, sibling: i + 1 }))
+  ]
+  all.sort((a, b) => a.pos - b.pos)
+
+  for (let entry of all) {
+    if (entry.type === 'item')
+      print(entry.data.type.padEnd(5) + ' ' + entry.data.name + (entry.data.ctx ? ' ' + entry.data.ctx : '').padEnd(3) + 'pos ' + entry.data.pos)
+    else
+      printTree(entry.data, entry.sibling)
+  }
+}
+
 function createNarrowestScope
 (context) {
   let scopeManager
@@ -214,166 +330,11 @@ function createNarrowestScope
   clearPrintBuffer()
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager) {
-    let allScopes, reported
-
-    allScopes = scopeManager.scopes
-    reported = new Set
-
     return {
       'Program:exit'() {
-        let scopeInfo
-
-        scopeInfo = new WeakMap
-        function scopeStart(scope) {
-          if (scope.block == null)
-            return Infinity
-          if (scope.type == 'function' && scope.block.type == 'FunctionDeclaration')
-            return scope.block.id?.range[0] ?? scope.block.range[0]
-          if (scope.type == 'class')
-            return scope.block.id?.range[0] ?? scope.block.range[0]
-          return scope.block.range[0]
-        }
-        function visit(scope, prefix) {
-          let siblingNum, items, children, i, childIdx
-
-          items = []
-          items.push({ type: 'SCOPE', name: prefix + ' ' + scope.type.toUpperCase(), pos: scopeStart(scope) })
-          {
-            let info
-
-            for (let variable of scope.variables) {
-              if (variable.defs.length > 0)
-                items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0] })
-              for (let ref of variable.references) {
-                let refInfo
-
-                refInfo = scopeInfo.get(ref.from)
-                if (refInfo) {
-                }
-                else {
-                  refInfo = { refs: [] }
-                  scopeInfo.set(ref.from, refInfo)
-                }
-                refInfo.refs.push(ref)
-              }
-            }
-            info = scopeInfo.get(scope)
-            if (info)
-              for (let ref of info.refs) {
-                let parent, sortPos, ctx
-
-                ctx = getConditionalContext(ref, scope)
-                parent = ref.identifier.parent
-                if (isWriteRef(ref))
-                  if (ref.identifier.parent?.type == 'UpdateExpression') {
-                    items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
-                  }
-                  else if (ref.identifier.parent?.type == 'AssignmentExpression') {
-                    sortPos = parent.right.range[1] + 0.4
-                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
-                  }
-                  else if (ref.identifier.parent?.type == 'VariableDeclarator')
-                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
-                  else
-                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
-                else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
-                  let idRef
-
-                  idRef = info.refs.find(r => isIdOfSameDeclarator(r, ref, parent))
-                  if (idRef)
-                    sortPos = idRef.identifier.range[0] - 0.4
-                  else
-                    sortPos = ref.identifier.range[0]
-                  items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
-                }
-                else
-                  items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-              }
-            items.sort((a, b) => a.pos - b.pos)
-          }
-          for (let variable of scope.variables) {
-            let node
-
-            if (reported.has(variable))
-              continue
-            if (variable.defs.length === 0)
-              continue
-            if (variable.defs[0].type == 'Parameter')
-              continue
-            if (variable.defs[0].type == 'FunctionName')
-              continue
-            if (variable.defs[0].type == 'ImportBinding')
-              continue
-            if (variable.defs[0].type == 'CatchClause')
-              continue
-            if (variable.defs[0].type == 'ClassName')
-              continue
-
-            node = variable.defs[0]?.name
-            if (node) {
-              let defScope, narrowestScope
-
-              defScope = getDefinitionScope(variable)
-              trace('1 found decl scope of', variable.name + ':', prefix + ' ' + defScope.type.toUpperCase())
-
-              narrowestScope = getNarrowestScope(variable)
-              trace('2 found narrowest scope of', variable.name + ':', prefix + ' ' + narrowestScope?.type.toUpperCase())
-
-              if (defScope == narrowestScope)
-                continue
-              trace('3', variable.name, 'could be moved to a narrower scope')
-
-              if (narrowestScope) {
-                if (defScope.type == 'for') {
-                  trace('4 exception:', variable.name, 'is in a `for` loop header')
-                  continue
-                }
-                if (0 && hasReadBeforeWriteInNestedScope(variable, defScope)) {
-                  trace('4 exception:', variable.name, ' hasReadBeforeWriteInNestedScope')
-                  continue
-                }
-                if (mayBeReadBeforeAnyWrite(defScope, variable, items)) {
-                  trace('4 exception:', variable.name, ' mayBeReadBeforeAnyWrite')
-                  continue
-                }
-
-                trace('5', variable.name, 'is too broad')
-
-                reported.add(variable)
-                context.report({
-                  node,
-                  messageId: 'tooBroad',
-                  data: { name: variable.name }
-                })
-              }
-            }
-          }
-          siblingNum = 0
-          children = []
-          for (let child of scope.childScopes)
-            children.push({ scope: child, pos: scopeStart(child) })
-          children.sort((a, b) => a.pos - b.pos)
-          i = 0
-          childIdx = 0
-          while (i < items.length || childIdx < children.length)
-            if (childIdx < children.length && (i >= items.length || children[childIdx].pos < items[i].pos)) {
-              siblingNum++
-              visit(children[childIdx++].scope, prefix + '.' + siblingNum)
-            }
-            else if (i < items.length) {
-              let item
-
-              item = items[i]
-              i++
-              if (item.type == 'SCOPE')
-                print('SCOPE ' + item.name)
-              else
-                print(item.type.padEnd(5) + ' ' + item.name + (item.ctx ? ' ' + item.ctx : '').padEnd(3) + 'pos ' + item.pos)
-            }
-        }
-
-        visit(allScopes[0], '1')
+        let tree = buildScopeTree(scopeManager.scopes[0], '1')
+        checkScopeNode(context, tree)
+        printTree(tree, 0)
       }
     }
   }

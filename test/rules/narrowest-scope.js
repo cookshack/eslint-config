@@ -58,43 +58,6 @@ function fail(count, code, expected) {
   invalidCases.push({ code, errors, expected })
 }
 
-pass(`
-function make
-() {
-  let clen
-
-  function parse
-  () {
-    while (1) {
-      if (maybe())
-        clen = get()
-
-      if (check(clen)) {
-        run()
-        clen = undefined
-      }
-      else
-        break
-    }
-  }
-
-  return 0
-}
-`,
-     `SCOPE 1 GLOBAL
-SCOPE 1.1 MODULE
-LET   make   pos 10
-SCOPE 1.1.1 FUNCTION
-LET   clen   pos 26
-LET   parse   pos 43
-SCOPE 1.1.1.1 FUNCTION
-SCOPE 1.1.1.1.1 BLOCK
-WRITE clen B pos 111.4
-READ  clen   pos 129
-SCOPE 1.1.1.1.1.1 BLOCK
-READ  undefined   pos 167
-WRITE clen   pos 176.4`)
-
 pass('if (g) { let x = 0; x++; console.log(x); }',
      `SCOPE 1 GLOBAL
 SCOPE 1.1 MODULE
@@ -387,6 +350,43 @@ WRITE clen B pos 62.4
 READ  clen   pos 76
 SCOPE 1.1.1.1 BLOCK
 WRITE clen   pos 107.4`)
+
+pass(`
+function make
+() {
+  let clen
+
+  function parse
+  () {
+    while (1) {
+      if (maybe())
+        clen = get()
+
+      if (check(clen)) {
+        run()
+        clen = undefined
+      }
+      else
+        break
+    }
+  }
+
+  return 0
+}
+`,
+     `SCOPE 1 GLOBAL
+SCOPE 1.1 MODULE
+LET   make   pos 10
+SCOPE 1.1.1 FUNCTION
+LET   clen   pos 26
+LET   parse   pos 43
+SCOPE 1.1.1.1 FUNCTION
+SCOPE 1.1.1.1.1 BLOCK
+WRITE clen B pos 111.4
+READ  clen   pos 129
+SCOPE 1.1.1.1.1.1 BLOCK
+READ  undefined   pos 167
+WRITE clen   pos 176.4`)
 
 fail(1, 'let x = 1; function foo() { return x }',
      `SCOPE 1 GLOBAL
