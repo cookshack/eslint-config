@@ -296,6 +296,14 @@ function checkScopeNode(context, treeNode, reported) {
         continue
       trace('3', variable.name, 'could be moved to a narrower scope')
 
+      if (defScope.type == 'for') {
+        trace('4 exception:', variable.name, 'is in a for loop header')
+        continue
+      }
+      if (0 && hasReadBeforeWriteInNestedScope(variable, defScope)) {
+        trace('4 exception:', variable.name, 'hasReadBeforeWriteInNestedScope')
+        continue
+      }
       if (mayBeReadBeforeAnyWrite(variable, treeNode.items)) {
         trace('4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
         continue
@@ -317,21 +325,20 @@ function checkScopeNode(context, treeNode, reported) {
 }
 
 function printTree(node, siblingNum) {
-  let prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
+  let prefix, all
+
+  prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
   print('SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase() + ' pos ' + scopeStart(node.scope))
 
-  let all = [
-    ...node.items.map(i => ({ pos: i.pos, type: 'item', data: i })),
-    ...node.children.map((c, i) => ({ pos: scopeStart(c.scope), type: 'scope', data: c, sibling: i + 1 }))
-  ]
+  all = [ ...node.items.map(i => ({ pos: i.pos, type: 'item', data: i })),
+          ...node.children.map((c, i) => ({ pos: scopeStart(c.scope), type: 'scope', data: c, sibling: i + 1 })) ]
   all.sort((a, b) => a.pos - b.pos)
 
-  for (let entry of all) {
+  for (let entry of all)
     if (entry.type === 'item')
       print(entry.data.type.padEnd(5) + ' ' + entry.data.name + (entry.data.ctx ? ' ' + entry.data.ctx : '').padEnd(3) + 'pos ' + entry.data.pos)
     else
       printTree(entry.data, entry.sibling)
-  }
 }
 
 function createNarrowestScope
@@ -340,15 +347,16 @@ function createNarrowestScope
 
   clearPrintBuffer()
   scopeManager = context.sourceCode.scopeManager
-  if (scopeManager) {
+  if (scopeManager)
     return {
       'Program:exit'() {
-        let tree = buildScopeTree(scopeManager.scopes[0], '1')
+        let tree
+
+        tree = buildScopeTree(scopeManager.scopes[0], '1')
         checkScopeNode(context, tree)
         printTree(tree, 0)
       }
     }
-  }
 }
 
 function createPositiveVibes
