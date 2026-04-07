@@ -234,13 +234,13 @@ WRITE tout   pos 122.4`)
 pass(`
 function init
 () {
-  let tout
+  let out2
 
   function update
   (view) {
-    if (tout)
-      clearTimeout(tout)
-    tout = setTimeout(() => console.log('hi'), 10000)
+    if (out2)
+      clearTimeout(out2)
+    out2 = setTimeout(() => console.log('hi'), 10000)
   }
 }
 `,
@@ -248,14 +248,14 @@ function init
 SCOPE 1.1 MODULE pos 1
 LET   init   pos 10
 SCOPE 1.1.1 FUNCTION pos 14
-LET   tout   pos 26
+LET   out2   pos 26
 LET   update   pos 43
 SCOPE 1.1.1.1 FUNCTION pos 49
 LET   view   pos 53
-READ  tout   pos 69
-READ  tout B pos 94
+READ  out2   pos 69
+READ  out2 B pos 94
 SCOPE 1.1.1.1.1 FUNCTION pos 122
-WRITE tout   pos 153.4`)
+WRITE out2   pos 153.4`)
 
 pass(`
 function init
