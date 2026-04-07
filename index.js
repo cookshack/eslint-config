@@ -248,13 +248,7 @@ function buildScopeTree(scope, prefix) {
         else
           node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
       else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
-        let idRef
-
-        idRef = variable.references.find(r => isIdOfSameDeclarator(r, ref, parent))
-        if (idRef)
-          sortPos = idRef.identifier.range[0] - 0.4
-        else
-          sortPos = ref.identifier.range[0]
+        sortPos = parent.id ? parent.id.range[0] - 0.4 : ref.identifier.range[0]
         node.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
       }
       else
