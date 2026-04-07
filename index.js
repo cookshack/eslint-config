@@ -7,7 +7,12 @@ let printBuffer
 printBuffer = []
 
 function print (...args) {
+  console.log(args.join(' '))
   printBuffer.push(args.join(' '))
+}
+
+function trace(...args) {
+  console.log('TRACE', ...args)
 }
 
 export
@@ -162,6 +167,34 @@ function hasReadBeforeWriteInNestedScope(variable, defScope) {
   return 0
 }
 
+function mayBeReadBeforeAnyWrite
+(defScope, variable, items) {
+  for (let index = 0; index < variable.references.length; index++) {
+    let ref, rItems, item
+
+    ref = variable.references[index]
+    rItems = items.filter(i => i.ref == ref)
+    if (rItems.length == 0)
+      console.log('WARN rItems empty')
+    if (rItems.length > 1)
+      console.log('WARN rItems.length: ' + rItems.length)
+    item = rItems[0]
+    if (isReadRef(ref)) {
+      // a possible read
+      console.log('DEBUG READ [B]')
+      return 1
+    }
+    if (item.ctx == 'B') {
+      console.log('DEBUG WRITE B')
+      // a conditional write
+      continue
+    }
+    // A guaranteed write before any possible read.
+    console.log('DEBUG WRITE')
+    return 0
+  }
+}
+
 function isProperAncestor(ancestor, descendant) {
   let s
 
@@ -233,17 +266,17 @@ function createNarrowestScope
                 parent = ref.identifier.parent
                 if (isWriteRef(ref))
                   if (ref.identifier.parent?.type == 'UpdateExpression') {
-                    items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-                    items.push({ type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+                    items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
                   }
                   else if (ref.identifier.parent?.type == 'AssignmentExpression') {
                     sortPos = parent.right.range[1] + 0.4
-                    items.push({ type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
+                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
                   }
                   else if (ref.identifier.parent?.type == 'VariableDeclarator')
-                    items.push({ type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
+                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
                   else
-                    items.push({ type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+                    items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
                 else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
                   let idRef
 
@@ -252,14 +285,16 @@ function createNarrowestScope
                     sortPos = idRef.identifier.range[0] - 0.4
                   else
                     sortPos = ref.identifier.range[0]
-                  items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
+                  items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
                 }
                 else
-                  items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+                  items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
               }
             items.sort((a, b) => a.pos - b.pos)
           }
           for (let variable of scope.variables) {
+            let node
+
             if (reported.has(variable))
               continue
             if (variable.defs.length === 0)
@@ -275,22 +310,35 @@ function createNarrowestScope
             if (variable.defs[0].type == 'ClassName')
               continue
 
-            let node
-
             node = variable.defs[0]?.name
             if (node) {
               let defScope, narrowestScope
 
               defScope = getDefinitionScope(variable)
+              trace('1 found decl scope of', variable.name + ':', prefix + ' ' + defScope.type.toUpperCase())
+
               narrowestScope = getNarrowestScope(variable)
+              trace('2 found narrowest scope of', variable.name + ':', prefix + ' ' + narrowestScope?.type.toUpperCase())
+
+              if (defScope == narrowestScope)
+                continue
+              trace('3', variable.name, 'could be moved to a narrower scope')
 
               if (narrowestScope) {
-                if (defScope.type == 'for')
+                if (defScope.type == 'for') {
+                  trace('4 exception:', variable.name, 'is in a `for` loop header')
                   continue
-                if (defScope === narrowestScope)
+                }
+                if (0 && hasReadBeforeWriteInNestedScope(variable, defScope)) {
+                  trace('4 exception:', variable.name, ' hasReadBeforeWriteInNestedScope')
                   continue
-                if (hasReadBeforeWriteInNestedScope(variable, defScope))
+                }
+                if (mayBeReadBeforeAnyWrite(defScope, variable, items)) {
+                  trace('4 exception:', variable.name, ' mayBeReadBeforeAnyWrite')
                   continue
+                }
+
+                trace('5', variable.name, 'is too broad')
 
                 reported.add(variable)
                 context.report({
