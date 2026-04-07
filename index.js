@@ -7,12 +7,12 @@ let printBuffer
 printBuffer = []
 
 function print (...args) {
-  console.log(args.join(' '))
   printBuffer.push(args.join(' '))
 }
 
 function trace(...args) {
-  console.log('TRACE', ...args)
+  if (0)
+    console.log('TRACE', ...args)
 }
 
 export
@@ -135,13 +135,6 @@ function nodeHas(value, target) {
   return false
 }
 
-function isIdOfSameDeclarator(r, ref, declarator) {
-  if (r == ref)
-    return 0
-  return r.identifier.parent === declarator &&
-         declarator.id === r.identifier
-}
-
 function hasReadBeforeWriteInNestedScope(variable, defScope) {
   let nestedFunctions
 
@@ -174,11 +167,9 @@ function mayBeReadBeforeAnyWrite
 
     ref = variable.references[index]
 
-    if (isReadRef(ref)) {
+    if (isReadRef(ref))
       // a possible read
-      console.log('DEBUG READ [B]')
       return 1
-    }
 
     refNode = scopeToNode.get(ref.from)
     rItems = refNode.items.filter(i => i.ref == ref)
@@ -187,13 +178,10 @@ function mayBeReadBeforeAnyWrite
     if (rItems.length > 1)
       console.log('WARN rItems.length: ' + rItems.length)
     item = rItems[0]
-    if (item.ctx == 'B') {
-      console.log('DEBUG WRITE B')
+    if (item.ctx == 'B')
       // a conditional write
       continue
-    }
     // A guaranteed write before any possible read.
-    console.log('DEBUG WRITE')
     return 0
   }
 }
@@ -242,33 +230,34 @@ function buildScopeTree(scope, prefix, scopeToNode) {
       node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0] })
 
     for (let ref of variable.references) {
-      let targetNode, parent, sortPos, ctx
+      let targetNode
 
       targetNode = scopeToNode.get(ref.from)
-      if (!targetNode)
-        continue
+      if (targetNode) {
+        let parent, sortPos, ctx
 
-      ctx = getConditionalContext(ref)
-      parent = ref.identifier.parent
-      if (isWriteRef(ref))
-        if (ref.identifier.parent?.type == 'UpdateExpression') {
-          targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+        ctx = getConditionalContext(ref)
+        parent = ref.identifier.parent
+        if (isWriteRef(ref))
+          if (ref.identifier.parent?.type == 'UpdateExpression') {
+            targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+          }
+          else if (ref.identifier.parent?.type == 'AssignmentExpression') {
+            sortPos = parent.right.range[1] + 0.4
+            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
+          }
+          else if (ref.identifier.parent?.type == 'VariableDeclarator')
+            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
+          else
+            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+        else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
+          sortPos = parent.id ? parent.id.range[0] - 0.4 : ref.identifier.range[0]
+          targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
         }
-        else if (ref.identifier.parent?.type == 'AssignmentExpression') {
-          sortPos = parent.right.range[1] + 0.4
-          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
-        }
-        else if (ref.identifier.parent?.type == 'VariableDeclarator')
-          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
         else
-          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
-      else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
-        sortPos = parent.id ? parent.id.range[0] - 0.4 : ref.identifier.range[0]
-        targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
+          targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
       }
-      else
-        targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
     }
   }
 

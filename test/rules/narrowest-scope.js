@@ -59,7 +59,7 @@ function fail(count, code, expected) {
 }
 
 pass('if (g) { let x = 0; x++; console.log(x); }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     SCOPE 1.1.1 BLOCK pos 7
       LET   x   pos 13
@@ -69,7 +69,7 @@ pass('if (g) { let x = 0; x++; console.log(x); }',
       READ  x   pos 37`)
 
 pass('let x = 0; x++; console.log(x);',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   x   pos 4
     WRITE x   pos 4.4
@@ -78,7 +78,7 @@ pass('let x = 0; x++; console.log(x);',
     READ  x   pos 28`)
 
 pass('{ let x = 0; if (x) console.log(1); }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     SCOPE 1.1.1 BLOCK pos 0
       LET   x   pos 6
@@ -86,7 +86,7 @@ pass('{ let x = 0; if (x) console.log(1); }',
       READ  x   pos 17`)
 
 pass('let x = 0; x++; let y = x; console.log(y);',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   x   pos 4
     WRITE x   pos 4.4
@@ -98,7 +98,7 @@ pass('let x = 0; x++; let y = x; console.log(y);',
     READ  y   pos 39`)
 
 pass('function foo() { let x; x = 1; return x }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   foo   pos 9
     SCOPE 1.1.1 FUNCTION pos 12
@@ -107,7 +107,7 @@ pass('function foo() { let x; x = 1; return x }',
       READ  x   pos 38`)
 
 pass('for (let i = 0; i < 10; i++) { console.log(i) }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     SCOPE 1.1.1 FOR pos 0
       LET   i   pos 9
@@ -119,7 +119,7 @@ pass('for (let i = 0; i < 10; i++) { console.log(i) }',
         READ  i   pos 43`)
 
 pass('function outer() { let x; function inner() { x = 1 } return x }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   outer   pos 9
     SCOPE 1.1.1 FUNCTION pos 14
@@ -130,7 +130,7 @@ pass('function outer() { let x; function inner() { x = 1 } return x }',
       READ  x   pos 60`)
 
 pass('let x; function foo() { x = 1 } function bar() { return x }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   x   pos 4
     LET   foo   pos 16
@@ -163,7 +163,7 @@ function f(s1, s2, otherwise) {
   return otherwise
 }
 `,
-`SCOPE 1 GLOBAL pos 1
+     `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   f   pos 10
     SCOPE 1.1.1 FUNCTION pos 11
@@ -195,14 +195,14 @@ function f(s1, s2, otherwise) {
       READ  otherwise   pos 255`)
 
 pass('import { a } from \'a.js\'; { a.f() }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   a   pos 9
     SCOPE 1.1.1 BLOCK pos 26
       READ  a   pos 28`)
 
 pass('function foo() { return 1 } function bar() { return foo() }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   foo   pos 9
     SCOPE 1.1.1 FUNCTION pos 12
@@ -220,7 +220,7 @@ function update
   tout = setTimeout(() => console.log('hi'), 10000)
 }
 `,
-`SCOPE 1 GLOBAL pos 1
+     `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   tout   pos 5
     LET   update   pos 20
@@ -244,7 +244,7 @@ function init
   }
 }
 `,
-`SCOPE 1 GLOBAL pos 1
+     `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   init   pos 10
     SCOPE 1.1.1 FUNCTION pos 14
@@ -279,7 +279,7 @@ function init
   return f
 }
 `,
-`SCOPE 1 GLOBAL pos 1
+     `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   init   pos 10
     SCOPE 1.1.1 FUNCTION pos 14
@@ -297,7 +297,7 @@ function init
       READ  f   pos 321`)
 
 pass('try { f() } catch (err) { console.log(err.message) }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     SCOPE 1.1.1 BLOCK pos 4
     SCOPE 1.1.2 CATCH pos 12
@@ -316,7 +316,7 @@ pass(`
 
   g = f({ a() { return new A('eg') } })
 `,
-`SCOPE 1 GLOBAL pos 3
+     `SCOPE 1 GLOBAL pos 3
   SCOPE 1.1 MODULE pos 3
     LET   A   pos 9
     SCOPE 1.1.1 CLASS pos 9
@@ -341,7 +341,7 @@ function parse
   }
 }
 `,
-`SCOPE 1 GLOBAL pos 1
+     `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   clen   pos 5
     LET   parse   pos 20
@@ -374,7 +374,7 @@ function make
   return 0
 }
 `,
-`SCOPE 1 GLOBAL pos 1
+     `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   make   pos 10
     SCOPE 1.1.1 FUNCTION pos 14
@@ -389,7 +389,7 @@ function make
             WRITE clen   pos 176.4`)
 
 fail(1, 'let x = 1; function foo() { return x }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   x   pos 4
     WRITE x   pos 4.4
@@ -398,7 +398,7 @@ fail(1, 'let x = 1; function foo() { return x }',
       READ  x   pos 35`)
 
 fail(1, 'let x; { let y = 1; x = y }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   x   pos 4
     SCOPE 1.1.1 BLOCK pos 7
@@ -435,7 +435,7 @@ function f
   return otherwise
 }
 `,
-`SCOPE 1 GLOBAL pos 1
+     `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   f   pos 10
     SCOPE 1.1.1 FUNCTION pos 11
@@ -468,7 +468,7 @@ function f
       READ  otherwise   pos 253`)
 
 fail(1, 'let a; try { f() } catch (err) { a = err.message; console.log(a) }',
-`SCOPE 1 GLOBAL pos 0
+     `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   a   pos 4
     SCOPE 1.1.1 BLOCK pos 11
