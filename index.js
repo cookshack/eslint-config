@@ -173,6 +173,13 @@ function mayBeReadBeforeAnyWrite
     let ref, refNode, rItems, item
 
     ref = variable.references[index]
+
+    if (isReadRef(ref)) {
+      // a possible read
+      console.log('DEBUG READ [B]')
+      return 1
+    }
+
     refNode = scopeToNode.get(ref.from)
     rItems = refNode.items.filter(i => i.ref == ref)
     if (rItems.length == 0)
@@ -180,11 +187,6 @@ function mayBeReadBeforeAnyWrite
     if (rItems.length > 1)
       console.log('WARN rItems.length: ' + rItems.length)
     item = rItems[0]
-    if (isReadRef(ref)) {
-      // a possible read
-      console.log('DEBUG READ [B]')
-      return 1
-    }
     if (item.ctx == 'B') {
       console.log('DEBUG WRITE B')
       // a conditional write
@@ -276,7 +278,11 @@ function buildScopeTree(scope, prefix, scopeToNode) {
 }
 
 function checkScopeNode(context, treeNode, reported, scopeToNode) {
+  let indent
+
   reported = reported || new Set
+  indent = '  '.repeat(treeNode.prefix.split('.').length - 1)
+
   for (let variable of treeNode.scope.variables) {
     let defNode
 
@@ -293,30 +299,30 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
 
       defScope = getDefinitionScope(variable)
       defNodePrefix = scopeToNode.get(defScope)?.prefix ?? '?'
-      trace('1 found decl scope of', variable.name + ':', defNodePrefix + ' ' + defScope.type.toUpperCase())
+      trace(indent, '1 found decl scope of', variable.name + ':', defNodePrefix + ' ' + defScope.type.toUpperCase())
 
       narrowestScope = getNarrowestScope(variable)
       narrowestPrefix = scopeToNode.get(narrowestScope)?.prefix ?? '?'
-      trace('2 found narrowest scope of', variable.name + ':', narrowestPrefix + ' ' + narrowestScope?.type.toUpperCase())
+      trace(indent, '2 found narrowest scope of', variable.name + ':', narrowestPrefix + ' ' + narrowestScope?.type.toUpperCase())
 
       if (defScope == narrowestScope)
         continue
-      trace('3', variable.name, 'could be moved to a narrower scope')
+      trace(indent, '3', variable.name, 'could be moved to a narrower scope')
 
       if (defScope.type == 'for') {
-        trace('4 exception:', variable.name, 'is in a for loop header')
+        trace(indent, '4 exception:', variable.name, 'is in a for loop header')
         continue
       }
       if (0 && hasReadBeforeWriteInNestedScope(variable, defScope)) {
-        trace('4 exception:', variable.name, 'hasReadBeforeWriteInNestedScope')
+        trace(indent, '4 exception:', variable.name, 'hasReadBeforeWriteInNestedScope')
         continue
       }
       if (mayBeReadBeforeAnyWrite(variable, scopeToNode)) {
-        trace('4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
+        trace(indent, '4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
         continue
       }
 
-      trace('5', variable.name, 'is too broad')
+      trace(indent, '5', variable.name, 'is too broad')
 
       reported.add(variable)
       context.report({
@@ -332,10 +338,11 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
 }
 
 function printTree(node, siblingNum) {
-  let prefix, all
+  let prefix, all, indent
 
   prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
-  print('SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase() + ' pos ' + scopeStart(node.scope))
+  indent = '  '.repeat(prefix.split('.').length - 1)
+  print(indent + 'SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase() + ' pos ' + scopeStart(node.scope))
 
   all = [ ...node.items.map(i => ({ pos: i.pos, type: 'item', data: i })),
           ...node.children.map((c, i) => ({ pos: scopeStart(c.scope), type: 'scope', data: c, sibling: i + 1 })) ]
@@ -343,7 +350,7 @@ function printTree(node, siblingNum) {
 
   for (let entry of all)
     if (entry.type === 'item')
-      print(entry.data.type.padEnd(5) + ' ' + entry.data.name + (entry.data.ctx ? ' ' + entry.data.ctx : '').padEnd(3) + 'pos ' + entry.data.pos)
+      print(indent + '  ' + entry.data.type.padEnd(5) + ' ' + entry.data.name + (entry.data.ctx ? ' ' + entry.data.ctx : '').padEnd(3) + 'pos ' + entry.data.pos)
     else
       printTree(entry.data, entry.sibling)
 }
