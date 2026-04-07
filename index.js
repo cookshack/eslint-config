@@ -7,6 +7,7 @@ let printBuffer
 printBuffer = []
 
 function print (...args) {
+  //console.log(args.join(' '))
   printBuffer.push(args.join(' '))
 }
 
@@ -160,8 +161,31 @@ function hasReadBeforeWriteInNestedScope(variable, defScope) {
   return 0
 }
 
+function isConditionalWrite
+(ref, narrowestScope) {
+  let node
+
+  node = ref.identifier.parent
+
+  while (node) {
+    if (node === narrowestScope.block)
+      break
+    if (node.type === 'BlockStatement') {
+      let parent
+
+      parent = node.parent
+      if (parent?.type === 'IfStatement' && (parent.consequent === node || parent.alternate === node))
+        return true
+      if ([ 'WhileStatement', 'DoWhileStatement', 'ForStatement', 'ForInStatement', 'ForOfStatement' ].includes(parent?.type) && parent.body === node)
+        return true
+    }
+    node = node.parent
+  }
+  return false
+}
+
 function mayBeReadBeforeAnyWrite
-(variable, scopeToNode) {
+(variable, scopeToNode, narrowestScope) {
   for (let index = 0; index < variable.references.length; index++) {
     let ref, refNode, rItems, item
 
@@ -178,7 +202,7 @@ function mayBeReadBeforeAnyWrite
     if (rItems.length > 1)
       console.log('WARN rItems.length: ' + rItems.length)
     item = rItems[0]
-    if (item.ctx == 'B')
+    if (item.ctx == 'B' || isConditionalWrite(ref, narrowestScope))
       // a conditional write
       continue
     // A guaranteed write before any possible read.
@@ -316,7 +340,7 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
         trace(indent, '4 exception:', variable.name, 'hasReadBeforeWriteInNestedScope')
         continue
       }
-      if (mayBeReadBeforeAnyWrite(variable, scopeToNode)) {
+      if (mayBeReadBeforeAnyWrite(variable, scopeToNode, narrowestScope)) {
         trace(indent, '4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
         continue
       }

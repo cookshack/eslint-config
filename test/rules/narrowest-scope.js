@@ -400,6 +400,35 @@ function make
             READ  undefined   pos 167
             WRITE clen   pos 176.4`)
 
+pass(`
+function initMouse
+() {
+  let hover
+
+  function updateHover
+  () {
+    if (maybe()) {
+      hover = 1
+    }
+    else if (hover) {
+      hover = 0
+    }
+  }
+}
+`,
+     `SCOPE 1 GLOBAL pos 1
+  SCOPE 1.1 MODULE pos 1
+    LET   initMouse   pos 10
+    SCOPE 1.1.1 FUNCTION pos 19
+      LET   hover   pos 31
+      LET   updateHover   pos 49
+      SCOPE 1.1.1.1 FUNCTION pos 60
+        SCOPE 1.1.1.1.1 BLOCK pos 85
+          WRITE hover   pos 102.4
+        READ  hover B pos 122
+        SCOPE 1.1.1.1.2 BLOCK pos 129
+          WRITE hover   pos 146.4`)
+
 fail(1, 'let x = 1; function foo() { return x }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
