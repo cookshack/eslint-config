@@ -274,7 +274,7 @@ function buildScopeTree(scope, prefix, scopeToNode) {
   return node
 }
 
-function checkScopeNode(context, treeNode, reported) {
+function checkScopeNode(context, treeNode, reported, scopeToNode) {
   reported = reported || new Set
   for (let variable of treeNode.scope.variables) {
     let defNode
@@ -288,13 +288,15 @@ function checkScopeNode(context, treeNode, reported) {
 
     defNode = variable.defs[0]?.name
     if (defNode) {
-      let defScope, narrowestScope
+      let defScope, narrowestScope, defNodePrefix, narrowestPrefix
 
       defScope = getDefinitionScope(variable)
-      trace('1 found decl scope of', variable.name + ':', defScope.type)
+      defNodePrefix = scopeToNode.get(defScope)?.prefix ?? '?'
+      trace('1 found decl scope of', variable.name + ':', defNodePrefix + ' ' + defScope.type.toUpperCase())
 
       narrowestScope = getNarrowestScope(variable)
-      trace('2 found narrowest scope of', variable.name + ':', narrowestScope?.type)
+      narrowestPrefix = scopeToNode.get(narrowestScope)?.prefix ?? '?'
+      trace('2 found narrowest scope of', variable.name + ':', narrowestPrefix + ' ' + narrowestScope?.type.toUpperCase())
 
       if (defScope == narrowestScope)
         continue
@@ -325,7 +327,7 @@ function checkScopeNode(context, treeNode, reported) {
   }
 
   for (let child of treeNode.children)
-    checkScopeNode(context, child, reported)
+    checkScopeNode(context, child, reported, scopeToNode)
 }
 
 function printTree(node, siblingNum) {
@@ -358,7 +360,7 @@ function createNarrowestScope
 
         scopeToNode = new Map
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
-        checkScopeNode(context, tree)
+        checkScopeNode(context, tree, null, scopeToNode)
         printTree(tree, 0)
       }
     }
