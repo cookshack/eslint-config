@@ -168,7 +168,7 @@ function hasReadBeforeWriteInNestedScope(variable, defScope) {
 }
 
 function mayBeReadBeforeAnyWrite
-(defScope, variable, items) {
+(variable, items) {
   for (let index = 0; index < variable.references.length; index++) {
     let ref, rItems, item
 
@@ -290,14 +290,13 @@ function checkScopeNode(context, treeNode, reported) {
       trace('1 found decl scope of', variable.name + ':', defScope.type)
 
       narrowestScope = getNarrowestScope(variable)
-
       trace('2 found narrowest scope of', variable.name + ':', narrowestScope?.type)
 
       if (defScope == narrowestScope)
         continue
       trace('3', variable.name, 'could be moved to a narrower scope')
 
-      if (mayBeReadBeforeAnyWrite(defScope, variable, treeNode.items)) {
+      if (mayBeReadBeforeAnyWrite(variable, treeNode.items)) {
         trace('4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
         continue
       }
