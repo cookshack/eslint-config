@@ -168,12 +168,13 @@ function hasReadBeforeWriteInNestedScope(variable, defScope) {
 }
 
 function mayBeReadBeforeAnyWrite
-(variable, items) {
+(variable, scopeToNode) {
   for (let index = 0; index < variable.references.length; index++) {
-    let ref, rItems, item
+    let ref, refNode, rItems, item
 
     ref = variable.references[index]
-    rItems = items.filter(i => i.ref == ref)
+    refNode = scopeToNode.get(ref.from)
+    rItems = refNode.items.filter(i => i.ref == ref)
     if (rItems.length == 0)
       console.log('WARN rItems empty')
     if (rItems.length > 1)
@@ -310,7 +311,7 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
         trace('4 exception:', variable.name, 'hasReadBeforeWriteInNestedScope')
         continue
       }
-      if (mayBeReadBeforeAnyWrite(variable, treeNode.items)) {
+      if (mayBeReadBeforeAnyWrite(variable, scopeToNode)) {
         trace('4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
         continue
       }
