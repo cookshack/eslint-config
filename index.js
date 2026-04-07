@@ -307,7 +307,7 @@ function checkScopeNode(context, treeNode, reported) {
 
 function printTree(node, siblingNum) {
   let prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
-  print('SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase())
+  print('SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase() + ' pos ' + scopeStart(node.scope))
 
   let all = [
     ...node.items.map(i => ({ pos: i.pos, type: 'item', data: i })),
