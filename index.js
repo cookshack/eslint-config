@@ -217,7 +217,7 @@ function scopeStart(scope) {
   return scope.block.range[0]
 }
 
-function buildScopeTree(scope, prefix) {
+function buildScopeTree(scope, prefix, scopeToNode) {
   let node, siblingNum
 
   node = {
@@ -226,41 +226,51 @@ function buildScopeTree(scope, prefix) {
     items: [],
     children: []
   }
-  for (let variable of scope.variables) {
-    if (variable.defs.length > 0)
-      node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0] })
-    for (let ref of variable.references) {
-      let parent, sortPos, ctx
+  scopeToNode.set(scope, node)
 
-      ctx = getConditionalContext(ref, scope)
-      parent = ref.identifier.parent
-      if (isWriteRef(ref))
-        if (ref.identifier.parent?.type == 'UpdateExpression') {
-          node.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
-        }
-        else if (ref.identifier.parent?.type == 'AssignmentExpression') {
-          sortPos = parent.right.range[1] + 0.4
-          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
-        }
-        else if (ref.identifier.parent?.type == 'VariableDeclarator')
-          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
-        else
-          node.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
-      else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
-        sortPos = parent.id ? parent.id.range[0] - 0.4 : ref.identifier.range[0]
-        node.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
-      }
-      else
-        node.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-    }
-  }
-  node.items.sort((a, b) => a.pos - b.pos)
   siblingNum = 0
   for (let child of scope.childScopes) {
     siblingNum++
-    node.children.push(buildScopeTree(child, prefix + '.' + siblingNum))
+    node.children.push(buildScopeTree(child, prefix + '.' + siblingNum, scopeToNode))
   }
+
+  for (let variable of scope.variables) {
+    if (variable.defs.length > 0)
+      node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0] })
+
+    for (let ref of variable.references) {
+      let targetNode, parent, sortPos, ctx
+
+      targetNode = scopeToNode.get(ref.from)
+      if (!targetNode)
+        continue
+
+      ctx = getConditionalContext(ref, variable.scope)
+      parent = ref.identifier.parent
+      if (isWriteRef(ref))
+        if (ref.identifier.parent?.type == 'UpdateExpression') {
+          targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+        }
+        else if (ref.identifier.parent?.type == 'AssignmentExpression') {
+          sortPos = parent.right.range[1] + 0.4
+          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
+        }
+        else if (ref.identifier.parent?.type == 'VariableDeclarator')
+          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
+        else
+          targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+      else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
+        sortPos = parent.id ? parent.id.range[0] - 0.4 : ref.identifier.range[0]
+        targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
+      }
+      else
+        targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+    }
+  }
+
+  node.items.sort((a, b) => a.pos - b.pos)
+
   return node
 }
 
@@ -344,9 +354,10 @@ function createNarrowestScope
   if (scopeManager)
     return {
       'Program:exit'() {
-        let tree
+        let tree, scopeToNode
 
-        tree = buildScopeTree(scopeManager.scopes[0], '1')
+        scopeToNode = new Map
+        tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
         checkScopeNode(context, tree)
         printTree(tree, 0)
       }
