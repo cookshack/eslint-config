@@ -251,12 +251,22 @@ function buildScopeTree(scope, prefix, scopeToNode) {
             targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
           else
             targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
-        else if (parent?.type == 'VariableDeclarator' && parent.init === ref.identifier) {
-          sortPos = parent.id ? parent.id.range[0] - 0.4 : ref.identifier.range[0]
-          targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
+        else {
+          let declarator
+
+          declarator = parent
+          while (declarator)
+            if (declarator.type == 'VariableDeclarator')
+              break
+            else
+              declarator = declarator.parent
+          if (declarator?.type == 'VariableDeclarator' && nodeContains(declarator.init, ref.identifier)) {
+            sortPos = declarator.id ? declarator.id.range[0] - 0.4 : ref.identifier.range[0]
+            targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
+          }
+          else
+            targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
         }
-        else
-          targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
       }
     }
   }

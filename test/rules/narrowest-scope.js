@@ -97,6 +97,18 @@ pass('let x = 0; x++; let y = x; console.log(y);',
     WRITE y   pos 20.4
     READ  y   pos 39`)
 
+pass('let x = 0; x++; let y = x + 1; console.log(y);',
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
+    LET   x   pos 4
+    WRITE x   pos 4.4
+    READ  x   pos 11
+    WRITE x   pos 11
+    READ  x   pos 19.6
+    LET   y   pos 20
+    WRITE y   pos 20.4
+    READ  y   pos 43`)
+
 pass('function foo() { let x; x = 1; return x }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
