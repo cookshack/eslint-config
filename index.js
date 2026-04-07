@@ -273,32 +273,44 @@ function buildScopeTree(scope, prefix) {
 function checkScopeNode(context, treeNode, reported) {
   reported = reported || new Set
   for (let variable of treeNode.scope.variables) {
+    let defNode
+
     if (reported.has(variable))
       continue
     if (variable.defs.length === 0)
       continue
-    if (['Parameter', 'FunctionName', 'ImportBinding', 'CatchClause', 'ClassName'].includes(variable.defs[0].type))
+    if ([ 'Parameter', 'FunctionName', 'ImportBinding', 'CatchClause', 'ClassName' ].includes(variable.defs[0].type))
       continue
 
-    let defNode = variable.defs[0]?.name
-    if (!defNode)
-      continue
+    defNode = variable.defs[0]?.name
+    if (defNode) {
+      let defScope, narrowestScope
 
-    let defScope = getDefinitionScope(variable)
-    let narrowestScope = getNarrowestScope(variable)
+      defScope = getDefinitionScope(variable)
+      trace('1 found decl scope of', variable.name + ':', defScope.type)
 
-    if (defScope == narrowestScope)
-      continue
+      narrowestScope = getNarrowestScope(variable)
 
-    if (mayBeReadBeforeAnyWrite(defScope, variable, treeNode.items))
-      continue
+      trace('2 found narrowest scope of', variable.name + ':', narrowestScope?.type)
 
-    reported.add(variable)
-    context.report({
-      node: defNode,
-      messageId: 'tooBroad',
-      data: { name: variable.name }
-    })
+      if (defScope == narrowestScope)
+        continue
+      trace('3', variable.name, 'could be moved to a narrower scope')
+
+      if (mayBeReadBeforeAnyWrite(defScope, variable, treeNode.items)) {
+        trace('4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
+        continue
+      }
+
+      trace('5', variable.name, 'is too broad')
+
+      reported.add(variable)
+      context.report({
+        node: defNode,
+        messageId: 'tooBroad',
+        data: { name: variable.name }
+      })
+    }
   }
 
   for (let child of treeNode.children)
