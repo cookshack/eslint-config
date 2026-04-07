@@ -228,7 +228,7 @@ SCOPE 1.1.1 FUNCTION pos 26
 LET   view   pos 28
 READ  tout   pos 42
 READ  tout B pos 65
-SCOPE 1.1.1.1 FUNCTION 91
+SCOPE 1.1.1.1 FUNCTION pos 91
 WRITE tout   pos 122.4`)
 
 pass(`
