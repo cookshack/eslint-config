@@ -97,7 +97,8 @@ function isReadRef
   return 1
 }
 
-function getConditionalContext(ref) {
+function getConditionalContext
+(ref) {
   let node, prevNode, scopeBlock
 
   scopeBlock = ref.from.block
