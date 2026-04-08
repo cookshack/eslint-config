@@ -6,22 +6,26 @@ let printBuffer
 
 printBuffer = []
 
-function print (...args) {
+function print
+(...args) {
   //console.log(args.join(' '))
   printBuffer.push(args.join(' '))
 }
 
-function trace(...args) {
+function trace
+(...args) {
   if (0)
     console.log('TRACE', ...args)
 }
 
 export
-function getPrintBuffer() {
+function getPrintBuffer
+() {
   return printBuffer.join('\n')
 }
 
-function clearPrintBuffer() {
+function clearPrintBuffer
+() {
   printBuffer = []
 }
 
@@ -70,7 +74,8 @@ function getDefinitionScope
   return variable.scope
 }
 
-function isWriteRef(ref) {
+function isWriteRef
+(ref) {
   let parent
 
   parent = ref.identifier.parent
