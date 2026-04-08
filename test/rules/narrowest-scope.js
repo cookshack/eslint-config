@@ -113,7 +113,7 @@ pass('function foo() { let x; x = 1; return x }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   foo     pos 9
-    SCOPE 1.1.1 FUNCTION pos 12
+    SCOPE 1.1.1 FUNCTION pos 12 name foo
       LET   x     pos 21
       WRITE x     pos 29.4
       READ  x     pos 38`)
@@ -134,10 +134,10 @@ pass('function outer() { let x; function inner() { x = 1 } return x }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   outer     pos 9
-    SCOPE 1.1.1 FUNCTION pos 14
+    SCOPE 1.1.1 FUNCTION pos 14 name outer
       LET   x     pos 23
       LET   inner     pos 35
-      SCOPE 1.1.1.1 FUNCTION pos 40
+      SCOPE 1.1.1.1 FUNCTION pos 40 name inner
         WRITE x     pos 50.4
       READ  x     pos 60`)
 
@@ -146,10 +146,10 @@ pass('let x; function foo() { x = 1 } function bar() { return x }',
   SCOPE 1.1 MODULE pos 0
     LET   x     pos 4
     LET   foo     pos 16
-    SCOPE 1.1.1 FUNCTION pos 19
+    SCOPE 1.1.1 FUNCTION pos 19 name foo
       WRITE x     pos 29.4
     LET   bar     pos 41
-    SCOPE 1.1.2 FUNCTION pos 44
+    SCOPE 1.1.2 FUNCTION pos 44 name bar
       READ  x     pos 56`)
 
 pass(`
@@ -178,7 +178,7 @@ function f(s1, s2, otherwise) {
      `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   f     pos 10
-    SCOPE 1.1.1 FUNCTION pos 11
+    SCOPE 1.1.1 FUNCTION pos 11 name f
       LET   s1     pos 12
       LET   s2     pos 16
       LET   otherwise     pos 20
@@ -217,9 +217,9 @@ pass('function foo() { return 1 } function bar() { return foo() }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
     LET   foo     pos 9
-    SCOPE 1.1.1 FUNCTION pos 12
+    SCOPE 1.1.1 FUNCTION pos 12 name foo
     LET   bar     pos 37
-    SCOPE 1.1.2 FUNCTION pos 40
+    SCOPE 1.1.2 FUNCTION pos 40 name bar
       READ  foo     pos 52`)
 
 pass(`
@@ -236,7 +236,7 @@ function update
   SCOPE 1.1 MODULE pos 1
     LET   tout     pos 5
     LET   update     pos 20
-    SCOPE 1.1.1 FUNCTION pos 26
+    SCOPE 1.1.1 FUNCTION pos 26 name update
       LET   view     pos 28
       READ  tout     pos 42
       READ  tout B C pos 65
@@ -259,10 +259,10 @@ function init
      `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   init     pos 10
-    SCOPE 1.1.1 FUNCTION pos 14
+    SCOPE 1.1.1 FUNCTION pos 14 name init
       LET   out2     pos 26
       LET   update     pos 43
-      SCOPE 1.1.1.1 FUNCTION pos 49
+      SCOPE 1.1.1.1 FUNCTION pos 49 name update
         LET   view     pos 53
         READ  out2     pos 69
         READ  out2 B C pos 94
@@ -294,10 +294,10 @@ function init
      `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   init     pos 10
-    SCOPE 1.1.1 FUNCTION pos 14
+    SCOPE 1.1.1 FUNCTION pos 14 name init
       LET   stopTimeout     pos 26
       LET   f     pos 50
-      SCOPE 1.1.1.1 FUNCTION pos 51
+      SCOPE 1.1.1.1 FUNCTION pos 51 name f
         READ  stopTimeout     pos 64
         SCOPE 1.1.1.1.1 BLOCK pos 77
           READ  stopTimeout   C pos 98
@@ -324,6 +324,12 @@ pass(`
       super()
       this.name = name
     }
+
+    update
+    (state) {
+      if (state.docChanged)
+        console.log('yes')
+    }
   }
 
   g = f({ a() { return new A('eg') } })
@@ -331,13 +337,16 @@ pass(`
      `SCOPE 1 GLOBAL pos 3
   SCOPE 1.1 MODULE pos 3
     LET   A     pos 9
-    SCOPE 1.1.1 CLASS pos 9
+    SCOPE 1.1.1 CLASS pos 9 name A
       LET   A     pos 9
-      SCOPE 1.1.1.1 FUNCTION pos 43
+      SCOPE 1.1.1.1 FUNCTION pos 43 name constructor
         LET   name     pos 44
         READ  name     pos 84
-    SCOPE 1.1.2 FUNCTION pos 111
-      READ  A     pos 127`)
+      SCOPE 1.1.1.2 FUNCTION pos 111 name update
+        LET   state     pos 112
+        READ  state     pos 131
+    SCOPE 1.1.2 FUNCTION pos 198 name a
+      READ  A     pos 214`)
 
 pass(`
 let clen
@@ -357,7 +366,7 @@ function parse
   SCOPE 1.1 MODULE pos 1
     LET   clen     pos 5
     LET   parse     pos 20
-    SCOPE 1.1.1 FUNCTION pos 25
+    SCOPE 1.1.1 FUNCTION pos 25 name parse
       WRITE clen B C pos 62.4
       READ  clen     pos 76
       SCOPE 1.1.1.1 BLOCK pos 83
@@ -389,10 +398,10 @@ function make
      `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   make     pos 10
-    SCOPE 1.1.1 FUNCTION pos 14
+    SCOPE 1.1.1 FUNCTION pos 14 name make
       LET   clen     pos 26
       LET   parse     pos 43
-      SCOPE 1.1.1.1 FUNCTION pos 48
+      SCOPE 1.1.1.1 FUNCTION pos 48 name parse
         SCOPE 1.1.1.1.1 BLOCK pos 70
           WRITE clen B C pos 111.4
           READ  clen     pos 129
@@ -419,10 +428,10 @@ function initMouse
      `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   initMouse     pos 10
-    SCOPE 1.1.1 FUNCTION pos 19
+    SCOPE 1.1.1 FUNCTION pos 19 name initMouse
       LET   hover     pos 31
       LET   updateHover     pos 49
-      SCOPE 1.1.1.1 FUNCTION pos 60
+      SCOPE 1.1.1.1 FUNCTION pos 60 name updateHover
         SCOPE 1.1.1.1.1 BLOCK pos 85
           WRITE hover   C pos 102.4
         READ  hover B C pos 122
@@ -442,7 +451,7 @@ function init
   SCOPE 1.1 MODULE pos 1
     LET   wexts     pos 12
     LET   init     pos 35
-    SCOPE 1.1.1 FUNCTION pos 39
+    SCOPE 1.1.1 FUNCTION pos 39 name init
       WRITE wexts     pos 63.4`)
 
 pass(`
@@ -458,7 +467,7 @@ function add
   SCOPE 1.1 MODULE pos 1
     LET   classCache     pos 5
     LET   add     pos 33
-    SCOPE 1.1.1 FUNCTION pos 36
+    SCOPE 1.1.1 FUNCTION pos 36 name add
       READ  classCache     pos 57
       READ  Map     pos 75
       WRITE classCache     pos 80.4`)
@@ -469,7 +478,7 @@ fail(1, 'let x = 1; function foo() { return x }',
     LET   x     pos 4
     WRITE x     pos 4.4
     LET   foo     pos 20
-    SCOPE 1.1.1 FUNCTION pos 23
+    SCOPE 1.1.1 FUNCTION pos 23 name foo
       READ  x     pos 35`)
 
 fail(1, 'let x; { let y = 1; x = y }',
@@ -513,7 +522,7 @@ function f
      `SCOPE 1 GLOBAL pos 1
   SCOPE 1.1 MODULE pos 1
     LET   f     pos 10
-    SCOPE 1.1.1 FUNCTION pos 11
+    SCOPE 1.1.1 FUNCTION pos 11 name f
       LET   a     pos 13
       LET   b     pos 16
       LET   otherwise     pos 19

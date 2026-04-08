@@ -7,12 +7,12 @@ let printBuffer
 printBuffer = []
 
 function print (...args) {
-  console.log(args.join(' '))
+  //console.log(args.join(' '))
   printBuffer.push(args.join(' '))
 }
 
 function trace(...args) {
-  if (1)
+  if (0)
     console.log('TRACE', ...args)
 }
 
@@ -385,7 +385,12 @@ function printTree(node, siblingNum) {
 
   prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
   indent = '  '.repeat(prefix.split('.').length - 1)
-  print(indent + 'SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase() + ' pos ' + scopeStart(node.scope))
+  {
+    let name
+
+    name = node.scope.block?.id?.name ?? node.scope.block?.parent?.key?.name
+    print(indent + 'SCOPE ' + prefix + ' ' + node.scope.type.toUpperCase() + ' pos ' + scopeStart(node.scope) + (name ? ' name ' + name : ''))
+  }
 
   all = [ ...node.items.map(i => ({ pos: i.pos, type: 'item', data: i })),
           ...node.children.map((c, i) => ({ pos: scopeStart(c.scope), type: 'scope', data: c, sibling: i + 1 })) ]
