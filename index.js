@@ -161,7 +161,7 @@ function hasReadBeforeWriteInNestedScope(variable, defScope) {
   return 0
 }
 
-function isConditionalWrite
+function isConditionalRef
 (ref, narrowestScope) {
   let node
 
@@ -184,6 +184,19 @@ function isConditionalWrite
   return false
 }
 
+function markConditionalRefs
+(variable, scopeToNode, narrowestScope) {
+  for (let ref of variable.references) {
+    let refNode, rItems, item
+
+    refNode = scopeToNode.get(ref.from)
+    rItems = refNode.items.filter(i => i.ref == ref)
+    item = rItems[0]
+    if (item && (item.ctx == 'B' || isConditionalRef(ref, narrowestScope)))
+      item.isConditional = true
+  }
+}
+
 function mayBeReadBeforeAnyWrite
 (variable, scopeToNode, narrowestScope) {
   for (let index = 0; index < variable.references.length; index++) {
@@ -202,7 +215,7 @@ function mayBeReadBeforeAnyWrite
     if (rItems.length > 1)
       console.log('WARN rItems.length: ' + rItems.length)
     item = rItems[0]
-    if (item.ctx == 'B' || isConditionalWrite(ref, narrowestScope))
+    if (item.ctx == 'B' || isConditionalRef(ref, narrowestScope))
       // a conditional write
       continue
     // A guaranteed write before any possible read.
@@ -333,6 +346,8 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
         narrowestPrefix = scopeToNode.get(narrowestScope)?.prefix ?? '?'
         trace(indent, '2 found narrowest scope of', variable.name + ':', narrowestPrefix + ' ' + narrowestScope?.type.toUpperCase())
 
+        markConditionalRefs(variable, scopeToNode, narrowestScope)
+
         if (defScope == narrowestScope)
           continue
         trace(indent, '3', variable.name, 'could be moved to a narrower scope')
@@ -379,7 +394,14 @@ function printTree(node, siblingNum) {
 
   for (let entry of all)
     if (entry.type === 'item')
-      print(indent + '  ' + entry.data.type.padEnd(5) + ' ' + entry.data.name + (entry.data.ctx ? ' ' + entry.data.ctx : '').padEnd(3) + 'pos ' + entry.data.pos)
+      print(indent
+            + '  ' + entry.data.type.padEnd(5)
+            + ' ' + entry.data.name
+            // B: is the ref conditional within the scope that "owns" the ref (for single statement `if`)
+            + (entry.data.ctx ? ' ' + entry.data.ctx : '').padEnd(3)
+            // C: is the ref conditional within the variable's narrowestScope?
+            + (entry.data.isConditional ? 'C' : ' ').padEnd(2)
+            + 'pos ' + entry.data.pos)
     else
       printTree(entry.data, entry.sibling)
 }
