@@ -1,37 +1,13 @@
 import globals from 'globals'
 import narrowestScopePlugin from './plugins/narrowest-scope.js'
 import { getPrintBuffer } from './plugins/narrowest-scope.js'
+import positiveVibesPlugin from './plugins/positive-vibes.js'
 
 export { getPrintBuffer }
 
 export let rules, languageOptions, plugins
 
-function createPositiveVibes
-(context) {
-  return {
-    UnaryExpression(node) {
-      if (node.operator == '!')
-        context.report({ node,
-                         messageId: 'positiveVibes' })
-    },
-    BinaryExpression(node) {
-      if (node.operator == '!=')
-        context.report({ node,
-                         messageId: 'equality' })
-      else if (node.operator == '!==')
-        context.report({ node,
-                         messageId: 'strictEquality' })
-    }
-  }
-}
-
-plugins = { 'cookshack': { rules: { 'positive-vibes': { meta: { type: 'problem',
-                                                                docs: { description: 'Prefer positive expressions.' },
-                                                                messages: { positiveVibes: 'Be positive!',
-                                                                            equality: 'Use ==.',
-                                                                            strictEquality: 'Use ===.' },
-                                                                schema: [] },
-                                                        create: createPositiveVibes },
+plugins = { 'cookshack': { rules: { 'positive-vibes': positiveVibesPlugin,
                                     'narrowest-scope': narrowestScopePlugin } } }
 
 rules = {
