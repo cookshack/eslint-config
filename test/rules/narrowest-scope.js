@@ -1,6 +1,5 @@
 import { Linter } from 'eslint'
-import { plugins } from '../../index.js'
-import { getPrintBuffer } from '../../plugins/narrowest-scope.js'
+import { plugins, getPrintBuffer } from '../../index.js'
 import { diffLines } from 'diff'
 
 let linter, validCases, invalidCases, config
