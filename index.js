@@ -315,6 +315,8 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
       continue
     if ([ 'Parameter', 'FunctionName', 'ImportBinding', 'CatchClause', 'ClassName' ].includes(variable.defs[0].type))
       continue
+    if (variable.defs[0].node.parent?.parent?.type === 'ExportNamedDeclaration')
+      continue
 
     defNode = variable.defs[0]?.name
     if (defNode) {

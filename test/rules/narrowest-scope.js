@@ -429,6 +429,22 @@ function initMouse
         SCOPE 1.1.1.1.2 BLOCK pos 129
           WRITE hover   pos 146.4`)
 
+pass(`
+export let wexts
+
+export
+function init
+() {
+  wexts = Mk.array
+}
+`,
+     `SCOPE 1 GLOBAL pos 1
+  SCOPE 1.1 MODULE pos 1
+    LET   wexts   pos 12
+    LET   init   pos 35
+    SCOPE 1.1.1 FUNCTION pos 39
+      WRITE wexts   pos 63.4`)
+
 fail(1, 'let x = 1; function foo() { return x }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
