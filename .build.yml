@@ -4,7 +4,7 @@ packages:
   - npm
 secrets:
   - e2e843cf-6f7e-4b74-989f-819a97ca70b8
-  - 29d1827e-ceed-47b7-b8a1-109d2ce13454
+  - 1815ea96-0015-4f6c-9b85-82dd3b70b437
 sources:
   - https://git.sr.ht/~mattmundell/build
   - git+ssh://git@git.sr.ht/~mattmundell/eslint-config
