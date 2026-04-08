@@ -30,7 +30,7 @@ function getNarrowestScope
 
   common = null
   for (let ref of variable.references) {
-    if (variable.defs.some(def => def.name === ref.identifier))
+    if (variable.defs.some(def => def.name == ref.identifier))
       continue
     if (ref.from)
       if (common)
@@ -100,15 +100,15 @@ function getConditionalContext
   prevNode = ref.identifier
   node = ref.identifier.parent
   while (node) {
-    if (node === scopeBlock)
+    if (node == scopeBlock)
       break
-    if (node.type === 'IfStatement')
-      if (prevNode === node.test || nodeContains(node.test, prevNode))
+    if (node.type == 'IfStatement')
+      if (prevNode == node.test || nodeContains(node.test, prevNode))
         prevNode = node
       else
         return 'B'
     else if ([ 'WhileStatement', 'DoWhileStatement', 'ForStatement', 'ForInStatement', 'ForOfStatement', 'SwitchStatement' ].includes(node.type))
-      if (prevNode === node.test || nodeContains(node.test, prevNode))
+      if (prevNode == node.test || nodeContains(node.test, prevNode))
         prevNode = node
       else
         return 'B'
@@ -120,9 +120,9 @@ function getConditionalContext
 }
 
 function nodeContains(node, target) {
-  if (node === target)
+  if (node == target)
     return true
-  if (node && typeof node === 'object')
+  if (node && typeof node == 'object')
     for (let key in node)
       if (nodeHas(node[key], target))
         return true
@@ -130,7 +130,7 @@ function nodeContains(node, target) {
 }
 
 function nodeHas(value, target) {
-  if (value === target)
+  if (value == target)
     return true
   if (Array.isArray(value))
     return value.some(v => nodeContains(v, target))
@@ -154,7 +154,7 @@ function hasReadBeforeWriteInNestedScope
   for (let fnScope of nestedFunctions) {
     let fnRefs, hasRead, hasWrite
 
-    fnRefs = variable.references.filter(ref => ref.from === fnScope || isProperAncestor(fnScope, ref.from))
+    fnRefs = variable.references.filter(ref => ref.from == fnScope || isProperAncestor(fnScope, ref.from))
     hasRead = fnRefs.some(ref => isReadRef(ref))
     hasWrite = fnRefs.some(ref => isWriteRef(ref))
     if (hasRead && hasWrite)
@@ -170,15 +170,15 @@ function isConditionalRef
   node = ref.identifier.parent
 
   while (node) {
-    if (node === narrowestScope.block)
+    if (node == narrowestScope.block)
       break
-    if (node.type === 'BlockStatement') {
+    if (node.type == 'BlockStatement') {
       let parent
 
       parent = node.parent
-      if (parent?.type === 'IfStatement' && (parent.consequent === node || parent.alternate === node))
+      if (parent?.type == 'IfStatement' && (parent.consequent == node || parent.alternate == node))
         return true
-      if ([ 'WhileStatement', 'DoWhileStatement', 'ForStatement', 'ForInStatement', 'ForOfStatement' ].includes(parent?.type) && parent.body === node)
+      if ([ 'WhileStatement', 'DoWhileStatement', 'ForStatement', 'ForInStatement', 'ForOfStatement' ].includes(parent?.type) && parent.body == node)
         return true
     }
     node = node.parent
@@ -325,11 +325,11 @@ function checkScopeNode
 
     if (reported.has(variable))
       continue
-    if (variable.defs.length === 0)
+    if (variable.defs.length == 0)
       continue
     if ([ 'Parameter', 'FunctionName', 'ImportBinding', 'CatchClause', 'ClassName' ].includes(variable.defs[0].type))
       continue
-    if (variable.defs[0].node.parent?.parent?.type === 'ExportNamedDeclaration')
+    if (variable.defs[0].node.parent?.parent?.type == 'ExportNamedDeclaration')
       continue
 
     defNode = variable.defs[0]?.name
@@ -386,7 +386,7 @@ function printTree
 (node, siblingNum) {
   let prefix, all, indent
 
-  prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
+  prefix = siblingNum == 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
   indent = '  '.repeat(prefix.split('.').length - 1)
   {
     let name
@@ -400,7 +400,7 @@ function printTree
   all.sort((a, b) => a.pos - b.pos)
 
   for (let entry of all)
-    if (entry.type === 'item')
+    if (entry.type == 'item')
       print(indent
             + '  ' + entry.data.type.padEnd(5)
             + ' ' + entry.data.name
