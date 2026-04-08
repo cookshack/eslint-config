@@ -3,6 +3,7 @@ import narrowestScopePlugin from './plugins/narrowest-scope.js'
 import { getPrintBuffer } from './plugins/narrowest-scope.js'
 import positiveVibesPlugin from './plugins/positive-vibes.js'
 import useRiskyEqualPlugin from './plugins/use-risky-equal.js'
+import alwaysLetPlugin from './plugins/always-let.js'
 
 export { getPrintBuffer }
 
@@ -10,7 +11,8 @@ export let rules, languageOptions, plugins
 
 plugins = { 'cookshack': { rules: { 'positive-vibes': positiveVibesPlugin,
                                     'narrowest-scope': narrowestScopePlugin,
-                                    'use-risky-equal': useRiskyEqualPlugin } } }
+                                    'use-risky-equal': useRiskyEqualPlugin,
+                                    'always-let': alwaysLetPlugin } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
