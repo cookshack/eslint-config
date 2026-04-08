@@ -28,7 +28,7 @@ function _pass(tc) {
   messages = linter.verify(tc.code, config)
   output = getPrintBuffer()
   if (messages.length > 0)
-    throw new Error('unexpected errors: ' + JSON.stringify(messages))
+    throw new Error('unexpected errors: ' + JSON.stringify(messages) + '\noutput:\n' + output)
   if (tc.expected?.trim() == output.trim())
     return
   throw new Error('output mismatch:\n' + patch(tc.expected, output))

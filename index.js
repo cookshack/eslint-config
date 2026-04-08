@@ -7,12 +7,12 @@ let printBuffer
 printBuffer = []
 
 function print (...args) {
-  //console.log(args.join(' '))
+  console.log(args.join(' '))
   printBuffer.push(args.join(' '))
 }
 
 function trace(...args) {
-  if (0)
+  if (1)
     console.log('TRACE', ...args)
 }
 
