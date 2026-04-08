@@ -445,6 +445,24 @@ function init
     SCOPE 1.1.1 FUNCTION pos 39
       WRITE wexts     pos 63.4`)
 
+pass(`
+let classCache
+
+export
+function add
+() {
+  classCache = classCache || new Map()
+}
+`,
+     `SCOPE 1 GLOBAL pos 1
+  SCOPE 1.1 MODULE pos 1
+    LET   classCache     pos 5
+    LET   add     pos 33
+    SCOPE 1.1.1 FUNCTION pos 36
+      READ  classCache     pos 57
+      READ  Map     pos 75
+      WRITE classCache     pos 80.4`)
+
 fail(1, 'let x = 1; function foo() { return x }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0

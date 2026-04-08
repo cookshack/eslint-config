@@ -199,22 +199,19 @@ function markConditionalRefs
 
 function mayBeReadBeforeAnyWrite
 (variable, scopeToNode, narrowestScope) {
-  for (let index = 0; index < variable.references.length; index++) {
-    let ref, refNode, rItems, item
+  let refs
 
-    ref = variable.references[index]
+  refs = [ ...variable.references ]
+  refs.sort((a, b) => (a.cookshackNarrowestScopeItem?.pos ?? a.identifier.range[0]) - (b.cookshackNarrowestScopeItem?.pos ?? b.identifier.range[0]))
+
+  for (let ref of refs) {
+    let item
 
     if (isReadRef(ref))
       // a possible read
       return 1
 
-    refNode = scopeToNode.get(ref.from)
-    rItems = refNode.items.filter(i => i.ref == ref)
-    if (rItems.length == 0)
-      console.log('WARN rItems empty')
-    if (rItems.length > 1)
-      console.log('WARN rItems.length: ' + rItems.length)
-    item = rItems[0]
+    item = ref.cookshackNarrowestScopeItem
     if (item.ctx == 'B' || isConditionalRef(ref, narrowestScope))
       // a conditional write
       continue
@@ -271,23 +268,24 @@ function buildScopeTree(scope, prefix, scopeToNode) {
 
       targetNode = scopeToNode.get(ref.from)
       if (targetNode) {
-        let parent, sortPos, ctx
+        let parent, sortPos, ctx, item
 
         ctx = getConditionalContext(ref)
         parent = ref.identifier.parent
+
         if (isWriteRef(ref))
           if (ref.identifier.parent?.type == 'UpdateExpression') {
-            targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+            targetNode.items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+            item = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] }
           }
           else if (ref.identifier.parent?.type == 'AssignmentExpression') {
             sortPos = parent.right.range[1] + 0.4
-            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos })
+            item = { ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos }
           }
           else if (ref.identifier.parent?.type == 'VariableDeclarator')
-            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 })
+            item = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 }
           else
-            targetNode.items.push({ ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] })
+            item = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] }
         else {
           let declarator
 
@@ -297,13 +295,14 @@ function buildScopeTree(scope, prefix, scopeToNode) {
               break
             else
               declarator = declarator.parent
-          if (declarator?.type == 'VariableDeclarator' && nodeContains(declarator.init, ref.identifier)) {
+          if (declarator?.type == 'VariableDeclarator' && nodeContains(declarator.init, ref.identifier))
             sortPos = declarator.id ? declarator.id.range[0] - 0.4 : ref.identifier.range[0]
-            targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos })
-          }
           else
-            targetNode.items.push({ ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
+            sortPos = ref.identifier.range[0]
+          item = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos }
         }
+        targetNode.items.push(item)
+        ref.cookshackNarrowestScopeItem = item
       }
     }
   }
