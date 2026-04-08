@@ -318,41 +318,45 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
 
     defNode = variable.defs[0]?.name
     if (defNode) {
-      let defScope, narrowestScope, defNodePrefix, narrowestPrefix
+      let defScope, narrowestScope, defNodePrefix
 
       defScope = getDefinitionScope(variable)
       defNodePrefix = scopeToNode.get(defScope)?.prefix ?? '?'
       trace(indent, '1 found decl scope of', variable.name + ':', defNodePrefix + ' ' + defScope.type.toUpperCase())
 
       narrowestScope = getNarrowestScope(variable)
-      narrowestPrefix = scopeToNode.get(narrowestScope)?.prefix ?? '?'
-      trace(indent, '2 found narrowest scope of', variable.name + ':', narrowestPrefix + ' ' + narrowestScope?.type.toUpperCase())
+      if (narrowestScope) {
+        let narrowestPrefix
 
-      if (defScope == narrowestScope)
-        continue
-      trace(indent, '3', variable.name, 'could be moved to a narrower scope')
+        narrowestPrefix = scopeToNode.get(narrowestScope)?.prefix ?? '?'
+        trace(indent, '2 found narrowest scope of', variable.name + ':', narrowestPrefix + ' ' + narrowestScope?.type.toUpperCase())
 
-      if (defScope.type == 'for') {
-        trace(indent, '4 exception:', variable.name, 'is in a for loop header')
-        continue
+        if (defScope == narrowestScope)
+          continue
+        trace(indent, '3', variable.name, 'could be moved to a narrower scope')
+
+        if (defScope.type == 'for') {
+          trace(indent, '4 exception:', variable.name, 'is in a for loop header')
+          continue
+        }
+        if (0 && hasReadBeforeWriteInNestedScope(variable, defScope)) {
+          trace(indent, '4 exception:', variable.name, 'hasReadBeforeWriteInNestedScope')
+          continue
+        }
+        if (mayBeReadBeforeAnyWrite(variable, scopeToNode, narrowestScope)) {
+          trace(indent, '4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
+          continue
+        }
+
+        trace(indent, '5', variable.name, 'is too broad')
+
+        reported.add(variable)
+        context.report({
+          node: defNode,
+          messageId: 'tooBroad',
+          data: { name: variable.name }
+        })
       }
-      if (0 && hasReadBeforeWriteInNestedScope(variable, defScope)) {
-        trace(indent, '4 exception:', variable.name, 'hasReadBeforeWriteInNestedScope')
-        continue
-      }
-      if (mayBeReadBeforeAnyWrite(variable, scopeToNode, narrowestScope)) {
-        trace(indent, '4 exception:', variable.name, 'mayBeReadBeforeAnyWrite')
-        continue
-      }
-
-      trace(indent, '5', variable.name, 'is too broad')
-
-      reported.add(variable)
-      context.report({
-        node: defNode,
-        messageId: 'tooBroad',
-        data: { name: variable.name }
-      })
     }
   }
 
