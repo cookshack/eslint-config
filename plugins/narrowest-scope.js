@@ -13,7 +13,8 @@ function trace
     console.log('TRACE', ...args)
 }
 
-export function getPrintBuffer
+export
+function getPrintBuffer
 () {
   return printBuffer.join('\n')
 }
@@ -136,7 +137,8 @@ function nodeHas(value, target) {
   return false
 }
 
-function hasReadBeforeWriteInNestedScope(variable, defScope) {
+function hasReadBeforeWriteInNestedScope
+(variable, defScope) {
   let nestedFunctions
 
   nestedFunctions = new Set(variable.references
@@ -217,7 +219,8 @@ function mayBeReadBeforeAnyWrite
   }
 }
 
-function isProperAncestor(ancestor, descendant) {
+function isProperAncestor
+(ancestor, descendant) {
   let s
 
   s = descendant.upper
@@ -239,7 +242,8 @@ function scopeStart(scope) {
   return scope.block.range[0]
 }
 
-function buildScopeTree(scope, prefix, scopeToNode) {
+function buildScopeTree
+(scope, prefix, scopeToNode) {
   let node, siblingNum
 
   node = {
@@ -309,7 +313,8 @@ function buildScopeTree(scope, prefix, scopeToNode) {
   return node
 }
 
-function checkScopeNode(context, treeNode, reported, scopeToNode) {
+function checkScopeNode
+(context, treeNode, reported, scopeToNode) {
   let indent
 
   reported = reported || new Set
@@ -377,7 +382,8 @@ function checkScopeNode(context, treeNode, reported, scopeToNode) {
     checkScopeNode(context, child, reported, scopeToNode)
 }
 
-function printTree(node, siblingNum) {
+function printTree
+(node, siblingNum) {
   let prefix, all, indent
 
   prefix = siblingNum === 0 ? node.prefix : node.prefix.split('.').slice(0, -1).join('.') + '.' + siblingNum
@@ -405,7 +411,8 @@ function printTree(node, siblingNum) {
       printTree(entry.data, entry.sibling)
 }
 
-export function createNarrowestScope
+export
+function createNarrowestScope
 (context) {
   let scopeManager
 
@@ -424,12 +431,9 @@ export function createNarrowestScope
     }
 }
 
-export default {
-  meta: {
-    type: 'suggestion',
-    docs: { description: 'Enforce variables are declared in their narrowest possible scope.' },
-    messages: { tooBroad: 'Variable "{{ name }}" is declared in a broader scope than necessary.' },
-    schema: []
-  },
-  create: createNarrowestScope
-}
+export
+default { meta: { type: 'suggestion',
+                  docs: { description: 'Enforce variables are declared in their narrowest possible scope.' },
+                  messages: { tooBroad: 'Variable "{{ name }}" is declared in a broader scope than necessary.' },
+                  schema: [] },
+          create: createNarrowestScope }

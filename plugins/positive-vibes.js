@@ -17,10 +17,11 @@ function createPositiveVibes
   }
 }
 
-export default { meta: { type: 'problem',
-                         docs: { description: 'Prefer positive expressions.' },
-                         messages: { positiveVibes: 'Be positive!',
-                                     equality: 'Use ==.',
-                                     strictEquality: 'Use ===.' },
-                         schema: [] },
-                 create: createPositiveVibes }
+export
+default { meta: { type: 'problem',
+                  docs: { description: 'Prefer positive expressions.' },
+                  messages: { positiveVibes: 'Be positive!',
+                              equality: 'Use ==.',
+                              strictEquality: 'Use ===.' },
+                  schema: [] },
+          create: createPositiveVibes }
