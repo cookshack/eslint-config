@@ -258,10 +258,10 @@ function processAst(astNode, treeNode, indent, visited) {
   if (treeNode.scope?.block?.id?.name)
     scopeName += `(${treeNode.scope.block.id.name})`
   console.log(`${indent}${astNode.type}`)
-  console.log(`${indent}  scope: ${scopeName}`)
+  console.log(`${indent}  | scope: ${scopeName}`)
 
   for (let item of treeNode.items ?? []) {
-    console.log(`${indent}  ${item.type} ${item.name} (pos ${item.pos})`)
+    console.log(`${indent}  | ${item.type} ${item.name} (pos ${item.pos})`)
   }
 
   let children = []
