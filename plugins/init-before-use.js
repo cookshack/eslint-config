@@ -264,7 +264,13 @@ function processAst(astNode, parentTree, astToTree, indent, visited) {
   console.log(`${indent}  | scope: ${scopeName}`)
 
   for (let item of treeNode?.items ?? []) {
-    console.log(`${indent}  | ${item.type} ${item.name} (pos ${item.pos})`)
+    if (item.type === 'LET') {
+      let isDeclNode = item.defNode?.parent === astNode
+      if (isDeclNode)
+        console.log(`${indent}  | ${item.type} ${item.name} (pos ${item.pos})`)
+    } else {
+      console.log(`${indent}  | ${item.type} ${item.name} (pos ${item.pos})`)
+    }
   }
 
   let children = []

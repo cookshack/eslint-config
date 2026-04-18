@@ -266,7 +266,7 @@ function buildScopeTree
 
   for (let variable of scope.variables) {
     if (variable.defs.length > 0)
-      node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0] })
+      node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0], defNode: variable.defs[0].node })
 
     for (let ref of variable.references) {
       let targetNode
