@@ -235,6 +235,8 @@ export function createInitBeforeUse(context) {
 
         let cst = processAst(context.sourceCode.ast, null, astToTree, '', new Set())
 
+        cstAnnotate(cst)
+
         console.log('\n=== CST TREE ===')
         printCst(cst, '')
 
@@ -275,16 +277,16 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
   for (let item of treeNode?.items ?? []) {
     if (item.type === 'LET') {
       if (item.defNode?.parent === astNode) {
-        lets.push(item.name)
+        lets.push({ item })
         console.log(`${indent}  | LET ${item.name}`)
       }
     } else if (item.ref) {
       if (astNode === item.ref.identifier) {
         if (item.type === 'READ') {
-          reads.push(item.name)
+          reads.push({ item })
           console.log(`${indent}  | READ ${item.name}`)
         } else if (item.type === 'WRITE') {
-          writes.push(item.name)
+          writes.push({ item })
           console.log(`${indent}  | WRITE ${item.name}`)
         }
       }
@@ -351,13 +353,54 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
   return cst
 }
 
+function cstAnnotate(cst) {
+  if (!cst)
+    return
+
+  for (let letInfo of cst.lets) {
+    let writeNode = findFirstWrite(cst, letInfo.item.defNode.name)
+    letInfo.firstWrite = writeNode
+  }
+
+  for (let child of cst.children) {
+    cstAnnotate(child)
+  }
+}
+
+function findFirstWrite(cst, targetIdentifier) {
+  for (let child of cst.children) {
+    let result = findFirstWriteInSubtree(child, targetIdentifier)
+    if (result)
+      return result
+  }
+  return null
+}
+
+function findFirstWriteInSubtree(cst, targetIdentifier) {
+  if (!cst)
+    return null
+
+  for (let writeInfo of cst.writes) {
+    if (writeInfo.item.ref.identifier === targetIdentifier)
+      return cst
+  }
+
+  for (let child of cst.children) {
+    let result = findFirstWriteInSubtree(child, targetIdentifier)
+    if (result)
+      return result
+  }
+
+  return null
+}
+
 function printCst(cst, indent) {
   if (!cst)
     return
 
-  let lets = cst.lets.length ? ` LET: ${cst.lets.join(', ')}` : ''
-  let reads = cst.reads.length ? ` READ: ${cst.reads.join(', ')}` : ''
-  let writes = cst.writes.length ? ` WRITE: ${cst.writes.join(', ')}` : ''
+  let lets = cst.lets.length ? ` LET: ${cst.lets.map(l => l.item.name + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
+  let reads = cst.reads.length ? ` READ: ${cst.reads.map(r => r.item.name).join(', ')}` : ''
+  let writes = cst.writes.length ? ` WRITE: ${cst.writes.map(w => w.item.name).join(', ')}` : ''
   let extra = lets + reads + writes
 
   let scopeName = cst.treeNode?.scope ? `${cst.treeNode.scope.type}` : 'no-scope'
