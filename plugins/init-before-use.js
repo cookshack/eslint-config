@@ -183,9 +183,15 @@ function cstAnnotate(cst, astToCst, context) {
           let variable = readRef.resolved
           if (variable.defs.length > 0) {
             let fnDefAst = variable.defs[0].node
+            console.log(`cstAnnotate: callee=${cst.astNode.callee.name}, defs[0].node.type=${fnDefAst.type}`)
+            console.log(`cstAnnotate: defs[0].node id=${fnDefAst.id?.name}`)
             if (fnDefAst) {
               cst.fnDefCst = astToCst.get(fnDefAst)
-              console.log(`cstAnnotate: CALL -> fnDefCst ${cst.fnDefCst?.id}`)
+              console.log(`cstAnnotate: fnDefAst=${fnDefAst?.type}, fnDefAst.id.name=${fnDefAst?.id?.name}`)
+              console.log(`cstAnnotate: CALL -> fnDefCst ${cst.fnDefCst?.id} (astToCst size=${astToCst.size})`)
+              if (!cst.fnDefCst) {
+                console.log(`cstAnnotate: WARN - astToCst has keys:`, [...astToCst.keys()].map(k => `${k.type}(${k.id?.name})`))
+              }
             }
           }
         }
@@ -227,7 +233,8 @@ function cstCheck(cst, context) {
 
   for (let letInfo of cst.lets) {
     if (letInfo.firstWrite) {
-      walk2(cst, letInfo, context, new Set())
+      for (let child of cst.children)
+        walk2Start(child, letInfo, context, new Set())
     }
   }
 
@@ -236,22 +243,37 @@ function cstCheck(cst, context) {
   }
 }
 
+function walk2Start(node, letInfo, context, visited) {
+  return walk2Internal(node, letInfo, context, visited)
+}
+
 function walk2(node, letInfo, context, visited) {
   if (!node)
     return false
 
-  if (node === letInfo.firstWrite)
-    return true
-
   if (node.astNode.type === 'FunctionDeclaration')
     return false
+
+  return walk2Internal(node, letInfo, context, visited)
+}
+
+function walk2Internal(node, letInfo, context, visited) {
+  if (!node)
+    return false
+
+  console.log(`walk2Internal: node=${node.id} ${node.astNode.type}, let=${letInfo.item.name}, firstWrite=${letInfo.firstWrite?.id}`)
+
+  if (node === letInfo.firstWrite)
+    return true
 
   if (node.astNode.type === 'CallExpression' && node.fnDefCst) {
     let fnVar = node.fnDefCst.astNode.id
     let key = `${letInfo.item.name}:${fnVar.name}`
+    console.log(`walk2: CALL ${fnVar.name}, key=${key}, visited=${[...visited]}`)
     if (!visited.has(key)) {
       visited.add(key)
       for (let child of node.fnDefCst.children) {
+        console.log(`walk2: checking child ${child.id} ${child.astNode.type}`)
         if (child.astNode.type === 'BlockStatement' && walk2(child, letInfo, context, visited))
           return true
       }
