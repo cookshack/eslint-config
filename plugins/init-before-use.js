@@ -265,11 +265,11 @@ function processAst(astNode, parentTree, astToTree, indent, visited) {
 
   for (let item of treeNode?.items ?? []) {
     if (item.type === 'LET') {
-      let isDeclNode = item.defNode?.parent === astNode
-      if (isDeclNode)
-        console.log(`${indent}  | ${item.type} ${item.name} (pos ${item.pos})`)
-    } else {
-      console.log(`${indent}  | ${item.type} ${item.name} (pos ${item.pos})`)
+      if (item.defNode?.parent === astNode)
+        console.log(`${indent}  | ${item.type} ${item.name}`)
+    } else if (item.ref) {
+      if (astNode === item.ref.identifier)
+        console.log(`${indent}  | ${item.type} ${item.name}`)
     }
   }
 
