@@ -275,7 +275,7 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
   let writes = []
 
   for (let item of treeNode?.items ?? []) {
-    if (item.type === 'LET') {
+    if (item.type === 'LET' && item.defType !== 'FunctionName') {
       if (item.defNode?.parent === astNode) {
         lets.push({ item })
         console.log(`${indent}  | LET ${item.name}`)

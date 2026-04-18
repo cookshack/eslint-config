@@ -17,6 +17,8 @@ function pass(code) {
 
 pass('let x = 1; x')
 
+pass('function x() { }')
+
 pass(`function a1
 () {
   let p
