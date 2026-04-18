@@ -232,7 +232,7 @@ export function createInitBeforeUse(context) {
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
         reported = new Set
 
-        processAst(context.sourceCode.ast, '', new Set(), scopeManager.scopes[0])
+        processAst(context.sourceCode.ast, tree, '', new Set())
 
         for (let variable of tree.scope.variables) {
           checkVariable(context, variable, scopeToNode, reported)
@@ -247,81 +247,70 @@ export function createInitBeforeUse(context) {
     }
 }
 
-function processAst(node, indent, visited, scope) {
-  if (!node || typeof node != 'object')
+function processAst(astNode, treeNode, indent, visited) {
+  if (!astNode || !treeNode)
     return
-  if (visited.has(node))
+  if (visited.has(astNode))
     return
-  visited.add(node)
+  visited.add(astNode)
 
-  let scopeName = scope ? `${scope.type}` : 'no-scope'
-  if (scope?.block?.id?.name)
-    scopeName += `(${scope.block.id.name})`
-  console.log(`${indent}${node.type}`)
-  console.log(`${indent}  [scope: ${scopeName}]`)
+  let scopeName = treeNode.scope ? `${treeNode.scope.type}` : 'no-scope'
+  if (treeNode.scope?.block?.id?.name)
+    scopeName += `(${treeNode.scope.block.id.name})`
+  console.log(`${indent}${astNode.type}`)
+  console.log(`${indent}  scope: ${scopeName}`)
 
-  let newScope = scope
-  for (let childScope of scope?.childScopes ?? []) {
-    if (childScope.block === node) {
-      newScope = childScope
-      break
-    }
-  }
-
-  if (newScope && newScope.block === node) {
-    console.log(`${indent}    [newScope.block === node: TRUE]`)
-    for (let v of newScope.variables ?? []) {
-      for (let def of v.defs ?? []) {
-        if (def.type == 'Variable') {
-          console.log(`${indent}    Variable ${v.name}`)
-        }
-      }
-    }
+  for (let item of treeNode.items ?? []) {
+    console.log(`${indent}  ${item.type} ${item.name} (pos ${item.pos})`)
   }
 
   let children = []
 
-  if (node.body) {
-    if (Array.isArray(node.body))
-      children.push(...node.body)
+  if (astNode.body) {
+    if (Array.isArray(astNode.body))
+      children.push(...astNode.body)
     else
-      children.push(node.body)
+      children.push(astNode.body)
   }
-  if (node.consequent)
-    children.push(node.consequent)
-  if (node.alternate)
-    children.push(node.alternate)
-  if (node.block)
-    children.push(node.block)
-  if (node.expression)
-    children.push(node.expression)
-  if (node.callee)
-    children.push(node.callee)
-  if (node.object)
-    children.push(node.object)
-  if (node.property)
-    children.push(node.property)
-  if (node.init)
-    children.push(node.init)
-  if (node.test)
-    children.push(node.test)
-  if (node.update)
-    children.push(node.update)
-  if (node.left)
-    children.push(node.left)
-  if (node.right)
-    children.push(node.right)
-  if (node.argument)
-    children.push(node.argument)
-  if (node.arguments)
-    children.push(...node.arguments)
-  if (node.elements)
-    children.push(...node.elements)
-  if (node.properties)
-    children.push(...node.properties)
+  if (astNode.consequent)
+    children.push(astNode.consequent)
+  if (astNode.alternate)
+    children.push(astNode.alternate)
+  if (astNode.block)
+    children.push(astNode.block)
+  if (astNode.expression)
+    children.push(astNode.expression)
+  if (astNode.callee)
+    children.push(astNode.callee)
+  if (astNode.object)
+    children.push(astNode.object)
+  if (astNode.property)
+    children.push(astNode.property)
+  if (astNode.init)
+    children.push(astNode.init)
+  if (astNode.test)
+    children.push(astNode.test)
+  if (astNode.update)
+    children.push(astNode.update)
+  if (astNode.left)
+    children.push(astNode.left)
+  if (astNode.right)
+    children.push(astNode.right)
+  if (astNode.argument)
+    children.push(astNode.argument)
+  if (astNode.arguments)
+    children.push(...astNode.arguments)
+  if (astNode.elements)
+    children.push(...astNode.elements)
+  if (astNode.properties)
+    children.push(...astNode.properties)
 
+  let childTreeIdx = 0
   for (let child of children) {
-    processAst(child, indent + '  ', visited, newScope)
+    let childTree = treeNode.children?.[childTreeIdx] ?? null
+    processAst(child, childTree, indent + '  ', visited)
+    if (childTree)
+      childTreeIdx++
   }
 }
 
