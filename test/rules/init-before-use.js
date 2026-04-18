@@ -43,6 +43,8 @@ pass(`for (let tc of validCases)
     globalThis.it(tc.code, () => _invalid(tc))
 `)
 
+pass('let x; let y = { x: 1 }; x = 2')
+
 fail(1, 'x; let x = 1')
 
 fail(1, 'f(); let f = () => {}')

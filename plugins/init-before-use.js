@@ -79,7 +79,7 @@ function create
                }
            },
            'AssignmentExpression'(node) {
-             if (node.left.type === 'Identifier') {
+             if (node.left.type == 'Identifier') {
                let scope, left
 
                scope = getCurrentScope()
@@ -97,32 +97,22 @@ function create
            'Identifier'(node) {
              let scope, parent, grandParent, pair, name, refs
 
-             function isBindingSite
-             () {
-               if (parent.type == 'Property' && parent.key == node) {
-                 if (parent.parent.type == 'ObjectExpression')
-                   return 0
-                 return 1
-               }
-               return 0
-             }
-
              parent = node.parent
              grandParent = parent?.parent
 
-             if (parent.type === 'VariableDeclarator' && parent.id === node)
+             if (parent.type == 'VariableDeclarator' && parent.id == node)
                return
 
-             if (parent.type === 'AssignmentExpression' && parent.left === node)
+             if (parent.type == 'AssignmentExpression' && parent.left == node)
                return
 
-             if (grandParent?.type === 'FunctionDeclaration' && grandParent.id === node)
+             if (grandParent?.type == 'FunctionDeclaration' && grandParent.id == node)
                return
 
-             if (parent.type === 'MemberExpression' && parent.property === node)
+             if (parent.type == 'MemberExpression' && parent.property == node)
                return
 
-             if (isBindingSite())
+             if (parent.type == 'Property' && parent.key == node && parent.parent.type == 'ObjectExpression')
                return
 
              scope = getCurrentScope()
