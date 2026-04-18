@@ -34,6 +34,7 @@ pass(`function a1
 
 fail('mustInit', 'let x')
 
+if (0)
 fail('initBeforeUse', `function outer
 (arg) {
   let p

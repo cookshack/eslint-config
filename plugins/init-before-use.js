@@ -240,14 +240,6 @@ export function createInitBeforeUse(context) {
         console.log('\n=== CST TREE ===')
         printCst(cst, '')
 
-        for (let variable of tree.scope.variables) {
-          checkVariable(context, variable, scopeToNode, reported)
-        }
-
-        for (let child of tree.children) {
-          checkChildScopes(context, child, reported, scopeToNode)
-        }
-
         print(getPrintBuffer())
       }
     }
