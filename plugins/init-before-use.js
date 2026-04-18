@@ -235,7 +235,7 @@ export function createInitBeforeUse(context) {
 
         let cst = processAst(context.sourceCode.ast, null, astToTree, '', new Set())
 
-        cstAnnotate(cst)
+        cstAnnotate(cst, context)
 
         console.log('\n=== CST TREE ===')
         printCst(cst, '')
@@ -357,17 +357,24 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
   return cst
 }
 
-function cstAnnotate(cst) {
+function cstAnnotate(cst, context) {
   if (!cst)
     return
 
   for (let letInfo of cst.lets) {
     let writeNode = findFirstWrite(cst, letInfo.item.defNode.id)
     letInfo.firstWrite = writeNode
+    if (!writeNode) {
+      context.report({
+        node: letInfo.item.defNode.id,
+        messageId: 'mustInit',
+        data: { name: letInfo.item.name }
+      })
+    }
   }
 
   for (let child of cst.children) {
-    cstAnnotate(child)
+    cstAnnotate(child, context)
   }
 }
 
