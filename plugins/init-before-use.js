@@ -16,10 +16,6 @@ function getPrintBuffer() {
   return printBuffer.join('\n')
 }
 
-function isForLoop(scope) {
-  return scope.type == 'for' || scope.type == 'for-in' || scope.type == 'for-of'
-}
-
 function createInitBeforeUse(context) {
   let scopeManager
 
@@ -175,8 +171,8 @@ function cstAnnotate(cst, astToCst, context) {
     }
   }
 
-  if (cst.astNode.type === 'CallExpression' && cst.astNode.callee?.type === 'Identifier') {
-    for (let child of cst.children) {
+  if (cst.astNode.type === 'CallExpression' && cst.astNode.callee?.type === 'Identifier')
+    for (let child of cst.children)
       if (child.astNode === cst.astNode.callee && child.reads.length > 0) {
         let readRef = child.reads[0].item.ref
         if (readRef?.resolved) {
@@ -196,12 +192,9 @@ function cstAnnotate(cst, astToCst, context) {
           }
         }
       }
-    }
-  }
 
-  for (let child of cst.children) {
+  for (let child of cst.children)
     cstAnnotate(child, astToCst, context)
-  }
 }
 
 function findFirstWrite(cst, letInfo) {
@@ -231,25 +224,19 @@ function cstCheck(cst, context) {
   if (!cst)
     return
 
-  for (let letInfo of cst.lets) {
-    if (letInfo.firstWrite) {
+  for (let letInfo of cst.lets)
+    if (letInfo.firstWrite)
       walk2Start(cst, letInfo, context)
-    }
-  }
 
-  for (let child of cst.children) {
+  for (let child of cst.children)
     cstCheck(child, context)
-  }
 }
 
 function walk2Start(node, letInfo, context) {
-  if (node.astNode.type === 'FunctionDeclaration') {
-    for (let child of node.children) {
-      if (child.astNode.type === 'BlockStatement') {
+  if (node.astNode.type === 'FunctionDeclaration')
+    for (let child of node.children)
+      if (child.astNode.type === 'BlockStatement')
         return walk2(child, letInfo, context, new Set())
-      }
-    }
-  }
   return walk2(node, letInfo, context, new Set())
 }
 
@@ -279,20 +266,17 @@ function walk2(node, letInfo, context, visited) {
     }
   }
 
-  for (let readInfo of node.reads) {
-    if (readInfo.item.ref.resolved === letInfo.item.variable) {
+  for (let readInfo of node.reads)
+    if (readInfo.item.ref.resolved === letInfo.item.variable)
       context.report({
         node: readInfo.item.ref.identifier,
         messageId: 'initBeforeUse',
         data: { name: letInfo.item.name }
       })
-    }
-  }
 
-  for (let child of node.children) {
+  for (let child of node.children)
     if (walk2(child, letInfo, context, visited))
       return true
-  }
 
   return false
 }
@@ -313,9 +297,8 @@ function printCst(cst, indent) {
 
   console.log(`${indent}${cst.id} ${cst.astNode.type} [${scopeName}]${extra}`)
 
-  for (let child of cst.children) {
+  for (let child of cst.children)
     printCst(child, indent + '  ')
-  }
 }
 
 export default {
