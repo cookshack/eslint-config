@@ -196,6 +196,8 @@ function createInitBeforeUse(context) {
 
         cstAnnotate(cst, context)
 
+        cstCheck(cst, context)
+
         console.log('\n=== CST TREE ===')
         printCst(cst, '')
 
@@ -352,6 +354,49 @@ function findFirstWriteInSubtree(cst, letInfo) {
   }
 
   return null
+}
+
+function cstCheck(cst, context) {
+  if (!cst)
+    return
+
+  for (let letInfo of cst.lets) {
+    if (letInfo.firstWrite) {
+      walk2(cst, letInfo, context)
+    }
+  }
+
+  for (let child of cst.children) {
+    cstCheck(child, context)
+  }
+}
+
+function walk2(node, letInfo, context) {
+  if (!node)
+    return false
+
+  if (node === letInfo.firstWrite)
+    return true
+
+  if (node.astNode.type === 'FunctionDeclaration')
+    return false
+
+  for (let readInfo of node.reads) {
+    if (readInfo.item.ref.resolved === letInfo.item.variable) {
+      context.report({
+        node: readInfo.item.ref.identifier,
+        messageId: 'initBeforeUse',
+        data: { name: letInfo.item.name }
+      })
+    }
+  }
+
+  for (let child of node.children) {
+    if (walk2(child, letInfo, context))
+      return true
+  }
+
+  return false
 }
 
 function printCst(cst, indent) {
