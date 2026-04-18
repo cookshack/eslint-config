@@ -232,7 +232,7 @@ export function createInitBeforeUse(context) {
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
         reported = new Set
 
-        processAst(context.sourceCode.ast, '', new Set())
+        processAst(context.sourceCode.ast, '', new Set(), scopeManager.scopes[0])
 
         for (let variable of tree.scope.variables) {
           checkVariable(context, variable, scopeToNode, reported)
@@ -247,14 +247,37 @@ export function createInitBeforeUse(context) {
     }
 }
 
-function processAst(node, indent, visited) {
+function processAst(node, indent, visited, scope) {
   if (!node || typeof node != 'object')
     return
   if (visited.has(node))
     return
   visited.add(node)
 
+  let scopeName = scope ? `${scope.type}` : 'no-scope'
+  if (scope?.block?.id?.name)
+    scopeName += `(${scope.block.id.name})`
   console.log(`${indent}${node.type}`)
+  console.log(`${indent}  [scope: ${scopeName}]`)
+
+  let newScope = scope
+  for (let childScope of scope?.childScopes ?? []) {
+    if (childScope.block === node) {
+      newScope = childScope
+      break
+    }
+  }
+
+  if (newScope && newScope.block === node) {
+    console.log(`${indent}    [newScope.block === node: TRUE]`)
+    for (let v of newScope.variables ?? []) {
+      for (let def of v.defs ?? []) {
+        if (def.type == 'Variable') {
+          console.log(`${indent}    Variable ${v.name}`)
+        }
+      }
+    }
+  }
 
   let children = []
 
@@ -298,7 +321,7 @@ function processAst(node, indent, visited) {
     children.push(...node.properties)
 
   for (let child of children) {
-    processAst(child, indent + '  ', visited)
+    processAst(child, indent + '  ', visited, newScope)
   }
 }
 
