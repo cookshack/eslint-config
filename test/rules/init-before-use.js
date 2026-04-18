@@ -27,6 +27,8 @@ pass('let x = 1; x')
 
 pass('function f() { let x = 1; return x }')
 
+//pass('for (x in [1,2,3]) {}; let x = 1')
+
 if (0)
 pass(`for (let tc of validCases)
     globalThis.it(tc.code, () => _valid(tc))
@@ -66,7 +68,7 @@ fail('mustInit', 'console.log(x); let x')
 
 fail([ 'initBeforeUse', 'initBeforeUse' ], 'x; y; let x = 1; let y = 2')
 
-//fail('initBeforeUse', 'for (x in [1,2,3]) {}; let x')
+fail('mustInit', 'for (x in [1,2,3]) {}; let x')
 
 fail('initBeforeUse', 'let x = f(); function f() { return x }')
 
