@@ -327,6 +327,10 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
     children.push(astNode.property)
   if (astNode.init)
     children.push(astNode.init)
+  if (astNode.id)
+    children.push(astNode.id)
+  if (astNode.declarations)
+    children.push(...astNode.declarations)
   if (astNode.test)
     children.push(astNode.test)
   if (astNode.update)
@@ -358,7 +362,7 @@ function cstAnnotate(cst) {
     return
 
   for (let letInfo of cst.lets) {
-    let writeNode = findFirstWrite(cst, letInfo.item.defNode.name)
+    let writeNode = findFirstWrite(cst, letInfo.item.defNode.id)
     letInfo.firstWrite = writeNode
   }
 
@@ -368,12 +372,7 @@ function cstAnnotate(cst) {
 }
 
 function findFirstWrite(cst, targetIdentifier) {
-  for (let child of cst.children) {
-    let result = findFirstWriteInSubtree(child, targetIdentifier)
-    if (result)
-      return result
-  }
-  return null
+  return findFirstWriteInSubtree(cst, targetIdentifier)
 }
 
 function findFirstWriteInSubtree(cst, targetIdentifier) {
