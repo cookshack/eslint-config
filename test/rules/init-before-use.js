@@ -45,6 +45,19 @@ pass(`for (let tc of validCases)
 
 pass('let x; let y = { x: 1 }; x = 2')
 
+pass(`function a1
+() {
+  let p
+
+  function a2
+  () {
+    return p[p.length - 1]
+  }
+
+  p = []
+  return a2(0)
+}`)
+
 fail(1, 'x; let x = 1')
 
 fail(1, 'f(); let f = () => {}')
