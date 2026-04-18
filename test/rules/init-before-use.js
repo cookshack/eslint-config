@@ -8,14 +8,40 @@ validCases = []
 invalidCases = []
 
 function fail(message, code) {
-  invalidCases.push({ code, errors: [ { messageId: message } ] })
+  let errors
+
+  if (Array.isArray(message))
+    errors = message.map(m => ({ messageId: m }))
+  else
+    errors = [ { messageId: message } ]
+  invalidCases.push({ code, errors })
 }
 
 function pass(code) {
   validCases.push({ code })
 }
 
+pass('let x; x = 1')
+
 pass('let x = 1; x')
+
+pass('function f() { let x = 1; return x }')
+
+pass('let x = f(); function f() { return x }')
+
+if (0)
+pass(`for (let tc of validCases)
+    globalThis.it(tc.code, () => _valid(tc))
+`)
+
+if (0)
+pass(`for (let tc of validCases)
+    globalThis.it(tc.code, () => _valid(tc))
+  for (let tc of invalidCases)
+    globalThis.it(tc.code, () => _invalid(tc))
+`)
+
+pass('let x; let y = { x: 1 }; x = 2')
 
 pass('function x() { }')
 
@@ -34,20 +60,30 @@ pass(`function a1
 
 fail('mustInit', 'let x')
 
-if (0)
+fail('initBeforeUse', 'x; let x = 1')
+
+fail('initBeforeUse', 'f(); let f = () => {}')
+
+fail('mustInit', 'console.log(x); let x')
+
+fail([ 'initBeforeUse', 'initBeforeUse' ], 'x; y; let x = 1; let y = 2')
+
+//fail('initBeforeUse', 'for (x in [1,2,3]) {}; let x')
+
 fail('initBeforeUse', `function outer
 (arg) {
   let p
 
   function inner
- () {
+  () {
     p.focus()
   }
 
   if (arg) {
     inner()
     return
- }
+  }
+
   p = get()
   inner()
 }`)
