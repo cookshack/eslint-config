@@ -4,6 +4,7 @@ import { getPrintBuffer } from './plugins/narrowest-scope.js'
 import positiveVibesPlugin from './plugins/positive-vibes.js'
 import useRiskyEqualPlugin from './plugins/use-risky-equal.js'
 import alwaysLetPlugin from './plugins/always-let.js'
+import initBeforeUsePlugin from './plugins/init-before-use.js'
 import declBlockStartPlugin from './plugins/decl-block-start.js'
 
 export { getPrintBuffer }
@@ -14,6 +15,7 @@ plugins = { 'cookshack': { rules: { 'positive-vibes': positiveVibesPlugin,
                                     'narrowest-scope': narrowestScopePlugin,
                                     'use-risky-equal': useRiskyEqualPlugin,
                                     'always-let': alwaysLetPlugin,
+                                    'init-before-use': initBeforeUsePlugin,
                                     'decl-block-start': declBlockStartPlugin } } }
 
 rules = {
@@ -49,6 +51,7 @@ rules = {
   'cookshack/narrowest-scope': 'error',
   'cookshack/use-risky-equal': 'error',
   'cookshack/always-let': 'error',
+  'cookshack/init-before-use': 'error',
   'cookshack/decl-block-start': 'error',
   'no-mixed-operators': 'error',
   'no-multi-spaces': 'error',
