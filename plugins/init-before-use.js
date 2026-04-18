@@ -233,7 +233,10 @@ export function createInitBeforeUse(context) {
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
         reported = new Set
 
-        processAst(context.sourceCode.ast, null, astToTree, '', new Set())
+        let cst = processAst(context.sourceCode.ast, null, astToTree, '', new Set())
+
+        console.log('\n=== CST TREE ===')
+        printCst(cst, '')
 
         for (let variable of tree.scope.variables) {
           checkVariable(context, variable, scopeToNode, reported)
@@ -343,6 +346,26 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
   }
 
   return cst
+}
+
+function printCst(cst, indent) {
+  if (!cst)
+    return
+
+  let lets = cst.lets.length ? ` LET: ${cst.lets.join(', ')}` : ''
+  let reads = cst.reads.length ? ` READ: ${cst.reads.join(', ')}` : ''
+  let writes = cst.writes.length ? ` WRITE: ${cst.writes.join(', ')}` : ''
+  let extra = lets + reads + writes
+
+  let scopeName = cst.treeNode?.scope ? `${cst.treeNode.scope.type}` : 'no-scope'
+  if (cst.treeNode?.scope?.block?.id?.name)
+    scopeName += `(${cst.treeNode.scope.block.id.name})`
+
+  console.log(`${indent}${cst.astNode.type} [${scopeName}]${extra}`)
+
+  for (let child of cst.children) {
+    printCst(child, indent + '  ')
+  }
 }
 
 function checkChildScopes(context, treeNode, reported, scopeToNode) {
