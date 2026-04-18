@@ -103,22 +103,12 @@ function checkStatement(context, stmt, scopeToNode, treeNode, varName, visitedFn
 }
 
 function processScope(context, scopeNode, varName, visitedFns, onRead, callPos) {
+  let scopeName = scopeNode.scope.block?.id?.name ?? scopeNode.scope.type
+
   let firstWrite = getFirstWriteInScope(scopeNode)
-
-  if (!firstWrite) {
-    let readItems = scopeNode.items.filter(i => i.type == 'READ' && i.name == varName)
-    for (let read of readItems) {
-      if (!read.isConditional) {
-        if (callPos !== undefined && read.pos >= callPos) {
-          continue
-        }
-        onRead(read.ref.identifier)
-      }
-    }
-    return
-  }
-
   let writePos = firstWrite.pos
+  console.log(`Step 1: ${scopeName} - first WRITE at ${writePos} for '${varName}'`)
+  console.log(`Step 2: ${scopeName} - processing nodes before write`)
 
   for (let item of scopeNode.items) {
     if (item.pos >= writePos)
@@ -126,8 +116,10 @@ function processScope(context, scopeNode, varName, visitedFns, onRead, callPos) 
 
     if (item.type == 'READ' && item.name == varName && !item.isConditional) {
       if (callPos !== undefined && item.pos >= callPos) {
+        console.log(`Step 2: ${scopeName} - READ at ${item.pos} >= callPos ${callPos}, skip`)
         continue
       }
+      console.log(`Step 2: ${scopeName} - found READ at ${item.pos}, report`)
       onRead(item.ref.identifier)
       return
     }
@@ -137,8 +129,10 @@ function processScope(context, scopeNode, varName, visitedFns, onRead, callPos) 
       for (let fnNode of calls) {
         if (!visitedFns.has(fnNode.scope)) {
           let thisCallPos = item.pos
+          console.log(`Step 2: ${scopeName} - recursing into fn (call at ${thisCallPos})`)
 
           if (thisCallPos >= writePos) {
+            console.log(`Step 2: ${scopeName} - call at ${thisCallPos} >= writePos ${writePos}, skip`)
             continue
           }
 
@@ -146,28 +140,39 @@ function processScope(context, scopeNode, varName, visitedFns, onRead, callPos) 
           newVisited.add(fnNode.scope)
 
           processScope(context, fnNode, varName, newVisited, onRead, thisCallPos)
+        } else {
+          console.log(`Step 2: ${scopeName} - fn already visited, skip`)
         }
       }
     }
   }
 
   for (let child of scopeNode.children) {
-    if (isForLoop(child.scope))
+    if (isForLoop(child.scope)) {
+      console.log(`Step 2: ${scopeName} - skipping for-loop child`)
       continue
+    }
 
     let childStart = scopeStart(child.scope)
+    console.log(`Step 2: ${scopeName} - checking child scope at ${childStart}`)
+
     if (childStart < writePos) {
+      console.log(`Step 2: ${scopeName} - child start ${childStart} < writePos ${writePos}, checking items`)
       for (let item of child.items) {
         if (item.pos >= writePos)
           break
         if (item.type == 'READ' && item.name == varName && !item.isConditional) {
+          console.log(`Step 2: ${scopeName} - found READ in child at ${item.pos}, report`)
           if (callPos !== undefined && item.pos >= callPos) {
+            console.log(`Step 2: ${scopeName} - READ at ${item.pos} >= callPos ${callPos}, skip`)
             continue
           }
           onRead(item.ref.identifier)
           return
         }
       }
+    } else {
+      console.log(`Step 2: ${scopeName} - child start ${childStart} >= writePos ${writePos}, skip`)
     }
   }
 }
@@ -189,10 +194,21 @@ function checkVariable(context, variable, scopeToNode, reported) {
   if (!defScopeNode)
     return
 
-  let hasError = false
+  console.log(`\n=== Checking variable '${variable.name}' in scope '${defScopeNode.scope.block?.id?.name ?? defScopeNode.scope.type}' ===`)
+
+  let firstWrite = getFirstWriteInScope(defScopeNode)
+  if (!firstWrite) {
+    console.log(`Step 1: no WRITE found for '${variable.name}', report "mustInit" and STOP`)
+    reported.add(variable)
+    context.report({
+      node: defNode,
+      messageId: 'mustInit',
+      data: { name: variable.name }
+    })
+    return
+  }
 
   processScope(context, defScopeNode, variable.name, new Set(), (identifier) => {
-    hasError = true
     reported.add(variable)
     context.report({
       node: identifier,
@@ -243,7 +259,8 @@ export default {
   meta: {
     type: 'problem',
     docs: { description: 'Warn when a variable is used before being explicitly initialized.' },
-    messages: { initBeforeUse: "'{{name}}' used before initialization." },
+    messages: { initBeforeUse: "'{{name}}' used before initialization.",
+                mustInit: "'{{name}}' must be initialized." },
     schema: []
   },
   create: createInitBeforeUse
