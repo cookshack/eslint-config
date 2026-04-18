@@ -232,6 +232,8 @@ export function createInitBeforeUse(context) {
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
         reported = new Set
 
+        processAst(context.sourceCode.ast, '', new Set())
+
         for (let variable of tree.scope.variables) {
           checkVariable(context, variable, scopeToNode, reported)
         }
@@ -243,6 +245,61 @@ export function createInitBeforeUse(context) {
         print(getPrintBuffer())
       }
     }
+}
+
+function processAst(node, indent, visited) {
+  if (!node || typeof node != 'object')
+    return
+  if (visited.has(node))
+    return
+  visited.add(node)
+
+  console.log(`${indent}${node.type}`)
+
+  let children = []
+
+  if (node.body) {
+    if (Array.isArray(node.body))
+      children.push(...node.body)
+    else
+      children.push(node.body)
+  }
+  if (node.consequent)
+    children.push(node.consequent)
+  if (node.alternate)
+    children.push(node.alternate)
+  if (node.block)
+    children.push(node.block)
+  if (node.expression)
+    children.push(node.expression)
+  if (node.callee)
+    children.push(node.callee)
+  if (node.object)
+    children.push(node.object)
+  if (node.property)
+    children.push(node.property)
+  if (node.init)
+    children.push(node.init)
+  if (node.test)
+    children.push(node.test)
+  if (node.update)
+    children.push(node.update)
+  if (node.left)
+    children.push(node.left)
+  if (node.right)
+    children.push(node.right)
+  if (node.argument)
+    children.push(node.argument)
+  if (node.arguments)
+    children.push(...node.arguments)
+  if (node.elements)
+    children.push(...node.elements)
+  if (node.properties)
+    children.push(...node.properties)
+
+  for (let child of children) {
+    processAst(child, indent + '  ', visited)
+  }
 }
 
 function checkChildScopes(context, treeNode, reported, scopeToNode) {

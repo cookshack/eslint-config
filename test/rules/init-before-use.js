@@ -17,7 +17,6 @@ function pass(code) {
 
 pass('let x = 1; x')
 
-if (0)
 pass(`function a1
 () {
   let p
@@ -33,7 +32,6 @@ pass(`function a1
 
 fail('mustInit', 'let x')
 
-if (0)
 fail('initBeforeUse', `function outer
 (arg) {
   let p
