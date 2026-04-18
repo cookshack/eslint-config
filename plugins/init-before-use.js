@@ -233,7 +233,7 @@ export function createInitBeforeUse(context) {
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
         reported = new Set
 
-        processAst(context.sourceCode.ast, tree, astToTree, '', new Set())
+        processAst(context.sourceCode.ast, null, astToTree, '', new Set())
 
         for (let variable of tree.scope.variables) {
           checkVariable(context, variable, scopeToNode, reported)
@@ -248,14 +248,14 @@ export function createInitBeforeUse(context) {
     }
 }
 
-function processAst(astNode, parentTree, astToTree, indent, visited) {
+function processAst(astNode, parentCst, astToTree, indent, visited) {
   if (!astNode)
     return
   if (visited.has(astNode))
     return
   visited.add(astNode)
 
-  let treeNode = astToTree.get(astNode) ?? parentTree
+  let treeNode = astToTree.get(astNode) ?? parentCst?.treeNode
 
   let scopeName = treeNode?.scope ? `${treeNode.scope.type}` : 'no-scope'
   if (treeNode?.scope?.block?.id?.name)
@@ -263,14 +263,36 @@ function processAst(astNode, parentTree, astToTree, indent, visited) {
   console.log(`${indent}${astNode.type}`)
   console.log(`${indent}  | scope: ${scopeName}`)
 
+  let lets = []
+  let reads = []
+  let writes = []
+
   for (let item of treeNode?.items ?? []) {
     if (item.type === 'LET') {
-      if (item.defNode?.parent === astNode)
-        console.log(`${indent}  | ${item.type} ${item.name}`)
+      if (item.defNode?.parent === astNode) {
+        lets.push(item.name)
+        console.log(`${indent}  | LET ${item.name}`)
+      }
     } else if (item.ref) {
-      if (astNode === item.ref.identifier)
-        console.log(`${indent}  | ${item.type} ${item.name}`)
+      if (astNode === item.ref.identifier) {
+        if (item.type === 'READ') {
+          reads.push(item.name)
+          console.log(`${indent}  | READ ${item.name}`)
+        } else if (item.type === 'WRITE') {
+          writes.push(item.name)
+          console.log(`${indent}  | WRITE ${item.name}`)
+        }
+      }
     }
+  }
+
+  let cst = {
+    astNode,
+    treeNode,
+    lets,
+    reads,
+    writes,
+    children: []
   }
 
   let children = []
@@ -315,8 +337,12 @@ function processAst(astNode, parentTree, astToTree, indent, visited) {
     children.push(...astNode.properties)
 
   for (let child of children) {
-    processAst(child, treeNode, astToTree, indent + '  ', visited)
+    let childCst = processAst(child, cst, astToTree, indent + '  ', visited)
+    if (childCst)
+      cst.children.push(childCst)
   }
+
+  return cst
 }
 
 function checkChildScopes(context, treeNode, reported, scopeToNode) {
