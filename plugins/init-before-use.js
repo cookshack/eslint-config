@@ -229,10 +229,11 @@ export function createInitBeforeUse(context) {
         let tree, scopeToNode, reported
 
         scopeToNode = new Map
-        tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
+        let astToTree = new Map
+        tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
         reported = new Set
 
-        processAst(context.sourceCode.ast, tree, '', new Set())
+        processAst(context.sourceCode.ast, tree, astToTree, '', new Set())
 
         for (let variable of tree.scope.variables) {
           checkVariable(context, variable, scopeToNode, reported)
@@ -247,20 +248,22 @@ export function createInitBeforeUse(context) {
     }
 }
 
-function processAst(astNode, treeNode, indent, visited) {
-  if (!astNode || !treeNode)
+function processAst(astNode, parentTree, astToTree, indent, visited) {
+  if (!astNode)
     return
   if (visited.has(astNode))
     return
   visited.add(astNode)
 
-  let scopeName = treeNode.scope ? `${treeNode.scope.type}` : 'no-scope'
-  if (treeNode.scope?.block?.id?.name)
+  let treeNode = astToTree.get(astNode) ?? parentTree
+
+  let scopeName = treeNode?.scope ? `${treeNode.scope.type}` : 'no-scope'
+  if (treeNode?.scope?.block?.id?.name)
     scopeName += `(${treeNode.scope.block.id.name})`
   console.log(`${indent}${astNode.type}`)
   console.log(`${indent}  | scope: ${scopeName}`)
 
-  for (let item of treeNode.items ?? []) {
+  for (let item of treeNode?.items ?? []) {
     console.log(`${indent}  | ${item.type} ${item.name} (pos ${item.pos})`)
   }
 
@@ -305,12 +308,8 @@ function processAst(astNode, treeNode, indent, visited) {
   if (astNode.properties)
     children.push(...astNode.properties)
 
-  let childTreeIdx = 0
   for (let child of children) {
-    let childTree = treeNode.children?.[childTreeIdx] ?? null
-    processAst(child, childTree, indent + '  ', visited)
-    if (childTree)
-      childTreeIdx++
+    processAst(child, treeNode, astToTree, indent + '  ', visited)
   }
 }
 

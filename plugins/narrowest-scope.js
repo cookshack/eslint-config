@@ -245,7 +245,7 @@ function scopeStart(scope) {
 export { isReadRef, isWriteRef, buildScopeTree, scopeStart }
 
 function buildScopeTree
-(scope, prefix, scopeToNode) {
+(scope, prefix, scopeToNode, astToTree) {
   let node, siblingNum
 
   node = {
@@ -255,11 +255,13 @@ function buildScopeTree
     children: []
   }
   scopeToNode.set(scope, node)
+  if (scope.block && astToTree)
+    astToTree.set(scope.block, node)
 
   siblingNum = 0
   for (let child of scope.childScopes) {
     siblingNum++
-    node.children.push(buildScopeTree(child, prefix + '.' + siblingNum, scopeToNode))
+    node.children.push(buildScopeTree(child, prefix + '.' + siblingNum, scopeToNode, astToTree))
   }
 
   for (let variable of scope.variables) {
