@@ -227,7 +227,8 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
 
   for (let item of treeNode?.items ?? []) {
     if (item.type === 'LET' && item.defType !== 'FunctionName') {
-      if (item.defNode?.parent === astNode) {
+      let scopeCreator = treeNode?.scope?.block
+      if (scopeCreator && astNode === scopeCreator) {
         lets.push({ item })
         console.log(`${indent}  | LET ${item.name}`)
       }
@@ -248,6 +249,7 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
     id: cstIdCounter++,
     astNode,
     treeNode,
+    scopeItems: treeNode?.items ?? [],
     lets,
     reads,
     writes,
@@ -313,11 +315,11 @@ function cstAnnotate(cst, context) {
     return
 
   for (let letInfo of cst.lets) {
-    let writeNode = findFirstWrite(cst, letInfo.item.defNode.id)
+    let writeNode = findFirstWrite(cst, letInfo)
     letInfo.firstWrite = writeNode
     if (!writeNode) {
       context.report({
-        node: letInfo.item.defNode.id,
+        node: letInfo.item.identifier,
         messageId: 'mustInit',
         data: { name: letInfo.item.name }
       })
@@ -329,21 +331,22 @@ function cstAnnotate(cst, context) {
   }
 }
 
-function findFirstWrite(cst, targetIdentifier) {
-  return findFirstWriteInSubtree(cst, targetIdentifier)
+function findFirstWrite(cst, letInfo) {
+  return findFirstWriteInSubtree(cst, letInfo)
 }
 
-function findFirstWriteInSubtree(cst, targetIdentifier) {
+function findFirstWriteInSubtree(cst, letInfo) {
   if (!cst)
     return null
 
   for (let writeInfo of cst.writes) {
-    if (writeInfo.item.ref.identifier === targetIdentifier)
+    let writeVar = writeInfo.item.ref.resolved
+    if (writeVar === letInfo.item.variable)
       return cst
   }
 
   for (let child of cst.children) {
-    let result = findFirstWriteInSubtree(child, targetIdentifier)
+    let result = findFirstWriteInSubtree(child, letInfo)
     if (result)
       return result
   }
