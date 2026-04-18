@@ -242,6 +242,8 @@ function scopeStart(scope) {
   return scope.block.range[0]
 }
 
+export { isReadRef, isWriteRef, buildScopeTree, scopeStart }
+
 function buildScopeTree
 (scope, prefix, scopeToNode) {
   let node, siblingNum

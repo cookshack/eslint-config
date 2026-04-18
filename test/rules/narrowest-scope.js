@@ -472,6 +472,30 @@ function add
       READ  Map     pos 75
       WRITE classCache     pos 80.4`)
 
+pass(`function a1
+() {
+  let p
+
+  function a2
+  () {
+    return p[p.length - 1]
+  }
+
+  p = []
+  return a2(0)
+}`,
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
+    LET   a1     pos 9
+    SCOPE 1.1.1 FUNCTION pos 11 name a1
+      LET   p     pos 23
+      LET   a2     pos 37
+      SCOPE 1.1.1.1 FUNCTION pos 39 name a2
+        READ  p     pos 58
+        READ  p     pos 60
+      WRITE p     pos 87.4
+      READ  a2     pos 97`)
+
 fail(1, 'let x = 1; function foo() { return x }',
      `SCOPE 1 GLOBAL pos 0
   SCOPE 1.1 MODULE pos 0
