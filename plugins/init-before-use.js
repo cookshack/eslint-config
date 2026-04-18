@@ -227,7 +227,7 @@ function cstCheck(cst, context) {
 
   for (let letInfo of cst.lets) {
     if (letInfo.firstWrite) {
-      walk2(cst, letInfo, context)
+      walk2(cst, letInfo, context, new Set())
     }
   }
 
@@ -236,7 +236,7 @@ function cstCheck(cst, context) {
   }
 }
 
-function walk2(node, letInfo, context) {
+function walk2(node, letInfo, context, visited) {
   if (!node)
     return false
 
@@ -246,11 +246,15 @@ function walk2(node, letInfo, context) {
   if (node.astNode.type === 'FunctionDeclaration')
     return false
 
-  if (node.astNode.type === 'CallExpression') {
-    let fnName = node.astNode.callee?.name ?? 'unknown'
-    console.log(`walk2: CALL ${fnName} at node ${node.id}`)
-    if (node.fnDefCst) {
-      console.log(`walk2: would recurse into fnDefCst ${node.fnDefCst.id}`)
+  if (node.astNode.type === 'CallExpression' && node.fnDefCst) {
+    let fnVar = node.fnDefCst.astNode.id
+    let key = `${letInfo.item.name}:${fnVar.name}`
+    if (!visited.has(key)) {
+      visited.add(key)
+      for (let child of node.fnDefCst.children) {
+        if (child.astNode.type === 'BlockStatement' && walk2(child, letInfo, context, visited))
+          return true
+      }
     }
   }
 
@@ -265,7 +269,7 @@ function walk2(node, letInfo, context) {
   }
 
   for (let child of node.children) {
-    if (walk2(child, letInfo, context))
+    if (walk2(child, letInfo, context, visited))
       return true
   }
 
