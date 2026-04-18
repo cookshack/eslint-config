@@ -406,6 +406,9 @@ function walk2(node, letInfo, context) {
   if (node.astNode.type === 'CallExpression') {
     let fnName = node.astNode.callee?.name ?? 'unknown'
     console.log(`walk2: CALL ${fnName} at node ${node.id}`)
+    if (node.fnDefCst) {
+      console.log(`walk2: would recurse into fnDefCst ${node.fnDefCst.id}`)
+    }
   }
 
   for (let readInfo of node.reads) {
@@ -433,7 +436,8 @@ function printCst(cst, indent) {
   let lets = cst.lets.length ? ` LET: ${cst.lets.map(l => l.item.name + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
   let reads = cst.reads.length ? ` READ: ${cst.reads.map(r => r.item.name).join(', ')}` : ''
   let writes = cst.writes.length ? ` WRITE: ${cst.writes.map(w => w.item.name).join(', ')}` : ''
-  let extra = lets + reads + writes
+  let fnDef = cst.fnDefCst ? ` fnDefCst:${cst.fnDefCst.id}` : ''
+  let extra = lets + reads + writes + fnDef
 
   let scopeName = cst.treeNode?.scope ? `${cst.treeNode.scope.type}` : 'no-scope'
   if (cst.treeNode?.scope?.block?.id?.name)
