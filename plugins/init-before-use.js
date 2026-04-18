@@ -251,6 +251,8 @@ export function createInitBeforeUse(context) {
     }
 }
 
+let cstIdCounter = 0
+
 function processAst(astNode, parentCst, astToTree, indent, visited) {
   if (!astNode)
     return
@@ -290,6 +292,7 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
   }
 
   let cst = {
+    id: cstIdCounter++,
     astNode,
     treeNode,
     lets,
@@ -361,7 +364,7 @@ function printCst(cst, indent) {
   if (cst.treeNode?.scope?.block?.id?.name)
     scopeName += `(${cst.treeNode.scope.block.id.name})`
 
-  console.log(`${indent}${cst.astNode.type} [${scopeName}]${extra}`)
+  console.log(`${indent}${cst.id} ${cst.astNode.type} [${scopeName}]${extra}`)
 
   for (let child of cst.children) {
     printCst(child, indent + '  ')
