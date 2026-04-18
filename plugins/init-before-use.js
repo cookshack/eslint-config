@@ -189,12 +189,13 @@ function createInitBeforeUse(context) {
 
         scopeToNode = new Map
         let astToTree = new Map
+        let astToCst = new Map
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
         reported = new Set
 
-        let cst = processAst(context.sourceCode.ast, null, astToTree, '', new Set())
+        let cst = processAst(context.sourceCode.ast, null, astToTree, astToCst, '', new Set())
 
-        cstAnnotate(cst, context)
+        cstAnnotate(cst, astToCst, context)
 
         cstCheck(cst, context)
 
@@ -208,7 +209,7 @@ function createInitBeforeUse(context) {
 
 let cstIdCounter = 0
 
-function processAst(astNode, parentCst, astToTree, indent, visited) {
+function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
   if (!astNode)
     return
   if (visited.has(astNode))
@@ -255,8 +256,11 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
     lets,
     reads,
     writes,
-    children: []
+    children: [],
+    fnDefCst: null
   }
+
+  astToCst.set(astNode, cst)
 
   let children = []
 
@@ -304,7 +308,7 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
     children.push(...astNode.properties)
 
   for (let child of children) {
-    let childCst = processAst(child, cst, astToTree, indent + '  ', visited)
+    let childCst = processAst(child, cst, astToTree, astToCst, indent + '  ', visited)
     if (childCst)
       cst.children.push(childCst)
   }
@@ -312,7 +316,7 @@ function processAst(astNode, parentCst, astToTree, indent, visited) {
   return cst
 }
 
-function cstAnnotate(cst, context) {
+function cstAnnotate(cst, astToCst, context) {
   if (!cst)
     return
 
@@ -328,8 +332,26 @@ function cstAnnotate(cst, context) {
     }
   }
 
+  if (cst.astNode.type === 'CallExpression' && cst.astNode.callee?.type === 'Identifier') {
+    for (let child of cst.children) {
+      if (child.astNode === cst.astNode.callee && child.reads.length > 0) {
+        let readRef = child.reads[0].item.ref
+        if (readRef?.resolved) {
+          let variable = readRef.resolved
+          if (variable.defs.length > 0) {
+            let fnDefAst = variable.defs[0].node
+            if (fnDefAst) {
+              cst.fnDefCst = astToCst.get(fnDefAst)
+              console.log(`cstAnnotate: CALL -> fnDefCst ${cst.fnDefCst?.id}`)
+            }
+          }
+        }
+      }
+    }
+  }
+
   for (let child of cst.children) {
-    cstAnnotate(child, context)
+    cstAnnotate(child, astToCst, context)
   }
 }
 
@@ -380,6 +402,11 @@ function walk2(node, letInfo, context) {
 
   if (node.astNode.type === 'FunctionDeclaration')
     return false
+
+  if (node.astNode.type === 'CallExpression') {
+    let fnName = node.astNode.callee?.name ?? 'unknown'
+    console.log(`walk2: CALL ${fnName} at node ${node.id}`)
+  }
 
   for (let readInfo of node.reads) {
     if (readInfo.item.ref.resolved === letInfo.item.variable) {
