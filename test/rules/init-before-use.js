@@ -55,6 +55,23 @@ fail(2, 'x; y; let x = 1; let y = 2')
 
 fail(1, 'for (x in [1,2,3]) {}; let x')
 
+fail(1, `function outer
+(arg) {
+  let p
+
+  function inner
+  () {
+    p.focus()
+  }
+
+  if (arg) {
+    inner()
+    return
+  }
+  p = get()
+  inner()
+}`)
+
 globalThis.describe('init-before-use',
                     () => ruleTester.run('init-before-use',
                                          plugins.cookshack.rules['init-before-use'],
