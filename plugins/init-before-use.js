@@ -177,48 +177,7 @@ function processScope(context, scopeNode, varName, visitedFns, onRead, callPos) 
   }
 }
 
-function checkVariable(context, variable, scopeToNode, reported) {
-  if (reported.has(variable))
-    return
-  if (variable.defs.length == 0)
-    return
-  if (['Parameter', 'FunctionName', 'ImportBinding', 'CatchClause', 'ClassName'].includes(variable.defs[0].type))
-    return
-
-  let defNode = variable.defs[0]?.name
-  if (!defNode)
-    return
-
-  let defScope = variable.scope
-  let defScopeNode = scopeToNode.get(defScope)
-  if (!defScopeNode)
-    return
-
-  console.log(`\n=== Checking variable '${variable.name}' in scope '${defScopeNode.scope.block?.id?.name ?? defScopeNode.scope.type}' ===`)
-
-  let firstWrite = getFirstWriteInScope(defScopeNode)
-  if (!firstWrite) {
-    console.log(`Step 1: no WRITE found for '${variable.name}', report "mustInit" and STOP`)
-    reported.add(variable)
-    context.report({
-      node: defNode,
-      messageId: 'mustInit',
-      data: { name: variable.name }
-    })
-    return
-  }
-
-  processScope(context, defScopeNode, variable.name, new Set(), (identifier) => {
-    reported.add(variable)
-    context.report({
-      node: identifier,
-      messageId: 'initBeforeUse',
-      data: { name: variable.name }
-    })
-  })
-}
-
-export function createInitBeforeUse(context) {
+function createInitBeforeUse(context) {
   let scopeManager
 
   clearPrintBuffer()
@@ -409,16 +368,6 @@ function printCst(cst, indent) {
 
   for (let child of cst.children) {
     printCst(child, indent + '  ')
-  }
-}
-
-function checkChildScopes(context, treeNode, reported, scopeToNode) {
-  for (let variable of treeNode.scope.variables) {
-    checkVariable(context, variable, scopeToNode, reported)
-  }
-
-  for (let child of treeNode.children) {
-    checkChildScopes(context, child, reported, scopeToNode)
   }
 }
 
