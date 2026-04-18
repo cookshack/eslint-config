@@ -233,8 +233,7 @@ function cstCheck(cst, context) {
 
   for (let letInfo of cst.lets) {
     if (letInfo.firstWrite) {
-      for (let child of cst.children)
-        walk2Start(child, letInfo, context, new Set())
+      walk2Start(cst, letInfo, context)
     }
   }
 
@@ -243,8 +242,15 @@ function cstCheck(cst, context) {
   }
 }
 
-function walk2Start(node, letInfo, context, visited) {
-  return walk2Internal(node, letInfo, context, visited)
+function walk2Start(node, letInfo, context) {
+  if (node.astNode.type === 'FunctionDeclaration') {
+    for (let child of node.children) {
+      if (child.astNode.type === 'BlockStatement') {
+        return walk2(child, letInfo, context, new Set())
+      }
+    }
+  }
+  return walk2(node, letInfo, context, new Set())
 }
 
 function walk2(node, letInfo, context, visited) {
@@ -254,14 +260,7 @@ function walk2(node, letInfo, context, visited) {
   if (node.astNode.type === 'FunctionDeclaration')
     return false
 
-  return walk2Internal(node, letInfo, context, visited)
-}
-
-function walk2Internal(node, letInfo, context, visited) {
-  if (!node)
-    return false
-
-  console.log(`walk2Internal: node=${node.id} ${node.astNode.type}, let=${letInfo.item.name}, firstWrite=${letInfo.firstWrite?.id}`)
+  console.log(`walk2: node=${node.id} ${node.astNode.type}, let=${letInfo.item.name}, firstWrite=${letInfo.firstWrite?.id}`)
 
   if (node === letInfo.firstWrite)
     return true
