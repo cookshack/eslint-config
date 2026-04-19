@@ -29,7 +29,7 @@ pass('let x = 1; x')
 
 pass('function f() { let x = 1; return x }')
 
-//pass('for (x in [1,2,3]) {}; let x = 1')
+pass('for (let x in [1,2,3]) {}; let x = 1')
 
 if (0)
 pass(`for (let tc of validCases)
@@ -69,6 +69,8 @@ fail('initBeforeUse', 'f(); let f = () => {}')
 fail('mustInit', 'console.log(x); let x')
 
 fail([ 'initBeforeUse', 'initBeforeUse' ], 'x; y; let x = 1; let y = 2')
+
+fail('initBeforeUse', 'for (x in [1,2,3]) {}; let x = 1')
 
 fail('mustInit', 'for (x in [1,2,3]) {}; let x')
 
