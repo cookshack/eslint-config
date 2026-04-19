@@ -176,7 +176,7 @@ function ostAnnotate(ost, astToOst, context) {
   for (let letInfo of ost.lets) {
     let writeNode = findFirstWrite(ost, letInfo)
     letInfo.firstWrite = writeNode
-    if (!writeNode) {
+    if (!writeNode && letInfo.item.defType !== 'ImportBinding') {
       context.report({
         node: letInfo.item.identifier,
         messageId: 'mustInit',

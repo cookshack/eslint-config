@@ -64,6 +64,8 @@ pass('let x = 1; x++')
 
 pass('let x = 1; x += 2')
 
+pass("import globals from 'globals'")
+
 fail('mustInit', 'let x')
 
 fail('initBeforeUse', 'x; let x = 1')
