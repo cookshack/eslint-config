@@ -1,29 +1,14 @@
 import { buildScopeTree } from './narrowest-scope.js'
 
 let ostIdCounter
-let printBuffer
 let errorCount
 
 ostIdCounter = 0
-printBuffer = []
 errorCount = 0
-
-function print(...args) {
-  printBuffer.push(args.join(' '))
-}
-
-function clearPrintBuffer() {
-  printBuffer = []
-}
-
-function getPrintBuffer() {
-  return printBuffer.join('\n')
-}
 
 function createInitBeforeUse(context) {
   let scopeManager
 
-  clearPrintBuffer()
   errorCount = 0
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager)
@@ -47,8 +32,6 @@ function createInitBeforeUse(context) {
           console.log('\n=== Ordered Syntax Tree ===')
           printOst(ost, '')
         }
-
-        print(getPrintBuffer())
       }
     }
 }
