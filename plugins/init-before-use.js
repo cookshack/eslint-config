@@ -2,9 +2,11 @@ import { buildScopeTree } from './narrowest-scope.js'
 
 let ostIdCounter
 let printBuffer
+let errorCount
 
 ostIdCounter = 0
 printBuffer = []
+errorCount = 0
 
 function print(...args) {
   printBuffer.push(args.join(' '))
@@ -22,6 +24,7 @@ function createInitBeforeUse(context) {
   let scopeManager
 
   clearPrintBuffer()
+  errorCount = 0
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager)
     return {
@@ -40,8 +43,10 @@ function createInitBeforeUse(context) {
 
         ostCheck(ost, context)
 
-        console.log('\n=== Ordered Syntax Tree ===')
-        printOst(ost, '')
+        if (errorCount > 0) {
+          console.log('\n=== Ordered Syntax Tree ===')
+          printOst(ost, '')
+        }
 
         print(getPrintBuffer())
       }
@@ -196,6 +201,7 @@ function ostAnnotate(ost, astToOst, context) {
         continue
       if (letInfo.item.defType == 'ImportBinding')
         continue
+      errorCount++
       context.report({
         node: letInfo.item.identifier,
         messageId: 'mustInit',
@@ -282,12 +288,14 @@ function walk2(node, letInfo, context, visited) {
 
     if (node == letInfo.firstWrite) {
       for (let readInfo of node.reads)
-        if (readInfo.item.ref.resolved == letInfo.item.variable)
+        if (readInfo.item.ref.resolved == letInfo.item.variable) {
+          errorCount++
           context.report({
             node: readInfo.item.ref.identifier,
             messageId: 'initBeforeUse',
             data: { name: letInfo.item.name }
           })
+        }
       return true
     }
 
@@ -307,12 +315,14 @@ function walk2(node, letInfo, context, visited) {
     }
 
     for (let readInfo of node.reads)
-      if (readInfo.item.ref.resolved == letInfo.item.variable)
+      if (readInfo.item.ref.resolved == letInfo.item.variable) {
+        errorCount++
         context.report({
           node: readInfo.item.ref.identifier,
           messageId: 'initBeforeUse',
           data: { name: letInfo.item.name }
         })
+      }
 
     for (let child of node.children)
       if (walk2(child, letInfo, context, visited))
