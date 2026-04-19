@@ -68,6 +68,9 @@ pass("import globals from 'globals'")
 
 pass('let x, y; y = () => { return x }; x = 1')
 
+// it's actually an err, but we'd have to track assignments
+pass('let x, y; y = () => { return x }; y(); x = 1')
+
 fail('mustInit', 'let x')
 
 fail('initBeforeUse', 'x; let x = 1')

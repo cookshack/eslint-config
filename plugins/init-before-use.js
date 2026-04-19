@@ -212,8 +212,11 @@ function ostAnnotate(ost, astToOst, context) {
               let fnDefAst
 
               fnDefAst = variable.defs[0].node
-              if (fnDefAst)
+              if (fnDefAst) {
+                if (fnDefAst.init?.type == 'ArrowFunctionExpression' || fnDefAst.init?.type == 'FunctionExpression')
+                  fnDefAst = fnDefAst.init
                 ost.fnDefOst = astToOst.get(fnDefAst)
+              }
             }
           }
         }
@@ -287,17 +290,22 @@ function walk2(node, letInfo, context, visited) {
     }
 
     if (node.astNode.type == 'CallExpression' && node.fnDefOst) {
-      let fnVar, key
+      let fnType
 
-      fnVar = node.fnDefOst.astNode.id
-      key = `${letInfo.item.name}:${fnVar.name}`
-      if (visited.has(key)) {
-      }
-      else {
-        visited.add(key)
-        for (let child of node.fnDefOst.children)
-          if (child.astNode.type == 'BlockStatement' && walk2(child, letInfo, context, visited))
-            return true
+      fnType = node.fnDefOst.astNode.type
+
+      if (fnType == 'FunctionDeclaration' || fnType == 'ArrowFunctionExpression' || fnType == 'FunctionExpression') {
+        let key
+
+        key = `${letInfo.item.name}:${node.fnDefOst.id}`
+        if (visited.has(key)) {
+        }
+        else {
+          visited.add(key)
+          for (let child of node.fnDefOst.children)
+            if (child.astNode.type == 'BlockStatement' && walk2(child, letInfo, context, visited))
+              return true
+        }
       }
     }
 
@@ -323,7 +331,7 @@ function printOst(ost, indent) {
   if (ost) {
     let lets, reads, writes, fnDef, extra, scopeName
 
-    lets = ost.lets.length ? ` LET:${ost.lets.map(l => `${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
+    lets = ost.lets.length ? ` ${ost.lets.map(l => `LET:${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
     reads = ost.reads.length ? ` READ:${ost.reads.map(r => `${r.item.name}:${r.item.varId}`).join(', ')}` : ''
     writes = ost.writes.length ? ` WRITE:${ost.writes.map(w => `${w.item.name}:${w.item.varId}`).join(', ')}` : ''
     fnDef = ost.fnDefOst ? ` fnDefOst:${ost.fnDefOst.id}` : ''
