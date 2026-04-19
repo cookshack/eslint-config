@@ -3,6 +3,7 @@ import { buildScopeTree } from './narrowest-scope.js'
 let ostIdCounter
 let printBuffer
 
+ostIdCounter = 0
 printBuffer = []
 
 function print(...args) {
