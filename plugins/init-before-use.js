@@ -28,34 +28,34 @@ function createInitBeforeUse(context) {
 
         scopeToNode = new Map
         let astToTree = new Map
-        let astToCst = new Map
+        let astToOst = new Map
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
         reported = new Set
 
-        let cst = processAst(context.sourceCode.ast, null, astToTree, astToCst, '', new Set())
+        let ost = processAst(context.sourceCode.ast, null, astToTree, astToOst, '', new Set())
 
-        cstAnnotate(cst, astToCst, context)
+        ostAnnotate(ost, astToOst, context)
 
-        cstCheck(cst, context)
+        ostCheck(ost, context)
 
-        console.log('\n=== CST TREE ===')
-        printCst(cst, '')
+        console.log('\n=== Ordered Syntax Tree ===')
+        printOst(ost, '')
 
         print(getPrintBuffer())
       }
     }
 }
 
-let cstIdCounter = 0
+let ostIdCounter = 0
 
-function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
+function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
   if (!astNode)
     return
   if (visited.has(astNode))
     return
   visited.add(astNode)
 
-  let treeNode = astToTree.get(astNode) ?? parentCst?.treeNode
+  let treeNode = astToTree.get(astNode) ?? parentOst?.treeNode
 
   let scopeName = treeNode?.scope ? `${treeNode.scope.type}` : 'no-scope'
   if (treeNode?.scope?.block?.id?.name)
@@ -87,8 +87,8 @@ function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
     }
   }
 
-  let cst = {
-    id: cstIdCounter++,
+  let ost = {
+    id: ostIdCounter++,
     astNode,
     treeNode,
     scopeItems: treeNode?.items ?? [],
@@ -96,10 +96,10 @@ function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
     reads,
     writes,
     children: [],
-    fnDefCst: null
+    fnDefOst: null
   }
 
-  astToCst.set(astNode, cst)
+  astToOst.set(astNode, ost)
 
   let children = []
 
@@ -161,20 +161,20 @@ function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
   }
 
   for (let child of children) {
-    let childCst = processAst(child, cst, astToTree, astToCst, indent + '  ', visited)
-    if (childCst)
-      cst.children.push(childCst)
+    let childOst = processAst(child, ost, astToTree, astToOst, indent + '  ', visited)
+    if (childOst)
+      ost.children.push(childOst)
   }
 
-  return cst
+  return ost
 }
 
-function cstAnnotate(cst, astToCst, context) {
-  if (!cst)
+function ostAnnotate(ost, astToOst, context) {
+  if (!ost)
     return
 
-  for (let letInfo of cst.lets) {
-    let writeNode = findFirstWrite(cst, letInfo)
+  for (let letInfo of ost.lets) {
+    let writeNode = findFirstWrite(ost, letInfo)
     letInfo.firstWrite = writeNode
     if (!writeNode) {
       context.report({
@@ -185,47 +185,47 @@ function cstAnnotate(cst, astToCst, context) {
     }
   }
 
-  if (cst.astNode.type === 'CallExpression' && cst.astNode.callee?.type === 'Identifier')
-    for (let child of cst.children)
-      if (child.astNode === cst.astNode.callee && child.reads.length > 0) {
+  if (ost.astNode.type === 'CallExpression' && ost.astNode.callee?.type === 'Identifier')
+    for (let child of ost.children)
+      if (child.astNode === ost.astNode.callee && child.reads.length > 0) {
         let readRef = child.reads[0].item.ref
         if (readRef?.resolved) {
           let variable = readRef.resolved
           if (variable.defs.length > 0) {
             let fnDefAst = variable.defs[0].node
-            console.log(`cstAnnotate: callee=${cst.astNode.callee.name}, defs[0].node.type=${fnDefAst.type}`)
-            console.log(`cstAnnotate: defs[0].node id=${fnDefAst.id?.name}`)
+            console.log(`ostAnnotate: callee=${ost.astNode.callee.name}, defs[0].node.type=${fnDefAst.type}`)
+            console.log(`ostAnnotate: defs[0].node id=${fnDefAst.id?.name}`)
             if (fnDefAst) {
-              cst.fnDefCst = astToCst.get(fnDefAst)
-              console.log(`cstAnnotate: fnDefAst=${fnDefAst?.type}, fnDefAst.id.name=${fnDefAst?.id?.name}`)
-              console.log(`cstAnnotate: CALL -> fnDefCst ${cst.fnDefCst?.id} (astToCst size=${astToCst.size})`)
-              if (!cst.fnDefCst) {
-                console.log(`cstAnnotate: WARN - astToCst has keys:`, [...astToCst.keys()].map(k => `${k.type}(${k.id?.name})`))
+              ost.fnDefOst = astToOst.get(fnDefAst)
+              console.log(`ostAnnotate: fnDefAst=${fnDefAst?.type}, fnDefAst.id.name=${fnDefAst?.id?.name}`)
+              console.log(`ostAnnotate: CALL -> fnDefOst ${ost.fnDefOst?.id} (astToOst size=${astToOst.size})`)
+              if (!ost.fnDefOst) {
+                console.log(`ostAnnotate: WARN - astToOst has keys:`, [...astToOst.keys()].map(k => `${k.type}(${k.id?.name})`))
               }
             }
           }
         }
       }
 
-  for (let child of cst.children)
-    cstAnnotate(child, astToCst, context)
+  for (let child of ost.children)
+    ostAnnotate(child, astToOst, context)
 }
 
-function findFirstWrite(cst, letInfo) {
-  return findFirstWriteInSubtree(cst, letInfo)
+function findFirstWrite(ost, letInfo) {
+  return findFirstWriteInSubtree(ost, letInfo)
 }
 
-function findFirstWriteInSubtree(cst, letInfo) {
-  if (!cst)
+function findFirstWriteInSubtree(ost, letInfo) {
+  if (!ost)
     return null
 
-  for (let writeInfo of cst.writes) {
+  for (let writeInfo of ost.writes) {
     let writeVar = writeInfo.item.ref.resolved
     if (writeVar === letInfo.item.variable)
-      return cst
+      return ost
   }
 
-  for (let child of cst.children) {
+  for (let child of ost.children) {
     let result = findFirstWriteInSubtree(child, letInfo)
     if (result)
       return result
@@ -234,16 +234,16 @@ function findFirstWriteInSubtree(cst, letInfo) {
   return null
 }
 
-function cstCheck(cst, context) {
-  if (!cst)
+function ostCheck(ost, context) {
+  if (!ost)
     return
 
-  for (let letInfo of cst.lets)
+  for (let letInfo of ost.lets)
     if (letInfo.firstWrite)
-      walk2Start(cst, letInfo, context)
+      walk2Start(ost, letInfo, context)
 
-  for (let child of cst.children)
-    cstCheck(child, context)
+  for (let child of ost.children)
+    ostCheck(child, context)
 }
 
 function walk2Start(node, letInfo, context) {
@@ -266,13 +266,13 @@ function walk2(node, letInfo, context, visited) {
   if (node === letInfo.firstWrite)
     return true
 
-  if (node.astNode.type === 'CallExpression' && node.fnDefCst) {
-    let fnVar = node.fnDefCst.astNode.id
+  if (node.astNode.type === 'CallExpression' && node.fnDefOst) {
+    let fnVar = node.fnDefOst.astNode.id
     let key = `${letInfo.item.name}:${fnVar.name}`
     console.log(`walk2: CALL ${fnVar.name}, key=${key}, visited=${[...visited]}`)
     if (!visited.has(key)) {
       visited.add(key)
-      for (let child of node.fnDefCst.children) {
+      for (let child of node.fnDefOst.children) {
         console.log(`walk2: checking child ${child.id} ${child.astNode.type}`)
         if (child.astNode.type === 'BlockStatement' && walk2(child, letInfo, context, visited))
           return true
@@ -295,24 +295,24 @@ function walk2(node, letInfo, context, visited) {
   return false
 }
 
-function printCst(cst, indent) {
-  if (!cst)
+function printOst(ost, indent) {
+  if (!ost)
     return
 
-  let lets = cst.lets.length ? ` LET: ${cst.lets.map(l => `${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
-  let reads = cst.reads.length ? ` READ: ${cst.reads.map(r => `${r.item.name}:${r.item.varId}`).join(', ')}` : ''
-  let writes = cst.writes.length ? ` WRITE: ${cst.writes.map(w => `${w.item.name}:${w.item.varId}`).join(', ')}` : ''
-  let fnDef = cst.fnDefCst ? ` fnDefCst:${cst.fnDefCst.id}` : ''
+  let lets = ost.lets.length ? ` LET: ${ost.lets.map(l => `${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
+  let reads = ost.reads.length ? ` READ: ${ost.reads.map(r => `${r.item.name}:${r.item.varId}`).join(', ')}` : ''
+  let writes = ost.writes.length ? ` WRITE: ${ost.writes.map(w => `${w.item.name}:${w.item.varId}`).join(', ')}` : ''
+  let fnDef = ost.fnDefOst ? ` fnDefOst:${ost.fnDefOst.id}` : ''
   let extra = lets + reads + writes + fnDef
 
-  let scopeName = cst.treeNode?.scope ? `${cst.treeNode.scope.type}` : 'no-scope'
-  if (cst.treeNode?.scope?.block?.id?.name)
-    scopeName += `(${cst.treeNode.scope.block.id.name})`
+  let scopeName = ost.treeNode?.scope ? `${ost.treeNode.scope.type}` : 'no-scope'
+  if (ost.treeNode?.scope?.block?.id?.name)
+    scopeName += `(${ost.treeNode.scope.block.id.name})`
 
-  console.log(`${indent}${cst.id} ${cst.astNode.type} [${scopeName}]${extra}`)
+  console.log(`${indent}${ost.id} ${ost.astNode.type} [${scopeName}]${extra}`)
 
-  for (let child of cst.children)
-    printCst(child, indent + '  ')
+  for (let child of ost.children)
+    printOst(child, indent + '  ')
 }
 
 export default {
