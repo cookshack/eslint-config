@@ -1,15 +1,21 @@
 import { buildScopeTree } from './narrowest-scope.js'
 
-let ostIdCounter
-let errorCount
+let ostIdCounter, errorCount, ost
 
 ostIdCounter = 0
 errorCount = 0
+ost = 0
 
 function trace
 (...args) {
   if (0)
     console.log(...args)
+}
+
+export
+function lastOst
+() {
+  return ost
 }
 
 function createInitBeforeUse(context) {
@@ -19,7 +25,7 @@ function createInitBeforeUse(context) {
   if (scopeManager)
     return {
       'Program:exit'() {
-        let ost, scopeToNode, astToTree, astToOst
+        let scopeToNode, astToTree, astToOst
 
         errorCount = 0
         scopeToNode = new Map
@@ -325,9 +331,12 @@ function walk2(node, letInfo, context, visited) {
 }
 
 export
-function printOst(ost, indent) {
+function ostString
+(ost, indent) {
   if (ost) {
-    let lets, reads, writes, fnDef, extra, scopeName
+    let lets, reads, writes, fnDef, extra, scopeName, result
+
+    indent = indent || ''
 
     lets = ost.lets.length ? ` ${ost.lets.map(l => `LET:${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
     reads = ost.reads.length ? ` READ:${ost.reads.map(r => `${r.item.name}:${r.item.varId}`).join(', ')}` : ''
@@ -339,11 +348,14 @@ function printOst(ost, indent) {
     if (ost.treeNode?.scope?.block?.id?.name)
       scopeName += `(${ost.treeNode.scope.block.id.name})`
 
-    console.log(`${indent}${ost.id} ${ost.astNode.type} [${scopeName}]${extra}`)
+    result = `${indent}${ost.id} ${ost.astNode.type} [${scopeName}]${extra}\n`
 
     for (let child of ost.children)
-      printOst(child, indent + '  ')
+      result += ostString(child, indent + '  ')
+
+    return result
   }
+  return ''
 }
 
 export default {

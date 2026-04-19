@@ -1,5 +1,6 @@
 import { Linter } from 'eslint'
-import { plugins, getPrintBuffer } from '../../index.js'
+import { plugins } from '../../index.js'
+import { lastOst, ostString } from '../../plugins/init-before-use.js'
 
 let linter, validCases, invalidCases, config
 
@@ -13,22 +14,20 @@ config = [ { languageOptions: { ecmaVersion: 2025,
              rules: { 'cookshack/init-before-use': 'error' } } ]
 
 function _pass(tc) {
-  let messages, output
+  let messages
 
   messages = linter.verify(tc.code, config)
-  output = getPrintBuffer()
   if (messages.length > 0)
-    throw new Error('unexpected errors: ' + JSON.stringify(messages, null, 2) + '\n' + output)
+    throw new Error('unexpected errors: ' + JSON.stringify(messages, null, 2) + '\n' + ostString(lastOst()))
 }
 
 function _fail(tc) {
-  let messages, output
+  let messages
 
   messages = linter.verify(tc.code, config)
-  output = getPrintBuffer()
   if (messages.length == tc.errors.length)
     return
-  throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length + '\n' + JSON.stringify(messages, null, 2) + '\n' + output)
+  throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length + '\n' + JSON.stringify(messages, null, 2) + '\n' + ostString(lastOst()))
 }
 
 function fail(message, code) {
