@@ -50,8 +50,8 @@ function createInitBeforeUse(context) {
 
 function isRegularDeclaration
 (item) {
-  if (item.type === 'LET') {
-    if (item.defType === 'FunctionName' || item.defType === 'Parameter')
+  if (item.type == 'LET') {
+    if (item.defType == 'FunctionName' || item.defType == 'Parameter')
       return 0
     return 1
   }
@@ -83,18 +83,18 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
         let scopeCreator
 
         scopeCreator = treeNode?.scope?.block
-        if (scopeCreator && astNode === scopeCreator) {
+        if (scopeCreator && astNode == scopeCreator) {
           lets.push({ item })
           console.log(`${indent}  | LET ${item.name}:${item.varId}`)
         }
       }
       else if (item.ref)
-        if (astNode === item.ref.identifier)
-          if (item.type === 'READ') {
+        if (astNode == item.ref.identifier)
+          if (item.type == 'READ') {
             reads.push({ item })
             console.log(`${indent}  | READ ${item.name}:${item.varId}`)
           }
-          else if (item.type === 'WRITE') {
+          else if (item.type == 'WRITE') {
             writes.push({ item })
             console.log(`${indent}  | WRITE ${item.name}:${item.varId}`)
           }
@@ -115,7 +115,7 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
 
     children = []
 
-    if (astNode.type === 'ForOfStatement' || astNode.type === 'ForInStatement' || astNode.type === 'ForStatement') {
+    if (astNode.type == 'ForOfStatement' || astNode.type == 'ForInStatement' || astNode.type == 'ForStatement') {
       if (astNode.right)
         children.push(astNode.right)
       if (astNode.left)
@@ -123,7 +123,7 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
       if (astNode.body)
         children.push(astNode.body)
     }
-    else if (astNode.type === 'AssignmentExpression') {
+    else if (astNode.type == 'AssignmentExpression') {
       if (astNode.right)
         children.push(astNode.right)
       if (astNode.left)
@@ -194,7 +194,7 @@ function ostAnnotate(ost, astToOst, context) {
       letInfo.firstWrite = writeNode
       if (writeNode)
         continue
-      if (letInfo.item.defType === 'ImportBinding')
+      if (letInfo.item.defType == 'ImportBinding')
         continue
       context.report({
         node: letInfo.item.identifier,
@@ -203,9 +203,9 @@ function ostAnnotate(ost, astToOst, context) {
       })
     }
 
-    if (ost.astNode.type === 'CallExpression' && ost.astNode.callee?.type === 'Identifier')
+    if (ost.astNode.type == 'CallExpression' && ost.astNode.callee?.type == 'Identifier')
       for (let child of ost.children)
-        if (child.astNode === ost.astNode.callee && child.reads.length > 0) {
+        if (child.astNode == ost.astNode.callee && child.reads.length > 0) {
           let readRef
 
           readRef = child.reads[0].item.ref
@@ -244,7 +244,7 @@ function findFirstWriteInSubtree(ost, letInfo) {
       let writeVar
 
       writeVar = writeInfo.item.ref.resolved
-      if (writeVar === letInfo.item.variable)
+      if (writeVar == letInfo.item.variable)
         return ost
     }
 
@@ -272,23 +272,23 @@ function ostCheck(ost, context) {
 }
 
 function walk2Start(node, letInfo, context) {
-  if (node.astNode.type === 'FunctionDeclaration')
+  if (node.astNode.type == 'FunctionDeclaration')
     for (let child of node.children)
-      if (child.astNode.type === 'BlockStatement')
+      if (child.astNode.type == 'BlockStatement')
         return walk2(child, letInfo, context, new Set())
   return walk2(node, letInfo, context, new Set())
 }
 
 function walk2(node, letInfo, context, visited) {
   if (node) {
-    if (node.astNode.type === 'FunctionDeclaration')
+    if (node.astNode.type == 'FunctionDeclaration')
       return false
 
     console.log(`walk2: node=${node.id} ${node.astNode.type}, let=${letInfo.item.name}, firstWrite=${letInfo.firstWrite?.id}`)
 
-    if (node === letInfo.firstWrite) {
+    if (node == letInfo.firstWrite) {
       for (let readInfo of node.reads)
-        if (readInfo.item.ref.resolved === letInfo.item.variable)
+        if (readInfo.item.ref.resolved == letInfo.item.variable)
           context.report({
             node: readInfo.item.ref.identifier,
             messageId: 'initBeforeUse',
@@ -297,7 +297,7 @@ function walk2(node, letInfo, context, visited) {
       return true
     }
 
-    if (node.astNode.type === 'CallExpression' && node.fnDefOst) {
+    if (node.astNode.type == 'CallExpression' && node.fnDefOst) {
       let fnVar, key
 
       fnVar = node.fnDefOst.astNode.id
@@ -309,14 +309,14 @@ function walk2(node, letInfo, context, visited) {
         visited.add(key)
         for (let child of node.fnDefOst.children) {
           console.log(`walk2: checking child ${child.id} ${child.astNode.type}`)
-          if (child.astNode.type === 'BlockStatement' && walk2(child, letInfo, context, visited))
+          if (child.astNode.type == 'BlockStatement' && walk2(child, letInfo, context, visited))
             return true
         }
       }
     }
 
     for (let readInfo of node.reads)
-      if (readInfo.item.ref.resolved === letInfo.item.variable)
+      if (readInfo.item.ref.resolved == letInfo.item.variable)
         context.report({
           node: readInfo.item.ref.identifier,
           messageId: 'initBeforeUse',
