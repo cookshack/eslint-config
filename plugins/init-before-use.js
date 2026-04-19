@@ -270,7 +270,7 @@ function walk2Start(node, letInfo, context) {
 
 function walk2(node, letInfo, context, visited) {
   if (node) {
-    if (node.astNode.type == 'FunctionDeclaration')
+    if (node.astNode.type == 'FunctionDeclaration' || node.astNode.type == 'ArrowFunctionExpression' || node.astNode.type == 'FunctionExpression')
       return false
 
     if (node == letInfo.firstWrite) {
