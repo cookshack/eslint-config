@@ -1,11 +1,35 @@
-import { RuleTester } from 'eslint'
-import { plugins } from '../../index.js'
+import { Linter } from 'eslint'
+import { plugins, getPrintBuffer } from '../../index.js'
 
-let ruleTester, validCases, invalidCases
+let linter, validCases, invalidCases, config
 
-ruleTester = new RuleTester()
+linter = new Linter()
 validCases = []
 invalidCases = []
+
+config = [ { languageOptions: { ecmaVersion: 2025,
+                                sourceType: 'module' },
+             plugins,
+             rules: { 'cookshack/init-before-use': 'error' } } ]
+
+function _pass(tc) {
+  let messages, output
+
+  messages = linter.verify(tc.code, config)
+  output = getPrintBuffer()
+  if (messages.length > 0)
+    throw new Error('unexpected errors: ' + JSON.stringify(messages, null, 2) + '\n' + output)
+}
+
+function _fail(tc) {
+  let messages, output
+
+  messages = linter.verify(tc.code, config)
+  output = getPrintBuffer()
+  if (messages.length == tc.errors.length)
+    return
+  throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length + '\n' + JSON.stringify(messages, null, 2) + '\n' + output)
+}
 
 function fail(message, code) {
   let errors
@@ -14,6 +38,7 @@ function fail(message, code) {
     errors = message.map(m => ({ messageId: m }))
   else
     errors = [ { messageId: message } ]
+
   invalidCases.push({ code, errors })
 }
 
@@ -115,8 +140,9 @@ fail('initBeforeUse', 'let x; x++')
 
 fail('initBeforeUse', 'let x; x += 2')
 
-globalThis.describe('init-before-use',
-                    () => ruleTester.run('init-before-use',
-                                         plugins.cookshack.rules['init-before-use'],
-                                         { valid: validCases,
-                                           invalid: invalidCases }))
+globalThis.describe('init-before-use', () => {
+  for (let tc of validCases)
+    globalThis.it(tc.code, () => _pass(tc))
+  for (let tc of invalidCases)
+    globalThis.it(tc.code, () => _fail(tc))
+})
