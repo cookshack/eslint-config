@@ -217,12 +217,8 @@ function ostAnnotate(ost, astToOst, context) {
               let fnDefAst
 
               fnDefAst = variable.defs[0].node
-              console.log(`ostAnnotate: callee=${ost.astNode.callee.name}, defs[0].node.type=${fnDefAst.type}`)
-              console.log(`ostAnnotate: defs[0].node id=${fnDefAst.id?.name}`)
               if (fnDefAst) {
                 ost.fnDefOst = astToOst.get(fnDefAst)
-                console.log(`ostAnnotate: fnDefAst=${fnDefAst?.type}, fnDefAst.id.name=${fnDefAst?.id?.name}`)
-                console.log(`ostAnnotate: CALL -> fnDefOst ${ost.fnDefOst?.id} (astToOst size=${astToOst.size})`)
                 ost.fnDefOst || console.log('ostAnnotate: WARN - astToOst has keys:', [ ...astToOst.keys() ].map(k => `${k.type}(${k.id?.name})`))
               }
             }
@@ -284,8 +280,6 @@ function walk2(node, letInfo, context, visited) {
     if (node.astNode.type == 'FunctionDeclaration')
       return false
 
-    console.log(`walk2: node=${node.id} ${node.astNode.type}, let=${letInfo.item.name}, firstWrite=${letInfo.firstWrite?.id}`)
-
     if (node == letInfo.firstWrite) {
       for (let readInfo of node.reads)
         if (readInfo.item.ref.resolved == letInfo.item.variable)
@@ -302,16 +296,13 @@ function walk2(node, letInfo, context, visited) {
 
       fnVar = node.fnDefOst.astNode.id
       key = `${letInfo.item.name}:${fnVar.name}`
-      console.log(`walk2: CALL ${fnVar.name}, key=${key}, visited=${[ ...visited ]}`)
       if (visited.has(key)) {
       }
       else {
         visited.add(key)
-        for (let child of node.fnDefOst.children) {
-          console.log(`walk2: checking child ${child.id} ${child.astNode.type}`)
+        for (let child of node.fnDefOst.children)
           if (child.astNode.type == 'BlockStatement' && walk2(child, letInfo, context, visited))
             return true
-        }
       }
     }
 
