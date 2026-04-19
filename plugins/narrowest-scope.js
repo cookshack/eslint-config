@@ -279,24 +279,24 @@ function buildScopeTree
 
       targetNode = scopeToNode.get(ref.from)
       if (targetNode) {
-        let parent, sortPos, ctx, item
+        let parent, sortPos, ctx, item1, item2
 
         ctx = getConditionalContext(ref)
         parent = ref.identifier.parent
 
         if (isWriteRef(ref))
           if (ref.identifier.parent?.type == 'UpdateExpression') {
-            targetNode.items.push({ type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] })
-            item = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] }
+            item1 = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] }
+            item2 = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] }
           }
           else if (ref.identifier.parent?.type == 'AssignmentExpression') {
             sortPos = parent.right.range[1] + 0.4
-            item = { ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos }
+            item1 = { ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos }
           }
           else if (ref.identifier.parent?.type == 'VariableDeclarator')
-            item = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 }
+            item1 = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 }
           else
-            item = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] }
+            item1 = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] }
         else {
           let declarator
 
@@ -310,13 +310,17 @@ function buildScopeTree
             sortPos = declarator.id ? declarator.id.range[0] - 0.4 : ref.identifier.range[0]
           else
             sortPos = ref.identifier.range[0]
-          item = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos }
+          item1 = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos }
         }
         if (!varIds.has(variable))
           varIds.set(variable, nextVarId++)
-        item.varId = varIds.get(variable)
-        targetNode.items.push(item)
-        ref.cookshackNarrowestScopeItem = item
+        item1.varId = varIds.get(variable)
+        targetNode.items.push(item1)
+        if (item2) {
+          item2.varId = varIds.get(variable)
+          targetNode.items.push(item2)
+        }
+        ref.cookshackNarrowestScopeItem = item2 || item1
       }
     }
   }
