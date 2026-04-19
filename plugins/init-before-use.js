@@ -112,11 +112,21 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
 
     children = []
 
-    if (astNode.type == 'ForOfStatement' || astNode.type == 'ForInStatement' || astNode.type == 'ForStatement') {
+    if (astNode.type == 'ForOfStatement' || astNode.type == 'ForInStatement') {
       if (astNode.right)
         children.push(astNode.right)
       if (astNode.left)
         children.push(astNode.left)
+      if (astNode.body)
+        children.push(astNode.body)
+    }
+    else if (astNode.type == 'ForStatement') {
+      if (astNode.init)
+        children.push(astNode.init)
+      if (astNode.test)
+        children.push(astNode.test)
+      if (astNode.update)
+        children.push(astNode.update)
       if (astNode.body)
         children.push(astNode.body)
     }

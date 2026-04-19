@@ -105,6 +105,19 @@ pass('let x, y; y = () => { return x }; x = 1')
 // it's actually an err, but we'd have to track assignments
 pass('let x, y; y = () => { return x }; y(); x = 1')
 
+pass('let i; for (i = addr; i < end; i++) {}')
+
+pass('for (let i = 0; i < 16; i++) { }')
+
+pass(`
+  for (let count = 0, i = 0; i < Ed.ctags.length; i++)
+    if (Ed.ctags[i].name.startsWith(word.text)) {
+      options.push({ label: Ed.ctags[i].name, type: Ed.ctags[i].kind })
+      if (count++ > 10)
+        break
+    }
+`)
+
 fail('mustInit', 'let x')
 
 fail('initBeforeUse', 'x; let x = 1')
