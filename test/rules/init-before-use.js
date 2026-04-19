@@ -31,7 +31,6 @@ pass('function f() { let x = 1; return x }')
 
 pass('for (let x in [1,2,3]) {}; let x = 1')
 
-if (0)
 pass(`for (let tc of validCases)
     globalThis.it(tc.code, () => _valid(tc))
 `)
