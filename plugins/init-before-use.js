@@ -299,9 +299,9 @@ function printOst(ost, indent) {
   if (!ost)
     return
 
-  let lets = ost.lets.length ? ` LET: ${ost.lets.map(l => `${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
-  let reads = ost.reads.length ? ` READ: ${ost.reads.map(r => `${r.item.name}:${r.item.varId}`).join(', ')}` : ''
-  let writes = ost.writes.length ? ` WRITE: ${ost.writes.map(w => `${w.item.name}:${w.item.varId}`).join(', ')}` : ''
+  let lets = ost.lets.length ? ` LET:${ost.lets.map(l => `${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
+  let reads = ost.reads.length ? ` READ:${ost.reads.map(r => `${r.item.name}:${r.item.varId}`).join(', ')}` : ''
+  let writes = ost.writes.length ? ` WRITE:${ost.writes.map(w => `${w.item.name}:${w.item.varId}`).join(', ')}` : ''
   let fnDef = ost.fnDefOst ? ` fnDefOst:${ost.fnDefOst.id}` : ''
   let extra = lets + reads + writes + fnDef
 
