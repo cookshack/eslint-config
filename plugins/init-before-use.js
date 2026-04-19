@@ -263,8 +263,16 @@ function walk2(node, letInfo, context, visited) {
 
   console.log(`walk2: node=${node.id} ${node.astNode.type}, let=${letInfo.item.name}, firstWrite=${letInfo.firstWrite?.id}`)
 
-  if (node === letInfo.firstWrite)
+  if (node === letInfo.firstWrite) {
+    for (let readInfo of node.reads)
+      if (readInfo.item.ref.resolved === letInfo.item.variable)
+        context.report({
+          node: readInfo.item.ref.identifier,
+          messageId: 'initBeforeUse',
+          data: { name: letInfo.item.name }
+        })
     return true
+  }
 
   if (node.astNode.type === 'CallExpression' && node.fnDefOst) {
     let fnVar = node.fnDefOst.astNode.id

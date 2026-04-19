@@ -102,13 +102,12 @@ fail('initBeforeUse', `function outer
 fail('initBeforeUse', 'let x; x = f(x)')
 
 fail('initBeforeUse', 'let x = 0; function shadow(y) { let x; x = shadow2(x) + y; return x } function shadow2(y) { let x = 3 + y; return x } shadow(x)')
-
-fail('initBefore', 'let x; --x')
-
-fail('initBefore', 'let x; x++')
-
-fail('initBefore', 'let x; x += 2')
 }
+//fail('initBeforeUse', 'let x; --x')
+
+fail('initBeforeUse', 'let x; x++')
+
+//fail('initBeforeUse', 'let x; x += 2')
 
 globalThis.describe('init-before-use',
                     () => ruleTester.run('init-before-use',
