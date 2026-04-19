@@ -35,7 +35,6 @@ pass(`for (let tc of validCases)
     globalThis.it(tc.code, () => _valid(tc))
 `)
 
-if (0)
 pass(`for (let tc of validCases)
     globalThis.it(tc.code, () => _valid(tc))
   for (let tc of invalidCases)
