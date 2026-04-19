@@ -303,7 +303,7 @@ function buildScopeTree
           }
           else if (ref.identifier.parent?.type == 'AssignmentExpression') {
             sortPos = parent.right.range[1] + 0.4
-            if (ref.identifier.parent.left === ref.identifier && isCompoundAssignmentOp(ref.identifier.parent.operator)) {
+            if (ref.identifier.parent.left == ref.identifier && isCompoundAssignmentOp(ref.identifier.parent.operator)) {
               item1 = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] }
               item2 = { ref, type: 'WRITE', name: ref.identifier.name, pos: sortPos }
             }
