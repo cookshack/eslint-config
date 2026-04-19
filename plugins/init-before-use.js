@@ -287,9 +287,9 @@ function printCst(cst, indent) {
   if (!cst)
     return
 
-  let lets = cst.lets.length ? ` LET: ${cst.lets.map(l => l.item.name + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
-  let reads = cst.reads.length ? ` READ: ${cst.reads.map(r => r.item.name).join(', ')}` : ''
-  let writes = cst.writes.length ? ` WRITE: ${cst.writes.map(w => w.item.name).join(', ')}` : ''
+  let lets = cst.lets.length ? ` LET: ${cst.lets.map(l => `${l.item.name}:${l.item.variable.scope.type}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
+  let reads = cst.reads.length ? ` READ: ${cst.reads.map(r => `${r.item.name}:${r.item.ref.resolved?.scope.type}`).join(', ')}` : ''
+  let writes = cst.writes.length ? ` WRITE: ${cst.writes.map(w => `${w.item.name}:${w.item.ref.resolved?.scope.type}`).join(', ')}` : ''
   let fnDef = cst.fnDefCst ? ` fnDefCst:${cst.fnDefCst.id}` : ''
   let extra = lets + reads + writes + fnDef
 
