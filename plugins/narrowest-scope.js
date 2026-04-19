@@ -246,6 +246,20 @@ function scopeStart(scope) {
 
 export { isReadRef, isWriteRef, buildScopeTree, scopeStart }
 
+function ensureInVarIds
+(variable) {
+  if (varIds.has(variable))
+    return
+  varIds.set(variable, nextVarId++)
+}
+
+function isCompoundAssignmentOp
+(op) {
+  if (op == '=')
+    return 0
+  return 1
+}
+
 function buildScopeTree
 (scope, prefix, scopeToNode, astToTree) {
   let node, siblingNum
@@ -268,8 +282,7 @@ function buildScopeTree
 
   for (let variable of scope.variables) {
     if (variable.defs.length > 0) {
-      if (!varIds.has(variable))
-        varIds.set(variable, nextVarId++)
+      ensureInVarIds(variable)
       node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0], defNode: variable.defs[0].node, defType: variable.defs[0].type, identifier: variable.defs[0].name, variable, varId: varIds.get(variable) })
     }
 
@@ -290,13 +303,12 @@ function buildScopeTree
           }
           else if (ref.identifier.parent?.type == 'AssignmentExpression') {
             sortPos = parent.right.range[1] + 0.4
-            if (ref.identifier.parent.left === ref.identifier && ref.identifier.parent.operator !== '=') {
+            if (ref.identifier.parent.left === ref.identifier && isCompoundAssignmentOp(ref.identifier.parent.operator)) {
               item1 = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] }
               item2 = { ref, type: 'WRITE', name: ref.identifier.name, pos: sortPos }
             }
-            else {
+            else
               item1 = { ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos }
-            }
           }
           else if (ref.identifier.parent?.type == 'VariableDeclarator')
             item1 = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 }
@@ -317,8 +329,7 @@ function buildScopeTree
             sortPos = ref.identifier.range[0]
           item1 = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos }
         }
-        if (!varIds.has(variable))
-          varIds.set(variable, nextVarId++)
+        ensureInVarIds(variable)
         item1.varId = varIds.get(variable)
         targetNode.items.push(item1)
         if (item2) {
