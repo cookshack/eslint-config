@@ -72,18 +72,16 @@ function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
       let scopeCreator = treeNode?.scope?.block
       if (scopeCreator && astNode === scopeCreator) {
         lets.push({ item })
-        console.log(`${indent}  | LET ${item.name}:${treeNode?.scope?.type ?? '?'}`)
+        console.log(`${indent}  | LET ${item.name}:${item.varId}`)
       }
     } else if (item.ref) {
       if (astNode === item.ref.identifier) {
         if (item.type === 'READ') {
           reads.push({ item })
-          let varScope = item.ref.resolved?.scope
-          console.log(`${indent}  | READ ${item.name}:${varScope?.type ?? '?'}`)
+          console.log(`${indent}  | READ ${item.name}:${item.varId}`)
         } else if (item.type === 'WRITE') {
           writes.push({ item })
-          let varScope = item.ref.resolved?.scope
-          console.log(`${indent}  | WRITE ${item.name}:${varScope?.type ?? '?'}`)
+          console.log(`${indent}  | WRITE ${item.name}:${item.varId}`)
         }
       }
     }
@@ -287,9 +285,9 @@ function printCst(cst, indent) {
   if (!cst)
     return
 
-  let lets = cst.lets.length ? ` LET: ${cst.lets.map(l => `${l.item.name}:${l.item.variable.scope.type}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
-  let reads = cst.reads.length ? ` READ: ${cst.reads.map(r => `${r.item.name}:${r.item.ref.resolved?.scope.type}`).join(', ')}` : ''
-  let writes = cst.writes.length ? ` WRITE: ${cst.writes.map(w => `${w.item.name}:${w.item.ref.resolved?.scope.type}`).join(', ')}` : ''
+  let lets = cst.lets.length ? ` LET: ${cst.lets.map(l => `${l.item.name}:${l.item.varId}` + (l.firstWrite ? ` (fw:${l.firstWrite.id})` : ' (no fw)')).join(', ')}` : ''
+  let reads = cst.reads.length ? ` READ: ${cst.reads.map(r => `${r.item.name}:${r.item.varId}`).join(', ')}` : ''
+  let writes = cst.writes.length ? ` WRITE: ${cst.writes.map(w => `${w.item.name}:${w.item.varId}`).join(', ')}` : ''
   let fnDef = cst.fnDefCst ? ` fnDefCst:${cst.fnDefCst.id}` : ''
   let extra = lets + reads + writes + fnDef
 

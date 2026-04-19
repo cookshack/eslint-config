@@ -244,6 +244,9 @@ function scopeStart(scope) {
 
 export { isReadRef, isWriteRef, buildScopeTree, scopeStart }
 
+let varIds = new Map()
+let nextVarId = 0
+
 function buildScopeTree
 (scope, prefix, scopeToNode, astToTree) {
   let node, siblingNum
@@ -265,8 +268,11 @@ function buildScopeTree
   }
 
   for (let variable of scope.variables) {
-    if (variable.defs.length > 0)
-      node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0], defNode: variable.defs[0].node, defType: variable.defs[0].type, identifier: variable.defs[0].name, variable })
+    if (variable.defs.length > 0) {
+      if (!varIds.has(variable))
+        varIds.set(variable, nextVarId++)
+      node.items.push({ type: 'LET', name: variable.name, pos: variable.defs[0].name.range[0], defNode: variable.defs[0].node, defType: variable.defs[0].type, identifier: variable.defs[0].name, variable, varId: varIds.get(variable) })
+    }
 
     for (let ref of variable.references) {
       let targetNode
@@ -306,6 +312,9 @@ function buildScopeTree
             sortPos = ref.identifier.range[0]
           item = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: sortPos }
         }
+        if (!varIds.has(variable))
+          varIds.set(variable, nextVarId++)
+        item.varId = varIds.get(variable)
         targetNode.items.push(item)
         ref.cookshackNarrowestScopeItem = item
       }
