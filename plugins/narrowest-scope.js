@@ -1,6 +1,8 @@
-let printBuffer
+let varIds, nextVarId, printBuffer
 
 printBuffer = []
+varIds = new Map()
+nextVarId = 0
 
 function print
 (...args) {
@@ -244,9 +246,6 @@ function scopeStart(scope) {
 
 export { isReadRef, isWriteRef, buildScopeTree, scopeStart }
 
-let varIds = new Map()
-let nextVarId = 0
-
 function buildScopeTree
 (scope, prefix, scopeToNode, astToTree) {
   let node, siblingNum
@@ -447,6 +446,7 @@ function createNarrowestScope
         let tree, scopeToNode
 
         scopeToNode = new Map
+        nextVarId = 0
         tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
         checkScopeNode(context, tree, null, scopeToNode)
         printTree(tree, 0)
