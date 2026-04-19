@@ -13,12 +13,22 @@ config = [ { languageOptions: { ecmaVersion: 2025,
              plugins,
              rules: { 'cookshack/init-before-use': 'error' } } ]
 
+function tree
+() {
+  let out
+
+  out = ostString(lastOst())
+  if (out.length)
+    return '=== Ordered Syntax Tree ===\n' + out
+  return ''
+}
+
 function _pass(tc) {
   let messages
 
   messages = linter.verify(tc.code, config)
   if (messages.length > 0)
-    throw new Error('unexpected errors: ' + JSON.stringify(messages, null, 2) + '\n' + ostString(lastOst()))
+    throw new Error('unexpected errors: ' + JSON.stringify(messages, null, 2) + '\n' + tree())
 }
 
 function _fail(tc) {
@@ -27,7 +37,7 @@ function _fail(tc) {
   messages = linter.verify(tc.code, config)
   if (messages.length == tc.errors.length)
     return
-  throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length + '\n' + JSON.stringify(messages, null, 2) + '\n' + ostString(lastOst()))
+  throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length + '\n' + JSON.stringify(messages, null, 2) + '\n' + tree())
 }
 
 function fail(message, code) {
