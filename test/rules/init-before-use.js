@@ -21,6 +21,8 @@ function pass(code) {
   validCases.push({ code })
 }
 
+pass('let x; function shadow() { let x = 2; return x } x = 1')
+
 pass('let x; x = 1')
 
 pass('let x = 1; x')

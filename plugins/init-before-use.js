@@ -72,16 +72,18 @@ function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
       let scopeCreator = treeNode?.scope?.block
       if (scopeCreator && astNode === scopeCreator) {
         lets.push({ item })
-        console.log(`${indent}  | LET ${item.name}`)
+        console.log(`${indent}  | LET ${item.name}:${treeNode?.scope?.type ?? '?'}`)
       }
     } else if (item.ref) {
       if (astNode === item.ref.identifier) {
         if (item.type === 'READ') {
           reads.push({ item })
-          console.log(`${indent}  | READ ${item.name}`)
+          let varScope = item.ref.resolved?.scope
+          console.log(`${indent}  | READ ${item.name}:${varScope?.type ?? '?'}`)
         } else if (item.type === 'WRITE') {
           writes.push({ item })
-          console.log(`${indent}  | WRITE ${item.name}`)
+          let varScope = item.ref.resolved?.scope
+          console.log(`${indent}  | WRITE ${item.name}:${varScope?.type ?? '?'}`)
         }
       }
     }
