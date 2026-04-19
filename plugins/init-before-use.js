@@ -6,6 +6,12 @@ let errorCount
 ostIdCounter = 0
 errorCount = 0
 
+function trace
+(...args) {
+  if (0)
+    console.log(...args)
+}
+
 function createInitBeforeUse(context) {
   let scopeManager
 
@@ -59,8 +65,8 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
     scopeName = treeNode?.scope ? `${treeNode.scope.type}` : 'no-scope'
     if (treeNode?.scope?.block?.id?.name)
       scopeName += `(${treeNode.scope.block.id.name})`
-    console.log(`${indent}${astNode.type}`)
-    console.log(`${indent}  | scope: ${scopeName}`)
+    trace(`${indent}${astNode.type}`)
+    trace(`${indent}  | scope: ${scopeName}`)
 
     lets = []
     reads = []
@@ -73,18 +79,18 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
         scopeCreator = treeNode?.scope?.block
         if (scopeCreator && astNode == scopeCreator) {
           lets.push({ item })
-          console.log(`${indent}  | LET ${item.name}:${item.varId}`)
+          trace(`${indent}  | LET ${item.name}:${item.varId}`)
         }
       }
       else if (item.ref)
         if (astNode == item.ref.identifier)
           if (item.type == 'READ') {
             reads.push({ item })
-            console.log(`${indent}  | READ ${item.name}:${item.varId}`)
+            trace(`${indent}  | READ ${item.name}:${item.varId}`)
           }
           else if (item.type == 'WRITE') {
             writes.push({ item })
-            console.log(`${indent}  | WRITE ${item.name}:${item.varId}`)
+            trace(`${indent}  | WRITE ${item.name}:${item.varId}`)
           }
 
     ost = {
