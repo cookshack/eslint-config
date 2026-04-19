@@ -291,7 +291,13 @@ function buildScopeTree
           }
           else if (ref.identifier.parent?.type == 'AssignmentExpression') {
             sortPos = parent.right.range[1] + 0.4
-            item1 = { ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos }
+            if (ref.identifier.parent.left === ref.identifier && ref.identifier.parent.operator !== '=') {
+              item1 = { ref, type: 'READ', name: ref.identifier.name, ctx, pos: ref.identifier.range[0] }
+              item2 = { ref, type: 'WRITE', name: ref.identifier.name, pos: sortPos }
+            }
+            else {
+              item1 = { ref, type: 'WRITE', name: ref.identifier.name, ctx, pos: sortPos }
+            }
           }
           else if (ref.identifier.parent?.type == 'VariableDeclarator')
             item1 = { ref, type: 'WRITE', name: ref.identifier.name, pos: ref.identifier.range[0] + 0.4 }

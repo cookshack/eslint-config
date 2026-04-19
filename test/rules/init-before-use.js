@@ -21,7 +21,6 @@ function pass(code) {
   validCases.push({ code })
 }
 
-if (0) {
 pass('let x; x = 1')
 
 pass('let x = 1; x')
@@ -60,9 +59,9 @@ pass(`function a1
 }`)
 
 pass('let x = 1; --x')
-}
+
 pass('let x = 1; x++')
-if (0) {
+
 pass('let x = 1; x += 2')
 
 fail('mustInit', 'let x')
@@ -102,12 +101,12 @@ fail('initBeforeUse', `function outer
 fail('initBeforeUse', 'let x; x = f(x)')
 
 fail('initBeforeUse', 'let x = 0; function shadow(y) { let x; x = shadow2(x) + y; return x } function shadow2(y) { let x = 3 + y; return x } shadow(x)')
-}
-//fail('initBeforeUse', 'let x; --x')
+
+fail('initBeforeUse', 'let x; --x')
 
 fail('initBeforeUse', 'let x; x++')
 
-//fail('initBeforeUse', 'let x; x += 2')
+fail('initBeforeUse', 'let x; x += 2')
 
 globalThis.describe('init-before-use',
                     () => ruleTester.run('init-before-use',

@@ -562,12 +562,14 @@ function f
         READ  b     pos 115
         SCOPE 1.1.1.1.1 FUNCTION pos 125
           LET   d     pos 125
+          READ  c1     pos 138
           READ  d     pos 144
           WRITE c1     pos 145.4
         READ  c1     pos 164
       SCOPE 1.1.1.2 BLOCK pos 174
         READ  ok     pos 185
         WRITE c2     pos 187.4
+        READ  c2     pos 192
         READ  ok     pos 198
         READ  ok     pos 203
         WRITE c2     pos 205.4
