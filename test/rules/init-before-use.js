@@ -21,13 +21,13 @@ function pass(code) {
   validCases.push({ code })
 }
 
-pass('let x; function shadow() { let x = 2; return x } function shadow2() { let x = 3; return x } x = 1')
-
 pass('let x; x = 1')
 
 pass('let x = 1; x')
 
 pass('function f() { let x = 1; return x }')
+
+pass('let x; function shadow() { let x = 2; return x } function shadow2() { let x = 3; return x } x = 1')
 
 pass('for (let x in [1,2,3]) {}; let x = 1')
 
@@ -91,6 +91,10 @@ fail('initBeforeUse', `function outer
   p = get()
   inner()
 }`)
+
+fail('initBeforeUse', 'let x; x = f(x)')
+
+//fail('initBeforeUse', 'let x = 0; function shadow(y) { let x; x = shadow2(x) + y; return x } function shadow2(y) { let x = 3 + y; return x } shadow(x)')
 
 globalThis.describe('init-before-use',
                     () => ruleTester.run('init-before-use',

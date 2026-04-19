@@ -110,6 +110,11 @@ function processAst(astNode, parentCst, astToTree, astToCst, indent, visited) {
       children.push(astNode.left)
     if (astNode.body)
       children.push(astNode.body)
+  } else if (astNode.type === 'AssignmentExpression') {
+    if (astNode.right)
+      children.push(astNode.right)
+    if (astNode.left)
+      children.push(astNode.left)
   } else {
     if (astNode.body) {
       if (Array.isArray(astNode.body))
