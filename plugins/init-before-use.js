@@ -212,10 +212,8 @@ function ostAnnotate(ost, astToOst, context) {
               let fnDefAst
 
               fnDefAst = variable.defs[0].node
-              if (fnDefAst) {
+              if (fnDefAst)
                 ost.fnDefOst = astToOst.get(fnDefAst)
-                ost.fnDefOst || console.log('ostAnnotate: WARN - astToOst has keys:', [ ...astToOst.keys() ].map(k => `${k.type}(${k.id?.name})`))
-              }
             }
           }
         }
