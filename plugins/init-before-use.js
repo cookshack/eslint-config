@@ -195,11 +195,11 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
 function ostAnnotate(ost, astToOst, context) {
   if (ost) {
     for (let letInfo of ost.lets) {
-      let writeNode
+      let writeOst
 
-      writeNode = findFirstWrite(ost, letInfo)
-      letInfo.firstWrite = writeNode
-      if (writeNode)
+      writeOst = findFirstWrite(ost, letInfo)
+      letInfo.firstWrite = writeOst
+      if (writeOst)
         continue
       if (letInfo.item.defType == 'ImportBinding')
         continue
@@ -240,11 +240,18 @@ function ostAnnotate(ost, astToOst, context) {
 }
 
 function findFirstWrite(ost, letInfo) {
+  if (ost.astNode.type == 'FunctionDeclaration' || ost.astNode.type == 'ArrowFunctionExpression' || ost.astNode.type == 'FunctionExpression')
+    for (let child of ost.children)
+      if (child.astNode.type == 'BlockStatement')
+        return findFirstWriteInSubtree(child, letInfo)
   return findFirstWriteInSubtree(ost, letInfo)
 }
 
 function findFirstWriteInSubtree(ost, letInfo) {
   if (ost) {
+    if (ost.astNode.type == 'FunctionDeclaration' || ost.astNode.type == 'ArrowFunctionExpression' || ost.astNode.type == 'FunctionExpression')
+      return null
+
     for (let writeInfo of ost.writes) {
       let writeVar
 

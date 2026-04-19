@@ -118,6 +118,28 @@ pass(`
     }
 `)
 
+pass(`
+function equal
+() {
+  let two
+
+  function run
+  () {
+    console.log(two)
+  }
+
+  function open
+  () {
+    // the point is to test if this will accidentally be first write of two
+    two = 0
+  }
+
+  if (globalThis.x) {
+    two = 1
+    run()
+  }
+}`)
+
 fail('mustInit', 'let x')
 
 fail('initBeforeUse', 'x; let x = 1')
