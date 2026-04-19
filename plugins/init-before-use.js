@@ -15,13 +15,13 @@ function trace
 function createInitBeforeUse(context) {
   let scopeManager
 
-  errorCount = 0
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager)
     return {
       'Program:exit'() {
         let ost, scopeToNode, astToTree, astToOst
 
+        errorCount = 0
         scopeToNode = new Map
         astToTree = new Map
         astToOst = new Map
@@ -34,10 +34,7 @@ function createInitBeforeUse(context) {
 
         ostCheck(ost, context)
 
-        if (errorCount > 0) {
-          console.log('\n=== Ordered Syntax Tree ===')
-          printOst(ost, '')
-        }
+        trace('ERRORS: ' + errorCount)
       }
     }
 }
@@ -327,6 +324,7 @@ function walk2(node, letInfo, context, visited) {
   return false
 }
 
+export
 function printOst(ost, indent) {
   if (ost) {
     let lets, reads, writes, fnDef, extra, scopeName
