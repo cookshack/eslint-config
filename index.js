@@ -53,9 +53,10 @@ rules = {
   'cookshack/narrowest-scope': 'error',
   'cookshack/use-risky-equal': 'error',
   'cookshack/always-let': 'error',
-  // using implicit init to undefined fits better
+  // using the implicit inititialization to undefined fits better
   //'cookshack/init-before-use': 'error',
   'cookshack/var-decl-block-start': 'error',
+  'cookshack/fn-decl-block-start': 'error',
   'no-mixed-operators': 'error',
   'no-multi-spaces': 'error',
   'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],
