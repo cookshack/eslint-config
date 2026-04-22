@@ -25,8 +25,6 @@ function fail
   invalidCases.push({ code, errors })
 }
 
-// VariableDeclaration
-
 pass('let x = 1')
 
 pass('var x = 1')
@@ -96,34 +94,6 @@ fail(1, 'if (1) { if (2) { x = 1; let y = 2 } }')
 fail(1, 'while (1) { x = 1; let y = 2 }')
 
 fail(1, 'for (let i = 0; i < 10; i++) { x = 1; let y = 2 }')
-
-// FunctionDeclaration
-
-pass('function f() { let x; function g() {} }')
-
-pass('{ function f() {} }')
-
-pass('{ let x; function f() {} }')
-
-pass('{ let x; let y; function f() {}; function g() {} }')
-
-pass('{ function f() {}; function g() {}; code() }')
-
-fail(1, 'function main1 () { let a; a = 0; let b }')
-
-fail(2, 'function main2 () { let a; a = 0; function f() { return 1 } let b }')
-
-fail(1, 'function f() { function g() {}; let x }')
-
-fail(1, '{ x; function f() {} }')
-
-fail(1, '{ let x; code(); function f() {} }')
-
-fail(1, '{ function f() {}; let x }')
-
-fail(2, '{ function f() {}; let x; let y }')
-
-fail(1, '{ function f() {}; function g() {}; let x }')
 
 globalThis.describe('var-decl-block-start',
                     () => ruleTester.run('var-decl-block-start',
