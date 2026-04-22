@@ -18,7 +18,7 @@ function fail
 
   errors = []
   while (count > 0) {
-    errors.push({ messageId: 'declBlockStart' })
+    errors.push({ messageId: 'varDeclBlockStart' })
     count--
   }
 
@@ -94,6 +94,12 @@ fail(1, 'if (1) { if (2) { x = 1; let y = 2 } }')
 fail(1, 'while (1) { x = 1; let y = 2 }')
 
 fail(1, 'for (let i = 0; i < 10; i++) { x = 1; let y = 2 }')
+
+fail(1, '{ function f() {}; let x }')
+
+fail(2, '{ function f() {}; let x; let y }')
+
+fail(1, '{ function f() {}; function g() {}; let x }')
 
 globalThis.describe('var-decl-block-start',
                     () => ruleTester.run('var-decl-block-start',

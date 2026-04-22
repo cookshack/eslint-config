@@ -18,7 +18,7 @@ function fail
 
   errors = []
   while (count > 0) {
-    errors.push({ messageId: 'declBlockStart' })
+    errors.push({ messageId: 'fnDeclBlockStart' })
     count--
   }
 
@@ -35,21 +35,11 @@ pass('{ let x; let y; function f() {}; function g() {} }')
 
 pass('{ function f() {}; function g() {}; code() }')
 
-fail(1, 'function main1 () { let a; a = 0; let b }')
-
-fail(2, 'function main2 () { let a; a = 0; function f() { return 1 } let b }')
-
-fail(1, 'function f() { function g() {}; let x }')
+fail(1, 'function main2 () { let a; a = 0; function f() { return 1 } let b }')
 
 fail(1, '{ x; function f() {} }')
 
 fail(1, '{ let x; code(); function f() {} }')
-
-fail(1, '{ function f() {}; let x }')
-
-fail(2, '{ function f() {}; let x; let y }')
-
-fail(1, '{ function f() {}; function g() {}; let x }')
 
 globalThis.describe('fn-decl-block-start',
                     () => ruleTester.run('fn-decl-block-start',
