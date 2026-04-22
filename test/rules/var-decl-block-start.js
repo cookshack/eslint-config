@@ -125,8 +125,8 @@ fail(2, '{ function f() {}; let x; let y }')
 
 fail(1, '{ function f() {}; function g() {}; let x }')
 
-globalThis.describe('decl-block-start',
-                    () => ruleTester.run('decl-block-start',
-                                         plugins.cookshack.rules['decl-block-start'],
+globalThis.describe('var-decl-block-start',
+                    () => ruleTester.run('var-decl-block-start',
+                                         plugins.cookshack.rules['var-decl-block-start'],
                                          { valid: validCases,
                                            invalid: invalidCases }))
