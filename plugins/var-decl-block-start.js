@@ -32,6 +32,6 @@ function create
 export
 default { meta: { type: 'suggestion',
                   docs: { description: 'Require variable declarations to be at the start of the block.' },
-                  messages: { varDeclBlockStart: 'VariableDeclaration must be at the start of the block.' },
+                  messages: { varDeclBlockStart: 'VarDecl must be at start of block.' },
                   schema: [] },
           create }

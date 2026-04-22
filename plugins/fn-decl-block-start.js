@@ -33,6 +33,6 @@ function create
 export
 default { meta: { type: 'suggestion',
                   docs: { description: 'Require function declarations to be at the start of the block.' },
-                  messages: { fnDeclBlockStart: 'FunctionDeclaration must be at the start of the block (after VariableDeclarations).' },
+                  messages: { fnDeclBlockStart: 'FnDecl must be the start the block (after VarDecls).' },
                   schema: [] },
           create }
