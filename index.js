@@ -6,6 +6,7 @@ import useRiskyEqualPlugin from './plugins/use-risky-equal.js'
 import alwaysLetPlugin from './plugins/always-let.js'
 import initBeforeUsePlugin from './plugins/init-before-use.js'
 import varDeclBlockStartPlugin from './plugins/var-decl-block-start.js'
+import fnDeclBlockStartPlugin from './plugins/fn-decl-block-start.js'
 
 export { getPrintBuffer }
 
@@ -16,7 +17,8 @@ plugins = { 'cookshack': { rules: { 'positive-vibes': positiveVibesPlugin,
                                     'use-risky-equal': useRiskyEqualPlugin,
                                     'always-let': alwaysLetPlugin,
                                     'init-before-use': initBeforeUsePlugin,
-                                    'var-decl-block-start': varDeclBlockStartPlugin } } }
+                                    'var-decl-block-start': varDeclBlockStartPlugin,
+                                    'fn-decl-block-start': fnDeclBlockStartPlugin } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
