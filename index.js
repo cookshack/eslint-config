@@ -7,6 +7,7 @@ import alwaysLetPlugin from './plugins/always-let.js'
 import initBeforeUsePlugin from './plugins/init-before-use.js'
 import varDeclBlockStartPlugin from './plugins/var-decl-block-start.js'
 import fnDeclBlockStartPlugin from './plugins/fn-decl-block-start.js'
+import fnArgsNlPlugin from './plugins/fn-args-nl.js'
 
 export { getPrintBuffer }
 
@@ -18,7 +19,8 @@ plugins = { 'cookshack': { rules: { 'positive-vibes': positiveVibesPlugin,
                                     'always-let': alwaysLetPlugin,
                                     'init-before-use': initBeforeUsePlugin,
                                     'var-decl-block-start': varDeclBlockStartPlugin,
-                                    'fn-decl-block-start': fnDeclBlockStartPlugin } } }
+                                    'fn-decl-block-start': fnDeclBlockStartPlugin,
+                                    'fn-args-nl': fnArgsNlPlugin } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
