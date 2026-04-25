@@ -26,11 +26,16 @@ function checkObjectExpressionProperties
 
   console.log('ALGORITHM 2: When first property is on a line after {: must use 1 indent unit from the column where { appears')
   console.log('CHECK POINT 2: is firstPropLine (%d) != braceLine (%d)?', firstPropLine, node.loc.start.line)
-  if (firstPropLine != node.loc.start.line)
-    if (firstPropCol != node.loc.start.column + unit(context)) {
-      console.log('CHECK 2 FAIL')
-      context.report({ node: firstProp, messageId: 'indentStruct' })
-    }
+  if (firstPropLine == node.loc.start.line) {
+    // first property is on brace line
+  }
+  else if (firstPropCol == node.loc.start.column + unit(context)) {
+    // ok
+  }
+  else {
+    console.log('CHECK 2 FAIL')
+    context.report({ node: firstProp, messageId: 'indentStruct' })
+  }
 
   console.log('ALGORITHM 3: Multi-line: all properties must align to first propertys column')
   console.log('CHECK POINT 3: checking property alignment, firstPropCol=%d', firstPropCol)
@@ -100,7 +105,10 @@ function checkObjectExpressionProperties
         let parenCol
 
         parenCol = i - sourceCode.lastIndexOf('\n', i)
-        if (parenCol - 1 != prop.key.loc.start.column) {
+        if (parenCol - 1 == prop.key.loc.start.column) {
+          // ok
+        }
+        else {
           console.log('CHECK 6 FAIL')
           context.report({ node: prop, messageId: 'indentStruct' })
         }
