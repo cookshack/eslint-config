@@ -1,22 +1,20 @@
 function createPositiveVibes
 (context) {
-  return {
-    UnaryExpression
-    (node) {
-      if (node.operator == '!')
-        context.report({ node,
-                         messageId: 'positiveVibes' })
-    },
-    BinaryExpression
-    (node) {
-      if (node.operator == '!=')
-        context.report({ node,
-                         messageId: 'equality' })
-      else if (node.operator == '!==')
-        context.report({ node,
-                         messageId: 'strictEquality' })
-    }
-  }
+  return { UnaryExpression
+           (node) {
+             if (node.operator == '!')
+               context.report({ node,
+                                messageId: 'positiveVibes' })
+           },
+           BinaryExpression
+           (node) {
+             if (node.operator == '!=')
+               context.report({ node,
+                                messageId: 'equality' })
+             else if (node.operator == '!==')
+               context.report({ node,
+                                messageId: 'strictEquality' })
+           } }
 }
 
 export

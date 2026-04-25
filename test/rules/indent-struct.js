@@ -16,7 +16,7 @@ function fail
 (count, code) {
   let errors
 
-  if (code === undefined) {
+  if (code == undefined) {
     code = count
     count = 1
   }
@@ -112,6 +112,14 @@ pass(`function create
            (node) {
              if (node.kind == 'const' || node.kind == 'var')
                context.report({ node, messageId: 'useLet' })
+           } }
+}`)
+
+pass(`function two
+() {
+  return { 'Program:exit'
+           () {
+             // do
            } }
 }`)
 

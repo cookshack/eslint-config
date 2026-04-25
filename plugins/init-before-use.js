@@ -42,8 +42,7 @@ function createInitBeforeUse
                ostCheck(ost, context)
 
                trace('ERRORS: ' + errorCount)
-             }
-           }
+             } }
 }
 
 function isRegularDeclaration
@@ -98,17 +97,15 @@ function processAst
             trace(`${indent}  | WRITE ${item.name}:${item.varId}`)
           }
 
-    ost = {
-      id: ostIdCounter++,
-      astNode,
-      treeNode,
-      scopeItems: treeNode?.items ?? [],
-      lets,
-      reads,
-      writes,
-      children: [],
-      fnDefOst: null
-    }
+    ost = { id: ostIdCounter++,
+            astNode,
+            treeNode,
+            scopeItems: treeNode?.items ?? [],
+            lets,
+            reads,
+            writes,
+            children: [],
+            fnDefOst: null }
 
     astToOst.set(astNode, ost)
 
@@ -207,11 +204,9 @@ function ostAnnotate
       if (letInfo.item.defType == 'ImportBinding')
         continue
       errorCount++
-      context.report({
-        node: letInfo.item.identifier,
-        messageId: 'mustInit',
-        data: { name: letInfo.item.name }
-      })
+      context.report({ node: letInfo.item.identifier,
+                       messageId: 'mustInit',
+                       data: { name: letInfo.item.name } })
     }
 
     if (ost.astNode.type == 'CallExpression' && ost.astNode.callee?.type == 'Identifier')
@@ -308,11 +303,9 @@ function walk2
       for (let readInfo of node.reads)
         if (readInfo.item.ref.resolved == letInfo.item.variable) {
           errorCount++
-          context.report({
-            node: readInfo.item.ref.identifier,
-            messageId: 'initBeforeUse',
-            data: { name: letInfo.item.name }
-          })
+          context.report({ node: readInfo.item.ref.identifier,
+                           messageId: 'initBeforeUse',
+                           data: { name: letInfo.item.name } })
         }
       return true
     }
@@ -340,11 +333,9 @@ function walk2
     for (let readInfo of node.reads)
       if (readInfo.item.ref.resolved == letInfo.item.variable) {
         errorCount++
-        context.report({
-          node: readInfo.item.ref.identifier,
-          messageId: 'initBeforeUse',
-          data: { name: letInfo.item.name }
-        })
+        context.report({ node: readInfo.item.ref.identifier,
+                         messageId: 'initBeforeUse',
+                         data: { name: letInfo.item.name } })
       }
 
     for (let child of node.children)
@@ -383,13 +374,9 @@ function ostString
   return ''
 }
 
-export default {
-  meta: {
-    type: 'problem',
-    docs: { description: 'Warn when a variable is used before being explicitly initialized.' },
-    messages: { initBeforeUse: "'{{name}}' used before initialization.",
-                mustInit: "'{{name}}' must be initialized." },
-    schema: []
-  },
-  create: createInitBeforeUse
-}
+export default { meta: { type: 'problem',
+                         docs: { description: 'Warn when a variable is used before being explicitly initialized.' },
+                         messages: { initBeforeUse: "'{{name}}' used before initialization.",
+                                     mustInit: "'{{name}}' must be initialized." },
+                         schema: [] },
+                 create: createInitBeforeUse }

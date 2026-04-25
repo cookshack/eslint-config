@@ -267,12 +267,11 @@ function buildScopeTree
 (scope, prefix, scopeToNode, astToTree) {
   let node, siblingNum
 
-  node = {
-    scope,
-    prefix,
-    items: [],
-    children: []
-  }
+  node = { scope,
+           prefix,
+           items: [],
+           children: [] }
+
   scopeToNode.set(scope, node)
   if (scope.block && astToTree)
     astToTree.set(scope.block, node)
@@ -405,11 +404,9 @@ function checkScopeNode
         trace(indent, '5', variable.name, 'is too broad')
 
         reported.add(variable)
-        context.report({
-          node: defNode,
-          messageId: 'tooBroad',
-          data: { name: variable.name }
-        })
+        context.report({ node: defNode,
+                         messageId: 'tooBroad',
+                         data: { name: variable.name } })
       }
     }
   }
@@ -455,18 +452,16 @@ function createNarrowestScope
   clearPrintBuffer()
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager)
-    return {
-      'Program:exit'
-      () {
-        let tree, scopeToNode
+    return { 'Program:exit'
+             () {
+               let tree, scopeToNode
 
-        scopeToNode = new Map
-        nextVarId = 0
-        tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
-        checkScopeNode(context, tree, null, scopeToNode)
-        printTree(tree, 0)
-      }
-    }
+               scopeToNode = new Map
+               nextVarId = 0
+               tree = buildScopeTree(scopeManager.scopes[0], '1', scopeToNode)
+               checkScopeNode(context, tree, null, scopeToNode)
+               printTree(tree, 0)
+             } }
 }
 
 export
