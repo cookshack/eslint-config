@@ -121,7 +121,8 @@ function getConditionalContext
   return ''
 }
 
-function nodeContains(node, target) {
+function nodeContains
+(node, target) {
   if (node == target)
     return true
   if (node && typeof node == 'object')
@@ -131,7 +132,8 @@ function nodeContains(node, target) {
   return false
 }
 
-function nodeHas(value, target) {
+function nodeHas
+(value, target) {
   if (value == target)
     return true
   if (Array.isArray(value))
@@ -234,7 +236,8 @@ function isProperAncestor
   return 0
 }
 
-function scopeStart(scope) {
+function scopeStart
+(scope) {
   if (scope.block == null)
     return Infinity
   if (scope.type == 'function' && scope.block.id)
@@ -453,7 +456,8 @@ function createNarrowestScope
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager)
     return {
-      'Program:exit'() {
+      'Program:exit'
+      () {
         let tree, scopeToNode
 
         scopeToNode = new Map

@@ -13,16 +13,19 @@ config = [ { languageOptions: { ecmaVersion: 2025,
              plugins,
              rules: { 'cookshack/narrowest-scope': 'error' } } ]
 
-function pass(code, expected) {
+function pass
+(code, expected) {
   validCases.push({ code, expected })
 }
 
-function patch(expected, output) {
+function patch
+(expected, output) {
   return diffLines(expected.trim(), output.trim()).flatMap(p => p.value.split('\n').filter(l => l).map(l => ({ ...p, line: l })))
     .map(p => (p.removed ? '- ' : p.added ? '+ ' : '  ') + p.line).join('\n')
 }
 
-function _pass(tc) {
+function _pass
+(tc) {
   let messages, output
 
   messages = linter.verify(tc.code, config)
@@ -34,7 +37,8 @@ function _pass(tc) {
   throw new Error('output mismatch:\n' + patch(tc.expected, output))
 }
 
-function _fail(tc) {
+function _fail
+(tc) {
   let messages, output
 
   messages = linter.verify(tc.code, config)
@@ -47,7 +51,8 @@ function _fail(tc) {
   throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length + '\n' + JSON.stringify(messages, null, 2))
 }
 
-function fail(count, code, expected) {
+function fail
+(count, code, expected) {
   let errors
 
   errors = []

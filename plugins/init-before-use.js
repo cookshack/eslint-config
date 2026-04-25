@@ -18,31 +18,32 @@ function lastOst
   return ost
 }
 
-function createInitBeforeUse(context) {
+function createInitBeforeUse
+(context) {
   let scopeManager
 
   scopeManager = context.sourceCode.scopeManager
   if (scopeManager)
-    return {
-      'Program:exit'() {
-        let scopeToNode, astToTree, astToOst
+    return { 'Program:exit'
+             () {
+               let scopeToNode, astToTree, astToOst
 
-        errorCount = 0
-        scopeToNode = new Map
-        astToTree = new Map
-        astToOst = new Map
-        buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
+               errorCount = 0
+               scopeToNode = new Map
+               astToTree = new Map
+               astToOst = new Map
+               buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
 
-        ostIdCounter = 0
-        ost = processAst(context.sourceCode.ast, null, astToTree, astToOst, '', new Set())
+               ostIdCounter = 0
+               ost = processAst(context.sourceCode.ast, null, astToTree, astToOst, '', new Set())
 
-        ostAnnotate(ost, astToOst, context)
+               ostAnnotate(ost, astToOst, context)
 
-        ostCheck(ost, context)
+               ostCheck(ost, context)
 
-        trace('ERRORS: ' + errorCount)
-      }
-    }
+               trace('ERRORS: ' + errorCount)
+             }
+           }
 }
 
 function isRegularDeclaration
@@ -55,7 +56,8 @@ function isRegularDeclaration
   return 0
 }
 
-function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
+function processAst
+(astNode, parentOst, astToTree, astToOst, indent, visited) {
   if (astNode) {
     let treeNode, scopeName, lets, reads, writes, ost, children
 
@@ -192,7 +194,8 @@ function processAst(astNode, parentOst, astToTree, astToOst, indent, visited) {
   }
 }
 
-function ostAnnotate(ost, astToOst, context) {
+function ostAnnotate
+(ost, astToOst, context) {
   if (ost) {
     for (let letInfo of ost.lets) {
       let writeOst
@@ -239,7 +242,8 @@ function ostAnnotate(ost, astToOst, context) {
   }
 }
 
-function findFirstWrite(ost, letInfo) {
+function findFirstWrite
+(ost, letInfo) {
   if (ost.astNode.type == 'FunctionDeclaration' || ost.astNode.type == 'ArrowFunctionExpression' || ost.astNode.type == 'FunctionExpression')
     for (let child of ost.children)
       if (child.astNode.type == 'BlockStatement')
@@ -247,7 +251,8 @@ function findFirstWrite(ost, letInfo) {
   return findFirstWriteInSubtree(ost, letInfo)
 }
 
-function findFirstWriteInSubtree(ost, letInfo) {
+function findFirstWriteInSubtree
+(ost, letInfo) {
   if (ost) {
     if (ost.astNode.type == 'FunctionDeclaration' || ost.astNode.type == 'ArrowFunctionExpression' || ost.astNode.type == 'FunctionExpression')
       return null
@@ -272,7 +277,8 @@ function findFirstWriteInSubtree(ost, letInfo) {
   return null
 }
 
-function ostCheck(ost, context) {
+function ostCheck
+(ost, context) {
   if (ost) {
     for (let letInfo of ost.lets)
       if (letInfo.firstWrite)
@@ -283,7 +289,8 @@ function ostCheck(ost, context) {
   }
 }
 
-function walk2Start(node, letInfo, context) {
+function walk2Start
+(node, letInfo, context) {
   if (node.astNode.type == 'FunctionDeclaration')
     for (let child of node.children)
       if (child.astNode.type == 'BlockStatement')
@@ -291,7 +298,8 @@ function walk2Start(node, letInfo, context) {
   return walk2(node, letInfo, context, new Set())
 }
 
-function walk2(node, letInfo, context, visited) {
+function walk2
+(node, letInfo, context, visited) {
   if (node) {
     if (node.astNode.type == 'FunctionDeclaration' || node.astNode.type == 'ArrowFunctionExpression' || node.astNode.type == 'FunctionExpression')
       return false

@@ -1,5 +1,6 @@
 export default
-function (results) {
+function
+(results) {
   let str
 
   str = ''

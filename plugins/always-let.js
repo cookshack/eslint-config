@@ -1,9 +1,10 @@
 function create
 (context) {
-  return { VariableDeclaration(node) {
-    if (node.kind == 'const' || node.kind == 'var')
-      context.report({ node, messageId: 'useLet' })
-  } }
+  return { VariableDeclaration
+           (node) {
+             if (node.kind == 'const' || node.kind == 'var')
+               context.report({ node, messageId: 'useLet' })
+           } }
 }
 
 export

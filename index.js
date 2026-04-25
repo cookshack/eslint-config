@@ -59,6 +59,7 @@ rules = {
   //'cookshack/init-before-use': 'error',
   'cookshack/var-decl-block-start': 'error',
   'cookshack/fn-decl-block-start': 'error',
+  'cookshack/fn-args-nl': 'error',
   'no-mixed-operators': 'error',
   'no-multi-spaces': 'error',
   'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],

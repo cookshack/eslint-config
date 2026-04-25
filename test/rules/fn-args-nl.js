@@ -39,6 +39,13 @@ pass(`function f
   arg
 ) {}`)
 
+pass(`export default
+function
+() {
+  return 1
+}
+`)
+
 fail(1, 'function f (arg) {}')
 
 fail(1, 'function f() {}')

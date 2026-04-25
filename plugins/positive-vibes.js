@@ -1,12 +1,14 @@
 function createPositiveVibes
 (context) {
   return {
-    UnaryExpression(node) {
+    UnaryExpression
+    (node) {
       if (node.operator == '!')
         context.report({ node,
                          messageId: 'positiveVibes' })
     },
-    BinaryExpression(node) {
+    BinaryExpression
+    (node) {
       if (node.operator == '!=')
         context.report({ node,
                          messageId: 'equality' })
