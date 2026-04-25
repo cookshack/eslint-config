@@ -51,7 +51,7 @@ let x = {
           a
           () {},
           b
-         () {}
+          () {}
         }`)
 
 pass(`
@@ -136,7 +136,7 @@ let x = { a: 1,
   c: 3 }`)
 
 fail(1, `
-let x = { a
+let aHasArgsOnNextLine = { a
   () {} }`)
 
 fail(1, `
