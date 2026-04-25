@@ -23,7 +23,8 @@ function tree
   return ''
 }
 
-function _pass(tc) {
+function _pass
+(tc) {
   let messages
 
   messages = linter.verify(tc.code, config)
@@ -31,7 +32,8 @@ function _pass(tc) {
     throw new Error('unexpected errors: ' + JSON.stringify(messages, null, 2) + '\n' + tree())
 }
 
-function _fail(tc) {
+function _fail
+(tc) {
   let messages
 
   messages = linter.verify(tc.code, config)
@@ -40,7 +42,8 @@ function _fail(tc) {
   throw new Error('expected ' + tc.errors.length + ' errors, got ' + messages.length + '\n' + JSON.stringify(messages, null, 2) + '\n' + tree())
 }
 
-function fail(message, code) {
+function fail
+(message, code) {
   let errors
 
   if (Array.isArray(message))
@@ -51,7 +54,8 @@ function fail(message, code) {
   invalidCases.push({ code, errors })
 }
 
-function pass(code) {
+function pass
+(code) {
   validCases.push({ code })
 }
 
