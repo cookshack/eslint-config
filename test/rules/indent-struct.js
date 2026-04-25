@@ -106,6 +106,15 @@ let x = { a: { a: 1,
                b: 2 } }   ; function f(){ return 1}
 `)
 
+pass(`function create
+(context) {
+  return { VariableDeclaration
+           (node) {
+             if (node.kind == 'const' || node.kind == 'var')
+               context.report({ node, messageId: 'useLet' })
+           } }
+}`)
+
 fail(2, `
 let x = {
   a: 1,
