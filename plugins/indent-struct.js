@@ -1,3 +1,8 @@
+function unit
+(context) {
+  return context.options[0] ?? 2
+}
+
 function checkObjectExpressionProperties
 (properties, node, context) {
   let firstProp, sourceCode, lastProp, lastPropEnd, closingBrace, firstPropLine, firstPropCol, afterLastProp, closingLine, lastPropValueEndLine
@@ -22,7 +27,7 @@ function checkObjectExpressionProperties
   console.log('ALGORITHM 2: When first property is on a line after {: must use 1 indent unit from the column where { appears')
   console.log('CHECK POINT 2: is firstPropLine (%d) != braceLine (%d)?', firstPropLine, node.loc.start.line)
   if (firstPropLine != node.loc.start.line)
-    if (firstPropCol != node.loc.start.column + 2) {
+    if (firstPropCol != node.loc.start.column + unit(context)) {
       console.log('CHECK 2 FAIL')
       context.report({ node: firstProp, messageId: 'indentStruct' })
     }
