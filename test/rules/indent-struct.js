@@ -32,9 +32,9 @@ pass('let x = { a: 1, b: 2 }')
 
 pass(`
 let x = {
-  a: 1,
-  b: 2
-}`)
+          a: 1,
+          b: 2
+        }`)
 
 pass(`
 let x = { a: 1,
@@ -48,11 +48,11 @@ let x = {
 
 pass(`
 let x = {
-  a
-  () {},
-  b
-  () {}
-}`)
+          a
+          () {},
+          b
+         () {}
+        }`)
 
 pass(`
 function f
@@ -109,8 +109,18 @@ let x = { a: { a: 1,
 fail(1, `
 let x = {
   a: 1,
-    b: 2
+  b: 2
 }`)
+
+fail(1, `
+let x = {
+          a: 1,
+           b: 2
+        }`)
+
+fail(1, `
+let x = { a: 1,
+         b: 2 }`)
 
 fail(1, `
 let x = { a: 1,
