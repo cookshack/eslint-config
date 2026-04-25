@@ -8,6 +8,7 @@ import initBeforeUsePlugin from './plugins/init-before-use.js'
 import varDeclBlockStartPlugin from './plugins/var-decl-block-start.js'
 import fnDeclBlockStartPlugin from './plugins/fn-decl-block-start.js'
 import fnArgsNlPlugin from './plugins/fn-args-nl.js'
+import indentStructPlugin from './plugins/indent-struct.js'
 
 export { getPrintBuffer }
 
@@ -20,7 +21,8 @@ plugins = { 'cookshack': { rules: { 'positive-vibes': positiveVibesPlugin,
                                     'init-before-use': initBeforeUsePlugin,
                                     'var-decl-block-start': varDeclBlockStartPlugin,
                                     'fn-decl-block-start': fnDeclBlockStartPlugin,
-                                    'fn-args-nl': fnArgsNlPlugin } } }
+                                    'fn-args-nl': fnArgsNlPlugin,
+                                    'indent-struct': indentStructPlugin } } }
 
 rules = {
   'array-bracket-newline': [ 'error', 'never' ],
@@ -36,7 +38,7 @@ rules = {
                             //flatTernaryExpressions: true,
                             //offsetTernaryExpressions: true,
                             // ternary, because overhangs strangely (eg multiline in array def)
-                            'ignoredNodes': [ 'ConditionalExpression' ],
+                            'ignoredNodes': [ 'ConditionalExpression', 'ObjectExpression' ],
                             FunctionDeclaration: { parameters: 'first', body: 1 },
                             FunctionExpression: { parameters: 'first', body: 1 },
                             ImportDeclaration: 'first',
@@ -60,6 +62,7 @@ rules = {
   'cookshack/var-decl-block-start': 'error',
   'cookshack/fn-decl-block-start': 'error',
   'cookshack/fn-args-nl': 'error',
+  'cookshack/indent-struct': 'error',
   'no-mixed-operators': 'error',
   'no-multi-spaces': 'error',
   'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],
