@@ -5,8 +5,9 @@ default { meta: { type: 'problem',
                   schema: [] },
           create
           (context) {
-            return { BinaryExpression(node) {
-              if (node.operator == '===')
-                context.report({ node, messageId: 'risky' })
-            } }
+            return { BinaryExpression
+                     (node) {
+                       if (node.operator == '===')
+                         context.report({ node, messageId: 'risky' })
+                     } }
           } }
