@@ -1,13 +1,21 @@
 function FnArgsNl
 (node, context) {
-  let nameLine, parenLine, nameEnd, i, newlines
+  let nameLine, parenLine, nameEnd, i, newlines, parent
 
-  nameLine = node.id?.loc.start.line ?? node.loc.start.line
-  nameEnd = node.id?.range?.[1] ?? node.range[0]
+  parent = node.parent
+
+  if (parent?.type == 'Property' && parent.method) {
+    nameLine = parent.key.loc.start.line
+    nameEnd = parent.key.range[1]
+  }
+  else {
+    nameLine = node.id?.loc.start.line ?? node.loc.start.line
+    nameEnd = node.id?.range?.[1] ?? node.range[0]
+  }
 
   i = nameEnd
   newlines = 0
-  while (1 < context.sourceCode.text.length) {
+  while (i < context.sourceCode.text.length) {
     if (context.sourceCode.text[i] == '(')
       break
     if (context.sourceCode.text[i] == '\n')

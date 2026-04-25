@@ -46,6 +46,28 @@ function
 }
 `)
 
+pass(`
+function f
+() {
+  return { f1
+           () {
+             return 1
+           } }
+}
+`)
+
+pass(`
+function f
+() {
+  return {
+    f1
+    () {
+      return 1
+    }
+  }
+}
+`)
+
 fail(1, 'function f (arg) {}')
 
 fail(1, 'function f() {}')
