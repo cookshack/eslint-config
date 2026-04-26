@@ -110,7 +110,10 @@ function checkObjectExpressionProperties
         let parenCol
 
         parenCol = i - sourceCode.lastIndexOf('\n', i)
-        if (parenCol - 1 == prop.key.loc.start.column) {
+        if (prop.value.type == 'FunctionExpression' && prop.value.async) {
+          // async methods can have whitespace between key and paren
+        }
+        else if (parenCol - 1 == prop.key.loc.start.column) {
           // ok
         }
         else {

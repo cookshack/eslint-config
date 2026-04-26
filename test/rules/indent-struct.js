@@ -133,6 +133,16 @@ let x = { get a
             return 2
           } }`)
 
+pass(`
+let x = { async f
+          () {
+            return 1
+          },
+          async g
+          () {
+            return 2
+          } }`)
+
 fail(2, `
 let x = {
   a: 1,
