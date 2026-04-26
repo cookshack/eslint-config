@@ -8,9 +8,13 @@ function FnArgsNl
     nameLine = parent.key.loc.start.line
     nameEnd = parent.key.range[1]
   }
+  else if (parent?.type == 'MethodDefinition') {
+    nameLine = parent.key.loc.start.line
+    nameEnd = parent.key.range[1]
+  }
   else {
-    nameLine = node.id?.loc.start.line ?? node.loc.start.line
-    nameEnd = node.id?.range?.[1] ?? node.range[0]
+    nameLine = node.loc.start.line
+    nameEnd = node.range[0]
   }
 
   i = nameEnd

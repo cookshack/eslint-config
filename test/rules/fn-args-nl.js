@@ -68,6 +68,17 @@ function f
 }
 `)
 
+pass(`
+  class Marker {
+    constructor
+    (name, num) {
+    }
+    toDOM
+    () {
+    }
+  }
+`)
+
 fail(1, 'function f (arg) {}')
 
 fail(1, 'function f() {}')
