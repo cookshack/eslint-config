@@ -1,5 +1,4 @@
-function
-FunctionDeclaration
+function FunctionDeclaration
 (context, node) {
   let parent
 

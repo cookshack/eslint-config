@@ -1,5 +1,4 @@
-function
-VariableDeclaration
+function VariableDeclaration
 (context, node) {
   let parent
 
@@ -24,6 +23,7 @@ VariableDeclaration
     }
   }
 }
+
 function create
 (context) {
   return { VariableDeclaration: node => VariableDeclaration(context, node) }
