@@ -123,6 +123,16 @@ pass(`function two
            } }
 }`)
 
+pass(`
+let x = { get a
+          () {
+            return 1
+          },
+          get b
+          () {
+            return 2
+          } }`)
+
 fail(2, `
 let x = {
   a: 1,
