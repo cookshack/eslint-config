@@ -4,7 +4,7 @@ function FnArgsNl
 
   parent = node.parent
 
-  if (parent?.type == 'Property' && parent.method) {
+  if (parent?.type == 'Property' && (parent.method || parent.kind == 'get' || parent.kind == 'set')) {
     nameLine = parent.key.loc.start.line
     nameEnd = parent.key.range[1]
   }

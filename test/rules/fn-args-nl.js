@@ -79,6 +79,17 @@ pass(`
   }
 `)
 
+pass(`
+  area = { get name
+           () {
+             return name
+           },
+           get value
+           () {
+             return value
+           } }
+`)
+
 fail(1, 'function f (arg) {}')
 
 fail(1, 'function f() {}')
