@@ -1,10 +1,10 @@
 import { buildScopeTree } from './narrowest-scope.js'
 
-let ostIdCounter, errorCount, ost
+let ostIdCounter, errorCount, $lastOst
 
 ostIdCounter = 0
 errorCount = 0
-ost = 0
+$lastOst = 0
 
 function trace
 (...args) {
@@ -15,7 +15,7 @@ function trace
 export
 function lastOst
 () {
-  return ost
+  return $lastOst
 }
 
 function createInitBeforeUse
@@ -35,11 +35,11 @@ function createInitBeforeUse
                buildScopeTree(scopeManager.scopes[0], '1', scopeToNode, astToTree)
 
                ostIdCounter = 0
-               ost = processAst(context.sourceCode.ast, null, astToTree, astToOst, '', new Set())
+               $lastOst = processAst(context.sourceCode.ast, null, astToTree, astToOst, '', new Set())
 
-               ostAnnotate(ost, astToOst, context)
+               ostAnnotate($lastOst, astToOst, context)
 
-               ostCheck(ost, context)
+               ostCheck($lastOst, context)
 
                trace('ERRORS: ' + errorCount)
              } }
