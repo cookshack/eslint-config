@@ -62,6 +62,11 @@ items.map(x => {
           })`)
 
 pass(`
+items.map((x ,y) => {
+            return x
+          })`)
+
+pass(`
 let obj = { method
             (x) {
               return x
