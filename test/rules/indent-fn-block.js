@@ -13,7 +13,7 @@ function pass
 }
 
 function fail
-(count, code) {
+(count, code, output) {
   let errors
 
   errors = []
@@ -22,7 +22,10 @@ function fail
     count--
   }
 
-  invalidCases.push({ code, errors })
+  if (output)
+    invalidCases.push({ code, errors, output })
+  else
+    invalidCases.push({ code, errors })
 }
 
 pass('function f() {}')
@@ -98,34 +101,56 @@ fail(1, `
 function f
 (x) {
    return x
+}`, `
+function f
+(x) {
+  return x
 }`)
 
 fail(1, `
 function f
 (x) {
   return x
-  }`)
+  }`, `
+function f
+(x) {
+  return x
+}`)
 
 fail(2, `
 function f
 (x) {
    return x
-  }`)
+  }`, `
+function f
+(x) {
+  return x
+}`)
 
 fail(1, `
 let f = function
         (x) {
            return x
+        }`, `
+let f = function
+        (x) {
+          return x
         }`)
 
 fail(1, `
 items.map(x => {
             return x
-         })`)
+         })`, `
+items.map(x => {
+            return x
+          })`)
 
 fail(1, `
 items.map(x => {
           return x
+          })`, `
+items.map(x => {
+            return x
           })`)
 
 fail(1, `
@@ -134,14 +159,26 @@ let obj = {
            (x) {
             return x
            }
+         }`, `
+let obj = {
+           method
+           (x) {
+             return x
+           }
          }`)
 
 fail(1, `
 let obj = {
            method
            (x) {
+              return x
+           }
+         }`, `
+let obj = {
+           method
+           (x) {
              return x
-          }
+           }
          }`)
 
 globalThis.describe('indent-fn-block',
