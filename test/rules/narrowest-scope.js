@@ -594,9 +594,10 @@ fail(1, 'let a; try { f() } catch (err) { a = err.message; console.log(a) }',
         WRITE a     pos 48.4
         READ  a     pos 62`)
 
-globalThis.describe('narrowest-scope', () => {
-  for (let tc of validCases)
-    globalThis.it(tc.code, () => _pass(tc))
-  for (let tc of invalidCases)
-    globalThis.it(tc.code, () => _fail(tc))
-})
+globalThis.describe('narrowest-scope',
+                    () => {
+                      for (let tc of validCases)
+                        globalThis.it(tc.code, () => _pass(tc))
+                      for (let tc of invalidCases)
+                        globalThis.it(tc.code, () => _fail(tc))
+                    })

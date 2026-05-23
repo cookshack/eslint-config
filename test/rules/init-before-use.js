@@ -188,9 +188,10 @@ fail('initBeforeUse', 'let x; x++')
 
 fail('initBeforeUse', 'let x; x += 2')
 
-globalThis.describe('init-before-use', () => {
-  for (let tc of validCases)
-    globalThis.it(tc.code, () => _pass(tc))
-  for (let tc of invalidCases)
-    globalThis.it(tc.code, () => _fail(tc))
-})
+globalThis.describe('init-before-use',
+                    () => {
+                      for (let tc of validCases)
+                        globalThis.it(tc.code, () => _pass(tc))
+                      for (let tc of invalidCases)
+                        globalThis.it(tc.code, () => _fail(tc))
+                    })
