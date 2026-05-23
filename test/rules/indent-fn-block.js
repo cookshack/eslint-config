@@ -97,6 +97,24 @@ function f
 
 pass('let f = x => x + 1')
 
+pass(`
+function f
+(x) {
+  if (x)
+    use(x)
+  else
+    drop(x)
+}`)
+
+pass(`
+run(arg, () => {
+           let x
+           if (x)
+             use(x)
+           else
+             drop(x)
+         })`)
+
 fail(1, `
 function f
 (x) {
@@ -180,6 +198,38 @@ let obj = {
              return x
            }
          }`)
+
+fail(2, `
+function f
+(x) {
+    if (x)
+      use(x)
+    else
+      drop(x)
+  }`, `
+function f
+(x) {
+  if (x)
+    use(x)
+  else
+    drop(x)
+}`)
+
+fail(3, `
+run(arg, () => {
+    let x
+    if (x)
+      use(x)
+    else
+      drop(x)
+  })`, `
+run(arg, () => {
+           let x
+           if (x)
+             use(x)
+           else
+             drop(x)
+         })`)
 
 globalThis.describe('indent-fn-block',
                     () => ruleTester.run('indent-fn-block',
