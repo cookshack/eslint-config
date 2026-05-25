@@ -9,7 +9,6 @@ import varDeclBlockStartPlugin from './plugins/var-decl-block-start.js'
 import fnDeclBlockStartPlugin from './plugins/fn-decl-block-start.js'
 import fnArgsNlPlugin from './plugins/fn-args-nl.js'
 import indentStructPlugin from './plugins/indent-struct.js'
-import indentFnBlockPlugin from './plugins/indent-fn-block.js'
 
 export { getPrintBuffer }
 
@@ -23,8 +22,7 @@ plugins = { 'cookshack': { rules: { 'positive-vibes': positiveVibesPlugin,
                                     'var-decl-block-start': varDeclBlockStartPlugin,
                                     'fn-decl-block-start': fnDeclBlockStartPlugin,
                                     'fn-args-nl': fnArgsNlPlugin,
-                                    'indent-struct': indentStructPlugin,
-                                    'indent-fn-block': indentFnBlockPlugin } } }
+                                    'indent-struct': indentStructPlugin } } }
 
 rules = { 'array-bracket-newline': [ 'error', 'never' ],
           'array-bracket-spacing': [ 'error', 'always' ],
@@ -36,10 +34,11 @@ rules = { 'array-bracket-newline': [ 'error', 'never' ],
           'function-paren-newline': [ 'error', 'never' ],
           'indent': [ 'error', 2, { ArrayExpression: 'first',
                                     CallExpression: { arguments: 'first' },
+                                    FunctionDeclaration: { body: 'keyword' },
                                     //flatTernaryExpressions: true,
                                     //offsetTernaryExpressions: true,
                                     // ternary, because overhangs strangely (eg multiline in array def)
-                                    'ignoredNodes': [ 'ConditionalExpression', 'ObjectExpression *', 'FunctionDeclaration *', 'FunctionExpression *', 'ArrowFunctionExpression *', 'CallExpression > FunctionExpression', 'CallExpression > ArrowFunctionExpression' ],
+                                    'ignoredNodes': [ 'ConditionalExpression', 'ObjectExpression *', 'FunctionExpression *', 'ArrowFunctionExpression *', 'CallExpression > FunctionExpression', 'CallExpression > ArrowFunctionExpression' ],
                                     ImportDeclaration: 'first',
                                     offsetTernaryExpressions: true,
                                     VariableDeclarator: 'first' } ],
@@ -61,7 +60,6 @@ rules = { 'array-bracket-newline': [ 'error', 'never' ],
           'cookshack/fn-decl-block-start': 'error',
           'cookshack/fn-args-nl': 'error',
           'cookshack/indent-struct': 'error',
-          'cookshack/indent-fn-block': 'error',
           'no-mixed-operators': 'error',
           'no-multi-spaces': 'error',
           'no-multiple-empty-lines': [ 'error', { max: 1, maxEOF: 0 } ],

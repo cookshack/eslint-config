@@ -1,31 +1,43 @@
-import { RuleTester } from 'eslint'
-import { plugins } from '../../index.js'
+import { Linter } from 'eslint'
+import { plugins, rules, languageOptions } from '../../index.js'
+import assert from 'node:assert'
 
-let ruleTester, validCases, invalidCases
+let linter, config, passCases, failCases
 
-ruleTester = new RuleTester()
-validCases = []
-invalidCases = []
+linter = new Linter()
+config = [ { languageOptions, plugins, rules } ]
+passCases = []
+failCases = []
+
+function indentCount
+(code) {
+  return linter.verify(code, config).filter(m => m.ruleId == 'indent').length
+}
 
 function pass
 (code) {
-  validCases.push({ code })
+  passCases.push(code)
 }
 
 function fail
-(count, code, output) {
-  let errors
+(count, code) {
+  failCases.push({ count, code })
+}
 
-  errors = []
-  while (count > 0) {
-    errors.push({ messageId: 'indentFnBlock' })
-    count--
-  }
+function _pass
+(tc) {
+  let n
 
-  if (output)
-    invalidCases.push({ code, errors, output })
-  else
-    invalidCases.push({ code, errors })
+  n = indentCount(tc)
+  assert.strictEqual(n, 0)
+}
+
+function _fail
+(tc) {
+  let n
+
+  n = indentCount(tc.code)
+  assert.strictEqual(n, tc.count)
 }
 
 pass('function f() {}')
@@ -119,56 +131,34 @@ fail(1, `
 function f
 (x) {
    return x
-}`, `
-function f
-(x) {
-  return x
 }`)
 
 fail(1, `
 function f
 (x) {
   return x
-  }`, `
-function f
-(x) {
-  return x
-}`)
+  }`)
 
 fail(2, `
 function f
 (x) {
    return x
-  }`, `
-function f
-(x) {
-  return x
-}`)
+  }`)
 
 fail(1, `
 let f = function
         (x) {
            return x
-        }`, `
-let f = function
-        (x) {
-          return x
         }`)
 
 fail(1, `
 items.map(x => {
             return x
-         })`, `
-items.map(x => {
-            return x
-          })`)
+         })`)
 
 fail(1, `
 items.map(x => {
           return x
-          })`, `
-items.map(x => {
-            return x
           })`)
 
 fail(1, `
@@ -176,12 +166,6 @@ let obj = {
            method
            (x) {
             return x
-           }
-         }`, `
-let obj = {
-           method
-           (x) {
-             return x
            }
          }`)
 
@@ -191,12 +175,6 @@ let obj = {
            (x) {
               return x
            }
-         }`, `
-let obj = {
-           method
-           (x) {
-             return x
-           }
          }`)
 
 fail(2, `
@@ -206,14 +184,7 @@ function f
       use(x)
     else
       drop(x)
-  }`, `
-function f
-(x) {
-  if (x)
-    use(x)
-  else
-    drop(x)
-}`)
+  }`)
 
 fail(3, `
 run(arg, () => {
@@ -222,17 +193,14 @@ run(arg, () => {
       use(x)
     else
       drop(x)
-  })`, `
-run(arg, () => {
-           let x
-           if (x)
-             use(x)
-           else
-             drop(x)
-         })`)
+  })`)
 
-globalThis.describe('indent-fn-block',
-                    () => ruleTester.run('indent-fn-block',
-                                         plugins.cookshack.rules['indent-fn-block'],
-                                         { valid: validCases,
-                                           invalid: invalidCases }))
+globalThis.describe('indent',
+                    () => {
+                      for (let tc of passCases)
+                        globalThis.it(tc.slice(0, 50),
+                                      () => _pass(tc))
+                      for (let tc of failCases)
+                        globalThis.it(tc.code.slice(0, 50),
+                                      () => _fail(tc))
+                    })
