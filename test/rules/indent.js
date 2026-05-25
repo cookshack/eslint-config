@@ -171,7 +171,7 @@ let obj = {
            }
          }`)
 
-fail(2, `
+fail(5, `
 function f
 (x) {
     if (x)
