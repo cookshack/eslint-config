@@ -16,7 +16,7 @@ function indentCount
 
 function pass
 (code) {
-  passCases.push(code)
+  passCases.push({ code })
 }
 
 function fail
@@ -26,18 +26,12 @@ function fail
 
 function _pass
 (tc) {
-  let n
-
-  n = indentCount(tc)
-  assert.strictEqual(n, 0)
+  assert.strictEqual(indentCount(tc.code), 0)
 }
 
 function _fail
 (tc) {
-  let n
-
-  n = indentCount(tc.code)
-  assert.strictEqual(n, tc.count)
+  assert.strictEqual(indentCount(tc.code), tc.count)
 }
 
 pass('function f() {}')
@@ -198,9 +192,9 @@ run(arg, () => {
 globalThis.describe('indent',
                     () => {
                       for (let tc of passCases)
-                        globalThis.it(tc.slice(0, 50),
+                        globalThis.it(tc.code,
                                       () => _pass(tc))
                       for (let tc of failCases)
-                        globalThis.it(tc.code.slice(0, 50),
+                        globalThis.it(tc.code,
                                       () => _fail(tc))
                     })
