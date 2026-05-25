@@ -1,5 +1,5 @@
 diff --git a/node_modules/eslint/lib/rules/indent.js b/node_modules/eslint/lib/rules/indent.js
-index 1556921..185d128 100644
+index 1556921..7fd0820 100644
 --- a/node_modules/eslint/lib/rules/indent.js
 +++ b/node_modules/eslint/lib/rules/indent.js
 @@ -600,8 +600,10 @@ module.exports = {
@@ -28,7 +28,7 @@ index 1556921..185d128 100644
  							},
  						},
  						additionalProperties: false,
-@@ -1325,6 +1329,23 @@ module.exports = {
+@@ -1325,6 +1329,26 @@ module.exports = {
  					blockIndentLevel = 1;
  				}
  
@@ -37,6 +37,9 @@ index 1556921..185d128 100644
 +					const fnKeyword = sourceCode.getFirstToken(node.parent);
 +					const openBrace = sourceCode.getFirstToken(node);
 +					const closeBrace = sourceCode.getLastToken(node);
++
++					offsets.setDesiredOffset(fnKeyword, undefined,
++						fnKeyword.loc.start.column / indentSize);
 +
 +					offsets.setDesiredOffsets(
 +						[openBrace.range[1], closeBrace.range[0]],

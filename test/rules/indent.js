@@ -180,7 +180,7 @@ function f
       drop(x)
   }`)
 
-fail(3, `
+fail(6, `
 run(arg, () => {
     let x
     if (x)
