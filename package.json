@@ -8,7 +8,7 @@
     "build-linter": "node scripts/build-linter.mjs",
     "check": "npx eslint --no-warn-ignored -f ./formatter.js -c ./index.js *.js test/rules/*.js plugins/*.js",
     "test": "mocha test/**/*.js",
-    "prepare": "husky && rollup -c && node scripts/build-linter.mjs",
+    "prepare": "husky && rollup -c 1>&2 && node scripts/build-linter.mjs",
     "postinstall": "patch-package"
   },
   "main": "dist/index.cjs",

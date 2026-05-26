@@ -23,7 +23,7 @@ const schemaNew =
 
 let count = 0
 src = src.replaceAll(schemaOld, s => { count++; return schemaNew })
-console.log(`Schema patches: ${count}`)
+console.error(`Schema patches: ${count}`)
 
 // Patch 2: Insert body: 'keyword' handler in BlockStatement
 const handlerAnchor =
@@ -68,7 +68,7 @@ if (!src.includes(handlerAnchor)) {
   process.exit(1)
 }
 src = src.replace(handlerAnchor, handlerReplacement)
-console.log('Handler patch: applied')
+console.error('Handler patch: applied')
 
 writeFileSync('dist/eslint-linter.mjs', src)
-console.log('Wrote dist/eslint-linter.mjs')
+console.error('Wrote dist/eslint-linter.mjs')
