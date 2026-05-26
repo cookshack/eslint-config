@@ -27,13 +27,13 @@
   "dependencies": {
     "eslint": "^10.4.0",
     "eslint-linter-browserify": "^10.4.0",
-    "globals": "^15.10.0"
+    "globals": "^15.10.0",
+    "patch-package": "^8.0.1"
   },
   "devDependencies": {
     "diff": "^8.0.4",
     "husky": "^9.1.7",
     "mocha": "^11.7.5",
-    "patch-package": "^8.0.1",
     "rollup": "^4.27.2"
   }
 }
