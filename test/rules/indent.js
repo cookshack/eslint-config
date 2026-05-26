@@ -189,6 +189,39 @@ run(arg, () => {
       drop(x)
   })`)
 
+fail(1, `
+run(() => {
+      let x
+      if (x)
+        use(x)
+        else
+        drop(x)
+    })`)
+
+fail(1, `
+run(function
+    (abc) {
+      if (abc)
+        use(abc)
+        else
+        drop(abc)
+    })`)
+
+fail(1, `
+if (items)
+  console.log(1)
+  else // the warning here is present in bred
+  console.log(2)`)
+
+fail(1, `
+console.log(globalThis.eg(function
+                          (abc) {
+                            if (abc)
+                              console.log(1)
+                              else // the warning here is missing in bred
+                              console.log(2)
+                          }))`)
+
 globalThis.describe('indent',
                     () => {
                       for (let tc of passCases)

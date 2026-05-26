@@ -1,9 +1,9 @@
 import { RuleTester } from 'eslint'
-import { Linter } from 'eslint'
+import { builtinRules } from 'eslint/use-at-your-own-risk'
 
 let ruleTester, validCases, invalidCases, rule
 
-rule = new Linter({ configType: 'eslintrc' }).getRules().get('no-shadow')
+rule = builtinRules.get('no-shadow')
 ruleTester = new RuleTester()
 validCases = []
 invalidCases = []

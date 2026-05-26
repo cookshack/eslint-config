@@ -180,8 +180,8 @@ function f(s1, s2, otherwise) {
   return otherwise
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   f     pos 10
     SCOPE 1.1.1 FUNCTION pos 11 name f
       LET   s1     pos 12
@@ -237,8 +237,8 @@ function update
   tout = setTimeout(() => console.log('hi'), 10000)
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   tout     pos 5
     LET   update     pos 20
     SCOPE 1.1.1 FUNCTION pos 26 name update
@@ -261,8 +261,8 @@ function init
   }
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   init     pos 10
     SCOPE 1.1.1 FUNCTION pos 14 name init
       LET   out2     pos 26
@@ -296,8 +296,8 @@ function init
   return f
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   init     pos 10
     SCOPE 1.1.1 FUNCTION pos 14 name init
       LET   stopTimeout     pos 26
@@ -339,8 +339,8 @@ pass(`
 
   g = f({ a() { return new A('eg') } })
 `,
-     `SCOPE 1 GLOBAL pos 3
-  SCOPE 1.1 MODULE pos 3
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   A     pos 9
     SCOPE 1.1.1 CLASS pos 9 name A
       LET   A     pos 9
@@ -367,8 +367,8 @@ function parse
   }
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   clen     pos 5
     LET   parse     pos 20
     SCOPE 1.1.1 FUNCTION pos 25 name parse
@@ -400,8 +400,8 @@ function make
   return 0
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   make     pos 10
     SCOPE 1.1.1 FUNCTION pos 14 name make
       LET   clen     pos 26
@@ -430,8 +430,8 @@ function initMouse
   }
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   initMouse     pos 10
     SCOPE 1.1.1 FUNCTION pos 19 name initMouse
       LET   hover     pos 31
@@ -452,8 +452,8 @@ function init
   wexts = Mk.array
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   wexts     pos 12
     LET   init     pos 35
     SCOPE 1.1.1 FUNCTION pos 39 name init
@@ -468,8 +468,8 @@ function add
   classCache = classCache || new Map()
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   classCache     pos 5
     LET   add     pos 33
     SCOPE 1.1.1 FUNCTION pos 36 name add
@@ -548,8 +548,8 @@ function f
   return otherwise
 }
 `,
-     `SCOPE 1 GLOBAL pos 1
-  SCOPE 1.1 MODULE pos 1
+     `SCOPE 1 GLOBAL pos 0
+  SCOPE 1.1 MODULE pos 0
     LET   f     pos 10
     SCOPE 1.1.1 FUNCTION pos 11 name f
       LET   a     pos 13

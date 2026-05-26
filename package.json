@@ -5,16 +5,18 @@
   "homepage": "https://git.sr.ht/~mattmundell/eslint-config",
   "type": "module",
   "scripts": {
+    "build-linter": "node scripts/build-linter.mjs",
     "check": "npx eslint --no-warn-ignored -f ./formatter.js -c ./index.js *.js test/rules/*.js plugins/*.js",
     "test": "mocha test/**/*.js",
-    "prepare": "husky && rollup -c",
+    "prepare": "husky && rollup -c && node scripts/build-linter.mjs",
     "postinstall": "patch-package"
   },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
     "import": "./dist/index.js",
-    "require": "./dist/index.cjs"
+    "require": "./dist/index.cjs",
+    "./eslint-linter.mjs": "./dist/eslint-linter.mjs"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,8 @@
   "author": "Matt Mundell",
   "license": "CC0-1.0",
   "dependencies": {
-    "eslint": "^9.24.0",
+    "eslint": "^10.4.0",
+    "eslint-linter-browserify": "^10.4.0",
     "globals": "^15.10.0"
   },
   "devDependencies": {

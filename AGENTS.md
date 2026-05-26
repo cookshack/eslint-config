@@ -1,6 +1,8 @@
 # AGENTS.md
 
-- `dist/` is gitignored and must be rebuilt after source changes: `npm run prepare` (runs husky + rollup)
+- `dist/` is gitignored and must be rebuilt after source changes: `npm run prepare` (runs husky + rollup + build-linter)
+- Linter bundle: `scripts/build-linter.mjs` patches `eslint-linter-browserify/linter.mjs` → `dist/eslint-linter.mjs` with `body: "keyword"` indent support; importable via `@cookshack/eslint-config/eslint-linter.mjs`
+- Both `node_modules/eslint` (for CLI/--fix) and `dist/eslint-linter.mjs` (for editor) use the `patches/` file via `patch-package` + `build-linter`
 - Self-lint: `npm run check` (uses this config to lint itself)
 - Tests: `npm test` (mocha, `test/**/*.js`)
 - Pre-commit hook runs `npm run check && npm test`
