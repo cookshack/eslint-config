@@ -39,7 +39,9 @@ function checkObjectExpressionProperties
   }
   else {
     trace('CHECK 2 FAIL')
-    context.report({ node: firstProp, messageId: 'indentStruct' })
+    context.report({ node: firstProp,
+                     messageId: 'indentStruct',
+                     fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', firstProp.range[0] - 1) + 1, firstProp.range[0] ], ' '.repeat(node.loc.start.column + unit(context))) })
   }
 
   trace('ALGORITHM 3: Multi-line: all properties must align to first propertys column')
@@ -53,7 +55,9 @@ function checkObjectExpressionProperties
     }
     else {
       trace('CHECK 3 FAIL')
-      context.report({ node: prop, messageId: 'indentStruct' })
+      context.report({ node: prop,
+                       messageId: 'indentStruct',
+                       fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', prop.range[0] - 1) + 1, prop.range[0] ], ' '.repeat(firstPropCol)) })
     }
   }
 
@@ -70,7 +74,9 @@ function checkObjectExpressionProperties
     }
     else {
       trace('CHECK 4 FAIL')
-      context.report({ node, messageId: 'indentStruct' })
+      context.report({ node,
+                       messageId: 'indentStruct',
+                       fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', closingBrace - 1) + 1, closingBrace ], ' '.repeat(braceCol)) })
     }
   }
 
@@ -83,7 +89,9 @@ function checkObjectExpressionProperties
     }
     else {
       trace('CHECK 5 FAIL')
-      context.report({ node, messageId: 'indentStruct' })
+      context.report({ node,
+                       messageId: 'indentStruct',
+                       fix: fixer => fixer.replaceTextRange([ lastPropEnd, closingBrace ], ' ') })
     }
   }
 
@@ -118,7 +126,9 @@ function checkObjectExpressionProperties
         }
         else {
           trace('CHECK 6 FAIL')
-          context.report({ node: prop, messageId: 'indentStruct' })
+          context.report({ node: prop,
+                           messageId: 'indentStruct',
+                           fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', i - 1) + 1, i ], ' '.repeat(prop.key.loc.start.column + 1)) })
         }
       }
     }
@@ -140,6 +150,7 @@ function create
 
 export default { meta: { type: 'suggestion',
                          docs: { description: 'Struct alignment rules.' },
+                         fixable: 'whitespace',
                          messages: { indentStruct: 'Indent structure' },
                          schema: [] },
                  create }

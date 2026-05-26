@@ -13,7 +13,7 @@ function pass
 }
 
 function fail
-(count, code) {
+(count, code, output) {
   let errors
 
   if (code == undefined) {
@@ -25,7 +25,7 @@ function fail
     errors.push({ messageId: 'indentStruct' })
     count--
   }
-  invalidCases.push({ code, errors })
+  invalidCases.push(output ? { code, errors, output } : { code, errors })
 }
 
 pass('let x = { a: 1, b: 2 }')
@@ -147,48 +147,76 @@ fail(2, `
 let x = {
   a: 1,
   b: 2
-}`)
+}`, `
+let x = {
+          a: 1,
+  b: 2
+        }`)
 
 fail(1, `
 let x = {
           a: 1,
            b: 2
+        }`, `
+let x = {
+          a: 1,
+          b: 2
         }`)
 
 fail(1, `
 let x = { a: 1,
-         b: 2 }`)
+         b: 2 }`, `
+let x = { a: 1,
+          b: 2 }`)
 
 fail(1, `
 let x = { a: 1,
-  b: 2 }`)
+  b: 2 }`, `
+let x = { a: 1,
+          b: 2 }`)
 
 fail(1, `
 let x = { a: 1,
-b: 2 }`)
+b: 2 }`, `
+let x = { a: 1,
+          b: 2 }`)
 
 fail(2, `
 let x = { a: 1,
   b: 2,
-  c: 3 }`)
+  c: 3 }`, `
+let x = { a: 1,
+          b: 2,
+          c: 3 }`)
 
 fail(1, `
 let aHasArgsOnNextLine = { a
-  () {} }`)
+  () {} }`, `
+let aHasArgsOnNextLine = { a
+                            () {} }`)
 
 fail(1, `
 let x = { a: 1,
           b: 2}
+`, `
+let x = { a: 1,
+          b: 2 }
 `)
 
 fail(1, `
 let x = { a: 1,
           b: 2  }
+`, `
+let x = { a: 1,
+          b: 2 }
 `)
 
 fail(1, `
 let x = { a: { a: 1,
                b: 2  } }
+`, `
+let x = { a: { a: 1,
+               b: 2 } }
 `)
 
 globalThis.describe('indent-struct',
