@@ -16,7 +16,7 @@
   "exports": {
     "import": "./dist/index.js",
     "require": "./dist/index.cjs",
-    "./eslint-linter.mjs": "./dist/eslint-linter.mjs"
+    "./eslint-linter-browserify.mjs": "./dist/eslint-linter-browserify.mjs"
   },
   "repository": {
     "type": "git",

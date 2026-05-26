@@ -70,5 +70,5 @@ if (!src.includes(handlerAnchor)) {
 src = src.replace(handlerAnchor, handlerReplacement)
 console.error('Handler patch: applied')
 
-writeFileSync('dist/eslint-linter.mjs', src)
-console.error('Wrote dist/eslint-linter.mjs')
+writeFileSync('dist/eslint-linter-browserify.mjs', src)
+console.error('Wrote dist/eslint-linter-browserify.mjs')
