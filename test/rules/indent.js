@@ -49,6 +49,13 @@ async function f
 }`)
 
 pass(`
+function f
+(x,
+ y) {
+  return x + y
+}`)
+
+pass(`
 let f = function
         (x) {
           return x
