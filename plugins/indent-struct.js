@@ -46,18 +46,24 @@ function checkObjectExpressionProperties
 
   trace('ALGORITHM 3: Multi-line: all properties must align to first propertys column')
   trace('CHECK POINT 3: checking property alignment, firstPropCol=%d', firstPropCol)
+  let alignCol
+
+  if (firstPropLine != node.loc.start.line && firstPropCol != node.loc.start.column + unit(context))
+    alignCol = node.loc.start.column + unit(context)
+  else
+    alignCol = firstPropCol
   for (let i = 1; i < properties.length; i++) {
     let prop
 
     prop = properties[i]
-    if (prop.loc.start.column == firstPropCol) {
+    if (prop.loc.start.column == alignCol) {
       // ok
     }
     else {
       trace('CHECK 3 FAIL')
       context.report({ node: prop,
                        messageId: 'indentStruct',
-                       fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', prop.range[0] - 1) + 1, prop.range[0] ], ' '.repeat(firstPropCol)) })
+                       fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', prop.range[0] - 1) + 1, prop.range[0] ], ' '.repeat(alignCol)) })
     }
   }
 
@@ -128,7 +134,7 @@ function checkObjectExpressionProperties
           trace('CHECK 6 FAIL')
           context.report({ node: prop,
                            messageId: 'indentStruct',
-                           fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', i - 1) + 1, i ], ' '.repeat(prop.key.loc.start.column + 1)) })
+                           fix: fixer => fixer.replaceTextRange([ sourceCode.lastIndexOf('\n', i - 1) + 1, i ], ' '.repeat(prop.key.loc.start.column)) })
         }
       }
     }

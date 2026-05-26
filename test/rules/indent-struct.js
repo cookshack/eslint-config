@@ -143,14 +143,14 @@ let x = { async f
             return 2
           } }`)
 
-fail(2, `
+fail(3, `
 let x = {
   a: 1,
   b: 2
 }`, `
 let x = {
           a: 1,
-  b: 2
+          b: 2
         }`)
 
 fail(1, `
@@ -193,7 +193,7 @@ fail(1, `
 let aHasArgsOnNextLine = { a
   () {} }`, `
 let aHasArgsOnNextLine = { a
-                            () {} }`)
+                           () {} }`)
 
 fail(1, `
 let x = { a: 1,
