@@ -1,5 +1,5 @@
 diff --git a/node_modules/eslint/lib/rules/indent.js b/node_modules/eslint/lib/rules/indent.js
-index 1556921..7fd0820 100644
+index c6c1875..031c8b8 100644
 --- a/node_modules/eslint/lib/rules/indent.js
 +++ b/node_modules/eslint/lib/rules/indent.js
 @@ -600,8 +600,10 @@ module.exports = {
@@ -28,29 +28,44 @@ index 1556921..7fd0820 100644
  							},
  						},
  						additionalProperties: false,
-@@ -1325,6 +1329,26 @@ module.exports = {
+@@ -1325,6 +1329,41 @@ module.exports = {
  					blockIndentLevel = 1;
  				}
  
-+				if ((node.parent && node.parent.type === "FunctionDeclaration" && options.FunctionDeclaration.body === "keyword") ||
-+					(node.parent && (node.parent.type === "FunctionExpression" || node.parent.type === "ArrowFunctionExpression") && options.FunctionExpression.body === "keyword")) {
-+					const fnKeyword = sourceCode.getFirstToken(node.parent);
-+					const openBrace = sourceCode.getFirstToken(node);
-+					const closeBrace = sourceCode.getLastToken(node);
++			if (node.parent && node.parent.type === "FunctionDeclaration" && options.FunctionDeclaration.body === "keyword") {
++				const fnKeyword = sourceCode.getFirstToken(node.parent);
++				const openBrace = sourceCode.getFirstToken(node);
++				const closeBrace = sourceCode.getLastToken(node);
 +
-+					offsets.setDesiredOffset(fnKeyword, undefined,
-+						fnKeyword.loc.start.column / indentSize);
++				offsets.setDesiredOffsets(
++					[openBrace.range[1], closeBrace.range[0]],
++					fnKeyword,
++					typeof blockIndentLevel === "number" ?
++						blockIndentLevel :
++						1,
++				);
++				offsets.setDesiredOffset(closeBrace, fnKeyword, 0);
++				return;
++			}
 +
-+					offsets.setDesiredOffsets(
-+						[openBrace.range[1], closeBrace.range[0]],
-+						fnKeyword,
-+						typeof blockIndentLevel === "number" ?
-+							blockIndentLevel :
-+							1,
-+					);
-+					offsets.setDesiredOffset(closeBrace, fnKeyword, 0);
-+					return;
-+				}
++			if (node.parent && (node.parent.type === "FunctionExpression" || node.parent.type === "ArrowFunctionExpression") && options.FunctionExpression.body === "keyword") {
++				const fnKeyword = sourceCode.getFirstToken(node.parent);
++				const openBrace = sourceCode.getFirstToken(node);
++				const closeBrace = sourceCode.getLastToken(node);
++
++				offsets.setDesiredOffset(fnKeyword, undefined,
++					fnKeyword.loc.start.column / indentSize);
++
++				offsets.setDesiredOffsets(
++					[openBrace.range[1], closeBrace.range[0]],
++					fnKeyword,
++					typeof blockIndentLevel === "number" ?
++						blockIndentLevel :
++						1,
++				);
++				offsets.setDesiredOffset(closeBrace, fnKeyword, 0);
++				return;
++			}
 +
  				/*
  				 * For blocks that aren't lone statements, ensure that the opening curly brace

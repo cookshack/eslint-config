@@ -1,0 +1,47 @@
+#!/bin/sh
+set -e
+
+STATE_DIR=node_modules/.eslint-config-pristine
+STATE_FILE="$STATE_DIR/.state"
+SCRIPT_DIR=$(dirname "$0")
+PATCHES_DIR=$(dirname "$SCRIPT_DIR")/patches
+
+eslint_version=NONE
+eslint_config_version=NONE
+
+if [ -f node_modules/eslint/package.json ]; then
+  eslint_version=$(node -p "require('./node_modules/eslint/package.json').version")
+fi
+
+if [ -f node_modules/@cookshack/eslint-config/package.json ]; then
+  eslint_config_version=$(node -p "require('./node_modules/@cookshack/eslint-config/package.json').version")
+fi
+
+current="$eslint_version:$eslint_config_version"
+
+if [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE")" = "$current" ]; then
+  echo "apply-patches: already patched ($current)"
+  exit 0
+fi
+
+echo "apply-patches: applying patches for eslint@$eslint_version (eslint-config@$eslint_config_version)"
+
+# need pristine eslint
+if [ "$eslint_version" = "NONE" ]; then
+  echo "apply-patches: eslint not installed, skipping"
+  exit 0
+fi
+
+rm -rf node_modules/eslint
+npm install --no-save --no-audit --no-fund --loglevel=error "eslint@$eslint_version"
+
+for p in "$PATCHES_DIR"/*.patch; do
+  [ -f "$p" ] || continue
+  echo "  applying $(basename "$p")"
+  git apply --whitespace=nowarn "$p"
+done
+
+mkdir -p "$STATE_DIR"
+echo "$current" > "$STATE_FILE"
+
+echo "apply-patches: done"

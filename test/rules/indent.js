@@ -146,7 +146,7 @@ function f
    return x
   }`)
 
-fail(1, `
+fail(4, `
 let handler
 
 handler = arg => {
