@@ -147,6 +147,24 @@ function f
   }`)
 
 fail(1, `
+let handler
+
+handler = arg => {
+            let decoder
+
+    function decode
+    (str) {
+      return decoder.decode(str)
+    }
+            decoder = new TextDecoder()
+
+            decode(arg)
+          }
+
+handler()
+`)
+
+fail(1, `
 let f = function
         (x) {
            return x
