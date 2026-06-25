@@ -25,8 +25,8 @@
   "author": "Matt Mundell",
   "license": "CC0-1.0",
   "dependencies": {
-    "eslint": "^10.4.0",
-    "eslint-linter-browserify": "^10.4.0",
+    "eslint": "10.4.0",
+    "eslint-linter-browserify": "10.4.0",
     "globals": "^15.10.0",
     "patch-package": "^8.0.1"
   },
